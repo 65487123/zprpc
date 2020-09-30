@@ -1,11 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="afb111f6-16ae-4c31-8f71-4f8c3f17afb9" name="Default Changelist" comment="" />
+    <list default="true" id="afb111f6-16ae-4c31-8f71-4f8c3f17afb9" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/uiDesigner.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/zprpc.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-common/src/main/java/com/lzp/util/AnnotationUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-common/src/main/java/com/lzp/util/PropertyUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-common/src/main/java/com/lzp/util/RequestSearialUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-common/src/main/java/com/lzp/util/ResponseSearialUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-common/src/main/java/com/lzp/util/SpringUtil.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/netty/ServiceHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/netty/SocketChannelInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/proto/command.proto" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/protocol/zpproto/AbstractDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/protocol/zpproto/LzpMessageDecoder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/protocol/zpproto/LzpMessageEncoder.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/protocol/zpproto/RequestDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/protocol/zpproto/ResponseDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/rpc-server/src/test/java/Test.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rpc-server/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/rpc-server/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/netty/Server.java" beforeDir="false" afterPath="$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/netty/Server.java" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CoverageViewManager">
+    <option name="myElementSize" value="239" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -14,6 +40,9 @@
         <option value="Class" />
       </list>
     </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="MavenImportPreferences">
     <option name="importingSettings">
@@ -30,14 +59,33 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../dubbo" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/rpc-common/src/main/java/com/lzp/util" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.20176731" />
   </component>
+  <component name="RecentsManager">
+    <key name="CopyClassDialog.RECENTS_KEY">
+      <recent name="com.lzp.util" />
+      <recent name="com.lzp.netty" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="E:\project\新建文件夹\zprpc\zprpc\zprpc\rpc-common\src\main\java\com\lzp\util" />
+      <recent name="E:\project\新建文件夹\zprpc\zprpc\zprpc\rpc-server\src\main\java\com\lzp\proto" />
+      <recent name="E:\project\新建文件夹\zprpc\zprpc\zprpc\rpc-server\src\main\java\com\lzp\protocol" />
+    </key>
+  </component>
   <component name="RunManager">
+    <configuration name="Test" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="Test" />
+      <module name="rpc-server" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
       <module name="zprpc" />
       <option name="VM_PARAMETERS" />
@@ -85,6 +133,11 @@
         <option name="Make" enabled="true" />
       </method>
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.Test" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -100,6 +153,8 @@
       <workItem from="1599790415579" duration="2551000" />
       <workItem from="1600913277727" duration="9374000" />
       <workItem from="1600946792617" duration="16573000" />
+      <workItem from="1601210037050" duration="35105000" />
+      <workItem from="1601441290056" duration="7291000" />
     </task>
     <servers />
   </component>
@@ -107,17 +162,93 @@
     <option name="version" value="1" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="552" y="178" key="#Project_Structure" timestamp="1601181098156">
+    <state x="552" y="178" key="#Project_Structure" timestamp="1601386536609">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="552" y="178" key="#Project_Structure/0.0.1920.1040@0.0.1920.1040" timestamp="1601181098156" />
+    <state x="552" y="178" key="#Project_Structure/0.0.1920.1040@0.0.1920.1040" timestamp="1601386536609" />
+    <state x="713" y="221" key="#com.intellij.ide.util.MemberChooser" timestamp="1601386415340">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="713" y="221" key="#com.intellij.ide.util.MemberChooser/0.0.1920.1040@0.0.1920.1040" timestamp="1601386415340" />
+    <state x="704" y="302" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1601386478923">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="704" y="302" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1601386478923" />
+    <state x="368" y="443" width="1061" height="597" key="#xdebugger.evaluate" timestamp="1601433161788">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="368" y="443" width="1061" height="597" key="#xdebugger.evaluate/0.0.1920.1040@0.0.1920.1040" timestamp="1601433161788" />
+    <state width="491" height="466" key="DebuggerActiveHint" timestamp="1601433047845">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="491" height="466" key="DebuggerActiveHint/0.0.1920.1040@0.0.1920.1040" timestamp="1601433047845" />
     <state x="740" y="275" key="FileChooserDialogImpl" timestamp="1600948006198">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="740" y="275" key="FileChooserDialogImpl/0.0.1920.1040@0.0.1920.1040" timestamp="1600948006198" />
+    <state width="1860" height="349" key="GridCell.Tab.0.bottom" timestamp="1601433316384">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="349" key="GridCell.Tab.0.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1601433316384" />
+    <state width="1860" height="349" key="GridCell.Tab.0.center" timestamp="1601433316383">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="349" key="GridCell.Tab.0.center/0.0.1920.1040@0.0.1920.1040" timestamp="1601433316383" />
+    <state width="1860" height="349" key="GridCell.Tab.0.left" timestamp="1601433316383">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="349" key="GridCell.Tab.0.left/0.0.1920.1040@0.0.1920.1040" timestamp="1601433316383" />
+    <state width="1860" height="349" key="GridCell.Tab.0.right" timestamp="1601433316383">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="349" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1601433316383" />
+    <state width="1860" height="332" key="GridCell.Tab.1.bottom" timestamp="1601433166075">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="332" key="GridCell.Tab.1.bottom/0.0.1920.1040@0.0.1920.1040" timestamp="1601433166075" />
+    <state width="1860" height="332" key="GridCell.Tab.1.center" timestamp="1601433166075">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="332" key="GridCell.Tab.1.center/0.0.1920.1040@0.0.1920.1040" timestamp="1601433166075" />
+    <state width="1860" height="332" key="GridCell.Tab.1.left" timestamp="1601433166075">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="332" key="GridCell.Tab.1.left/0.0.1920.1040@0.0.1920.1040" timestamp="1601433166075" />
+    <state width="1860" height="332" key="GridCell.Tab.1.right" timestamp="1601433166075">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1860" height="332" key="GridCell.Tab.1.right/0.0.1920.1040@0.0.1920.1040" timestamp="1601433166075" />
     <state x="441" y="429" key="new project wizard" timestamp="1601207678063">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="441" y="429" key="new project wizard/0.0.1920.1040@0.0.1920.1040" timestamp="1601207678063" />
+    <state x="637" y="265" width="672" height="678" key="search.everywhere.popup" timestamp="1601442966600">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="637" y="265" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040@0.0.1920.1040" timestamp="1601442966600" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/util/SpringUtil.java</url>
+          <line>15</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/rpc-server/src/main/java/com/lzp/util/ResponseSearialUtil.java</url>
+          <line>26</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>jar://$MAVEN_REPOSITORY$/io/protostuff/protostuff-runtime/1.7.2/protostuff-runtime-1.7.2-sources.jar!/io/protostuff/runtime/RuntimeSchema.java</url>
+          <line>338</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/zprpc$Test.ic" NAME="Test Coverage Results" MODIFIED="1601431984330" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" />
   </component>
 </project>
