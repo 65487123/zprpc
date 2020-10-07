@@ -11,11 +11,11 @@
         <module name="rpc-demo-client" />
         <module name="rpc-demo-api" />
         <module name="rpc-server" />
-        <module name="config" />
         <module name="rpc-client" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="config" target="1.8" />
       <module name="rpc-netty" target="1.8" />
     </bytecodeTargetLevel>
   </component>

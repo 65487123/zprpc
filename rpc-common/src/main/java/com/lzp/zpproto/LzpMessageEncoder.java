@@ -1,4 +1,4 @@
-package com.lzp.protocol.zpproto;
+package com.lzp.zpproto;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

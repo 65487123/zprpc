@@ -1,6 +1,7 @@
-package com.lzp.protocol.zpproto;
+package com.lzp.dtos;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 
 /**
@@ -11,20 +12,26 @@ import java.util.List;
  */
 public class RequestDTO {
     private String serviceId;
-    private List<Object> prams;
+    private Method method;
+    private Object[] prams;
 
-    public RequestDTO(){}
+    public RequestDTO() {
+    }
 
-    public RequestDTO(String serviceId, List<Object> prams) {
+    public RequestDTO(String serviceId, Object... prams) {
         this.serviceId = serviceId;
         this.prams = prams;
+    }
+
+    public Method getMethod() {
+        return method;
     }
 
     public String getServiceId() {
         return serviceId;
     }
 
-    public List<Object> getPrams() {
+    public Object[] getPrams() {
         return prams;
     }
 
@@ -32,6 +39,7 @@ public class RequestDTO {
     public String toString() {
         return "RequestDTO{" +
                 "serviceId='" + serviceId + '\'' +
+                ", method=" + method +
                 ", prams=" + prams +
                 '}';
     }

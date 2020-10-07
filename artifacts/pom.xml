@@ -15,11 +15,6 @@
     <dependencies>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>config</artifactId>
-            <version>${version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.lzp.zprpc</groupId>
             <artifactId>rpc-client</artifactId>
             <version>${version}</version>
         </dependency>

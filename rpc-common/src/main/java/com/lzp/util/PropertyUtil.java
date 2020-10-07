@@ -25,9 +25,14 @@ public class PropertyUtil {
         }
     }
 
-    public static int getPort(){
-        return Integer.parseInt(properties.getProperty("port"));
+
+    public static String getBasePack(){
+        return properties.getProperty("basePack");
     }
 
+
+    public static String getNacosIpList(){
+        return properties.getProperty("nacosIpList");
+    }
 
 }

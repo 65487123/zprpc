@@ -1,8 +1,6 @@
 package com.lzp.netty;
 
-import com.lzp.util.PropertyUtil;
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -17,16 +15,22 @@ import org.slf4j.LoggerFactory;
  */
 public class Server {
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    public static String ip;
+    public static int port;
 
-
-    public static void startRpcServer(){
+    public static void startRpcServer(String ip, int port) {
+        if (Server.ip != null) {
+            throw new RuntimeException("The server has started");
+        }
+        Server.ip = ip;
+        Server.port = port;
         EventLoopGroup bossGroup = new NioEventLoopGroup(1);
         ServerBootstrap serverBootstrap = new ServerBootstrap();
-        EventLoopGroup workerGroup = new NioEventLoopGroup(2);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(1);
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 .childHandler(new SocketChannelInitializer());
         try {
-            serverBootstrap.bind(PropertyUtil.getPort()).sync();
+            serverBootstrap.bind(ip,port).sync();
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
         } finally {

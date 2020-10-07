@@ -13,7 +13,6 @@ import java.util.Map;
  * @author: Lu ZePing
  * @date: 2020/9/28 19:23
  */
-@SuppressWarnings("unchecked")
 @Component
 public class SpringUtil implements ApplicationContextAware {
 

@@ -1,4 +1,4 @@
-package com.lzp.protocol.zpproto;
+package com.lzp.dtos;
 
 import java.io.Serializable;
 

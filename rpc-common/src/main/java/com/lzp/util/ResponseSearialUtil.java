@@ -1,6 +1,6 @@
 package com.lzp.util;
 
-import com.lzp.protocol.zpproto.ResponseDTO;
+import com.lzp.dtos.ResponseDTO;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
