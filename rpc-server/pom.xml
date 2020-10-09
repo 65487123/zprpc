@@ -16,6 +16,11 @@
             <groupId>com.lzp.zprpc</groupId>
             <artifactId>rpc-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.lzp.zprpc</groupId>
+            <artifactId>zprpc-registry</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

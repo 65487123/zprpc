@@ -1,9 +1,14 @@
-package com.lzp.util;
+package com.lzp.registry.nacos;
 
 import com.alibaba.nacos.api.exception.NacosException;
+import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.lzp.annotation.Service;
+import com.lzp.registry.api.RegistryClient;
+import com.lzp.util.PropertyUtil;
+import com.lzp.util.SpringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -12,14 +17,19 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Description:扫描指定包下所有类，获得所有被指定注解修饰的类，返回实例（如果项目用到了Spring，就到
- * Spring容器中找，找不到才自己初始化一个),并注册到注册中心中
- * 只会扫描依赖了这个项目的工程的classpath下的包，其classpath下面的jar包里的包是不会扫描的
+ * Description:实现了统一接口的nacos客户端
  *
  * @author: Lu ZePing
- * @date: 2020/9/30 11:14
+ * @date: 2020/10/9 14:10
  */
-public class RegisterUtil {
+public class NacosClient implements RegistryClient {
+    private static final Logger logger = LoggerFactory.getLogger(NacosClient.class);
+
+
+    @Override
+    public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
+        return searchAndRegiInstance(basePack,NamingFactory.createNamingService(PropertyUtil.getNacosIpList()),ip,port);
+    }
 
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.com.lzp.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
@@ -45,9 +55,9 @@ public class RegisterUtil {
      */
 
 
-    public static Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService,String ip,int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
+    private Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService,String ip,int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
         Map<String, Object> idServiceMap = new HashMap();
-        String classpath = RegisterUtil.class.getResource("/").getPath();
+        String classpath = NacosClient.class.getResource("/").getPath();
         basePack = basePack.replace(".", File.separator);
         String searchPath = classpath + basePack;
         List<String> classPaths = new ArrayList<String>();

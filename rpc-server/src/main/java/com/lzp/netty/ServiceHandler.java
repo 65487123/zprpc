@@ -1,10 +1,8 @@
 package com.lzp.netty;
 
-import com.alibaba.nacos.api.naming.NamingFactory;
-import com.alibaba.nacos.api.naming.NamingService;
 import com.lzp.dtos.RequestDTO;
 import com.lzp.dtos.ResponseDTO;
-import com.lzp.util.RegisterUtil;
+import com.lzp.registry.nacos.NacosClient;
 import com.lzp.util.PropertyUtil;
 import com.lzp.util.RequestSearialUtil;
 import com.lzp.util.ResponseSearialUtil;
@@ -25,12 +23,21 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
     private static final Logger logger = LoggerFactory.getLogger(ServiceHandler.class);
 
     private static Map<String, Object> idServiceMap;
-    private static NamingService namingService ;
 
     static {
         try {
-            namingService = NamingFactory.createNamingService(PropertyUtil.getNacosIpList());
-            idServiceMap = RegisterUtil.searchAndRegiInstance(PropertyUtil.getBasePack(), namingService, Server.ip, Server.port);
+            //默认用nacos做注册中心
+            //暂时也只实现了用nacos做注册中心，如果后续有时间可以加入其他注册中心实现，那么就需要配置文件中加配置，然后这里读取配置，选择new具体的注册中心
+            /*
+                RegistryClient registryClient;
+                switch(配置文件读出的注册中心配置){
+                    case "xxx":registryClient = xxxClient();
+                    break;
+                    ...
+                    ...
+                }
+            */
+            idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(),Server.ip, Server.port);
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
         }

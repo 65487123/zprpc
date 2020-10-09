@@ -28,6 +28,7 @@ public class Server {
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         EventLoopGroup workerGroup = new NioEventLoopGroup(1);
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                /*.childOption(ChannelOption.TCP_NODELAY,true)*/
                 .childHandler(new SocketChannelInitializer());
         try {
             serverBootstrap.bind(ip,port).sync();

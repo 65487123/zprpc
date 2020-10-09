@@ -7,21 +7,19 @@
         <groupId>com.lzp.zprpc</groupId>
         <version>1.0</version>
     </parent>
-    <packaging>jar</packaging>
-
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rpc-client</artifactId>
+    <artifactId>zprpc-registry</artifactId>
 
     <dependencies>
         <dependency>
-            <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-common</artifactId>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+            <version>${nacos.version}</version>
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>zprpc-registry</artifactId>
-            <version>${project.version}</version>
+            <artifactId>rpc-common</artifactId>
         </dependency>
     </dependencies>
 </project>

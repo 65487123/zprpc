@@ -18,6 +18,7 @@
         <module>rpc-server</module>
         <module>rpc-demo</module>
         <module>rpc-common</module>
+        <module>zprpc-registry</module>
     </modules>
 
     <parent>
