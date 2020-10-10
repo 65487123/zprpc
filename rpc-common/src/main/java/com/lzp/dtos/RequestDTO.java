@@ -1,8 +1,6 @@
 package com.lzp.dtos;
 
-import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * Description:RPC请求对象
@@ -11,8 +9,17 @@ import java.util.List;
  * @date: 2020/9/29 14:16
  */
 public class RequestDTO {
+    /**
+     * 被调用的serviceId
+     */
     private String serviceId;
+    /**
+     * 被调用的方法
+     */
     private Method method;
+    /**
+     * 调用参数
+     */
     private Object[] prams;
 
     public RequestDTO() {

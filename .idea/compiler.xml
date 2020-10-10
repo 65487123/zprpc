@@ -6,10 +6,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="zprpc-registry" />
+        <module name="rpc-demo-client" />
         <module name="rpc-common" />
         <module name="rpc-demo-server" />
-        <module name="rpc-demo-client" />
+        <module name="zprpc-registry" />
         <module name="rpc-demo-api" />
         <module name="rpc-server" />
         <module name="rpc-client" />

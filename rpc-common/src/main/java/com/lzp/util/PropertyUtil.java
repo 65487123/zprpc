@@ -22,16 +22,17 @@ public class PropertyUtil {
         try {
             properties.load(in);
         } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
     }
 
 
-    public static String getBasePack(){
+    public static String getBasePack() {
         return properties.getProperty("basePack");
     }
 
 
-    public static String getNacosIpList(){
+    public static String getNacosIpList() {
         return properties.getProperty("nacosIpList");
     }
 

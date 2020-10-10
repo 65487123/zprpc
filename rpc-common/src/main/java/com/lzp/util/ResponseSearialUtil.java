@@ -6,7 +6,7 @@ import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.runtime.RuntimeSchema;
 
 /**
- * Description:
+ * Description:序列化、反序列化响应对象的工具
  *
  * @author: Lu ZePing
  * @date: 2020/9/29 14:03
