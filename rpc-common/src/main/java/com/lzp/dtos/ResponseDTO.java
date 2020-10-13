@@ -13,16 +13,16 @@ public class ResponseDTO {
      */
     private Object result;
     /**
-     * 被调用的serviceId
+     * rpc调用的requestId
      */
-    private String id;
+    private String reqId;
 
     public Object getResult() {
         return result;
     }
 
-    public String getId() {
-        return id;
+    public String getReqId() {
+        return reqId;
     }
 
     public ResponseDTO() {

@@ -15,22 +15,16 @@
         <module name="rpc-client" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="config" target="1.8" />
-      <module name="rpc-netty" target="1.8" />
-    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="artifacts" options="-parameters" />
-      <module name="config" options="-parameters" />
       <module name="rpc-client" options="-parameters" />
       <module name="rpc-common" options="-parameters" />
       <module name="rpc-demo" options="-parameters" />
       <module name="rpc-demo-api" options="-parameters" />
       <module name="rpc-demo-client" options="-parameters" />
       <module name="rpc-demo-server" options="-parameters" />
-      <module name="rpc-netty" options="-parameters" />
       <module name="rpc-server" options="-parameters" />
       <module name="zprpc" options="-parameters" />
       <module name="zprpc-registry" options="-parameters" />
