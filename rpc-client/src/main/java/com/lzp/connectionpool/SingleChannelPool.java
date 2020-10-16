@@ -7,6 +7,7 @@ import io.netty.channel.Channel;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -17,7 +18,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * @date: 2020/10/13 16:34
  */
 public class SingleChannelPool implements FixedShareableChannelPool {
-    private Map<ServiceFactory.HostAndPort, Channel> hostAndPortChannelsMap = new HashMap<>();
+    //用ConcurrentHashMap是为了防止指令重排序而出现半初始化问题
+    private Map<ServiceFactory.HostAndPort, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
 
     @Override
     public Channel getChannel(ServiceFactory.HostAndPort hostAndPort) throws InterruptedException {

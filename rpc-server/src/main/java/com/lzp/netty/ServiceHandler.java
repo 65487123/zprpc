@@ -44,14 +44,13 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes)  {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
         RequestDTO requestDTO = RequestSearialUtil.deserialize(bytes);
-
         try {
             channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(requestDTO.getMethod()
-                    .invoke(idServiceMap.get(requestDTO.getServiceId()), requestDTO.getPrams()))));
-        } catch (Exception e){
-            channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO("exceptionÈ"+e.getMessage())));
+                    .invoke(idServiceMap.get(requestDTO.getServiceId()), requestDTO.getPrams()), requestDTO.getThreadId())));
+        } catch (Exception e) {
+            channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO("exceptionÈ" + e.getMessage(), requestDTO.getThreadId())));
         }
     }
 

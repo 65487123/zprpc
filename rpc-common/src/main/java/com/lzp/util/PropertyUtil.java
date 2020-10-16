@@ -31,6 +31,10 @@ public class PropertyUtil {
         return properties.getProperty("basePack");
     }
 
+    public static String getConnetionPoolSize() {
+        return properties.getProperty("connetionPoolSize");
+    }
+
 
     public static String getNacosIpList() {
         return properties.getProperty("nacosIpList");

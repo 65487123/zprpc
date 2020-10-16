@@ -1,16 +1,16 @@
 package com.lzp.netty;
 
+import com.lzp.dtos.ResponseDTO;
 import com.lzp.util.ResponseSearialUtil;
 import com.lzp.util.ThreadFactoryImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Description:处理服务端返回的RPC调用结果
@@ -19,35 +19,80 @@ import java.util.concurrent.TimeUnit;
  * @date: 2020/9/29 21:31
  */
 public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
+
     /**
-     * Description:用来存超时时刻和线程，这个类的对象占24字节
+     * Description:用来存超时时刻和线程以及rpc结果
      */
-    public static class ThreadWithTime {
+    public static class ThreadResultAndTime {
         /**
-         * Description:long 基本类型存过期时间， 占8个字节
+         * 过期的具体时刻
          */
         private long deadLine;
         /**
-         * Description:线程对象的引用， 指针压缩后占4个字节
-         * 属性总共12字节，加上指针压缩后的对象头12字节， 刚好24字节，不需要对其填充。
+         * 被阻塞的线程
          */
-        private Thread blockedThread;
+        private Thread thread;
+        /**
+         * rpc结果
+         */
+        private volatile Object result;
 
-        ThreadWithTime(long deadLine, Thread blockedThread) {
+        public ThreadResultAndTime(long deadLine, Thread thread) {
             this.deadLine = deadLine;
-            this.blockedThread = blockedThread;
+            this.thread = thread;
+        }
+
+        public Object getResult() {
+            return result;
         }
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(ResultHandler.class);
+
     /**
-     * Description:key是rpc请求id，value是待唤醒的线程和超时时间
+     * Description:单线程的线程池，用来检测rpc超时
      */
-    public static Map<String, ThreadWithTime> reqIdThreadMap = new HashMap<>();
+    private static ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("rpc timeout check"));
+    /**
+     * Description:key是发起rpc请求后被阻塞的线程id，value是待唤醒的线程和超时时间
+     */
+    public static Map<Long, ThreadResultAndTime> reqIdThreadMap = new ConcurrentHashMap<>();
 
     private ExecutorService checkTimeoutThreadPoll = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("timeoutCheck"));
 
+
+    static {
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                long now;
+                while (true) {
+                    now = System.currentTimeMillis();
+                    for (Map.Entry<Long, ThreadResultAndTime> entry : reqIdThreadMap.entrySet()) {
+                        //漏网之鱼会在下次被揪出来
+                        if (entry.getValue().deadLine < now) {
+                            ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(entry.getKey());
+                            threadResultAndTime.result = "exceptionÈtimeout";
+                            LockSupport.unpark(threadResultAndTime.thread);
+                        }
+                    }
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException e) {
+                        logger.error(e.getMessage(),e);
+                    }
+                }
+            }
+        });
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) throws Exception {
-        ResponseSearialUtil.deserialize(bytes).getReqId();
+        ResponseDTO responseDTO = ResponseSearialUtil.deserialize(bytes);
+        ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(responseDTO.getThreadId());
+        if (threadResultAndTime != null) {
+            threadResultAndTime.result = responseDTO.getResult();
+            LockSupport.unpark(threadResultAndTime.thread);
+        }
     }
 }

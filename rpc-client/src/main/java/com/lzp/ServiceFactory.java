@@ -8,7 +8,14 @@ import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.lzp.connectionpool.FixedShareableChannelPool;
+import com.lzp.connectionpool.ServiceChannelPoolImp;
+import com.lzp.connectionpool.SingleChannelPool;
+import com.lzp.dtos.RequestDTO;
+import com.lzp.exception.RpcException;
+import com.lzp.netty.ResultHandler;
 import com.lzp.util.PropertyUtil;
+import com.lzp.util.RequestSearialUtil;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +26,10 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * Description:提供代理bean，用以远程调服务。代理bean是单例的
@@ -34,10 +43,17 @@ public class ServiceFactory {
     private static Map<String, Channel> serviceIdChannelMap = new ConcurrentHashMap<>();
     private static Map<String, BeanAndAllHostAndPort> serviceIdInstanceMap = new ConcurrentHashMap<>();
     private static NamingService naming;
+    private static FixedShareableChannelPool channelPool;
 
     static {
         try {
             naming = NamingFactory.createNamingService(PropertyUtil.getNacosIpList());
+            String connectionPoolSize;
+            if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
+                channelPool = new SingleChannelPool();
+            } else {
+                channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
+            }
         } catch (NacosException e) {
             logger.error(e.getMessage(), e);
         }
@@ -101,6 +117,7 @@ public class ServiceFactory {
     /**
      * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样
      * 代理对象是单例的
+     *
      * @param serviceId    需要远程调用的服务id
      * @param interfaceCls 本地和远程服务实现的接口
      */
@@ -139,21 +156,42 @@ public class ServiceFactory {
     /**
      * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样，增加了超时时间设置，指定时间内没返回结果，则抛出异常
      *
-     * @param serviceId  需要远程调用的服务id
+     * @param serviceId    需要远程调用的服务id
      * @param interfaceCls 本地和远程服务实现的接口
-     * @param timeout 超时时间，单位是秒
+     * @param timeout      超时时间，单位是秒
      */
-    public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) {
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-
-                return null;
+    public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+        if (serviceIdInstanceMap.get(serviceId) == null) {
+            synchronized (ServiceFactory.class) {
+                if (serviceIdInstanceMap.get(serviceId) == null) {
+                    List<HostAndPort> hostAndPorts = new ArrayList<>();
+                    for (Instance instance : naming.selectInstances(serviceId, true)) {
+                        hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+                    }
+                    addListener(serviceId);
+                    Object bean = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
+                    serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, bean));
+                    return bean;
+                } else {
+                    return serviceIdInstanceMap.get(serviceId).bean;
+                }
             }
-        });
+        } else {
+            BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
+            if (beanAndAllHostAndPort.bean == null) {
+                synchronized (ServiceFactory.class) {
+                    if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
+                        beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
+                    }
+                    return beanAndAllHostAndPort.bean;
+                }
+            } else {
+                return beanAndAllHostAndPort.bean;
+            }
+        }
     }
 
-   /* public static Object getAstServiceBean(String serviceId, Class interfaceCls, int timeout) {
+   /* public static Object getAsyServiceBean(String serviceId, Class interfaceCls, int timeout) {
         return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -163,7 +201,9 @@ public class ServiceFactory {
         });
     }*/
 
-    /**Description:监听指定服务。当被监听的服务实例列表发生变化，更新本地缓存
+    /**
+     * Description:监听指定服务。当被监听的服务实例列表发生变化，更新本地缓存
+     *
      * @param serviceId
      * @Date: 2020/10/12 20:16
      * @Return
@@ -186,13 +226,47 @@ public class ServiceFactory {
     }
 
 
-    private static Object getBeanCore(String serviceId, Class interfaceCls){
+    private static Object getBeanCore(String serviceId, Class interfaceCls) {
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, (proxy, method, args) -> {
+            //根据serviceid找到所有提供这个服务的ip+port
+            List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+            Thread thisThread = Thread.currentThread();
+            ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(Long.MAX_VALUE, thisThread);
+            ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+            channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size()))).writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+            Object result;
+            //用while，防止虚假唤醒
+            while ((result = threadResultAndTime.getResult()) == null) {
+                LockSupport.park(thisThread);
+            }
+            return result;
+        });
+    }
+
+    private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout) {
         return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 //根据serviceid找到所有提供这个服务的ip+port
-
-                return null;
+                List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+                Thread thisThread = Thread.currentThread();
+                ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
+                ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+                channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size()))).writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+                Object result;
+                //用while，防止虚假唤醒
+                while ((result = threadResultAndTime.getResult()) == null) {
+                    LockSupport.park(thisThread);
+                }
+                if (result instanceof String && ((String) result).startsWith("exceptionÈ")) {
+                    String message;
+                    if ("timeout".equals(message = ((String) result).substring(10))) {
+                        throw new TimeoutException();
+                    } else {
+                        throw new RpcException(message);
+                    }
+                }
+                return result;
             }
         });
     }
