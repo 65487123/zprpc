@@ -1,5 +1,5 @@
 # zprpc
-中文|[English](https://github.com/65487123/LxuCache-Client/blob/master/README-EN.md)
+[中文](https://github.com/65487123/zprpc/blob/master/README.md)|English
 # Features
     A high-performance rpc framework, temporarily only supports nacos as the registry.
 #### 特点：
