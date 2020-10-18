@@ -1,15 +1,15 @@
 # zprpc
 [中文](https://github.com/65487123/zprpc/blob/master/README.md)|English
-# Features
+# Introduction
     A high-performance rpc framework, temporarily only supports nacos as the registry.
-#### 特点：
+#### Features：
     1、Simple configuration and easy to use.
     2、The application scenarios are rich, and the startup process does not rely on any components, such as tomcat,
 	   spring (with or without these components, the usage is the same).
     3、High performance: network communication is based on netty, protostuff for serialization. The connection pool 
 	   mechanism is realized, and multiple RPC calls can share a connection at the same time (non-blocking), 
 	   singleton proxy object, code details pay attention to performance.                  
-# 	使用方法：
+# 	How to use：
 ### 一、Environment setup
     1、Pull the code to the local, execute the maven compilation command in the project root directory: mvn clean install
     2、Set up the nacos environment: find the nacos source code on github, pull it locally, compile and start.
