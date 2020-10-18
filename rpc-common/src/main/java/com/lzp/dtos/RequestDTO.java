@@ -33,10 +33,11 @@ public class RequestDTO {
     public RequestDTO() {
     }
 
-    public RequestDTO(long threadId, String serviceId, Object... prams) {
+    public RequestDTO(long threadId, String serviceId, Method method, Object... prams) {
         this.threadId = threadId;
         this.prams = prams;
         this.serviceId = serviceId;
+        this.method = method;
     }
 
     public Method getMethod() {

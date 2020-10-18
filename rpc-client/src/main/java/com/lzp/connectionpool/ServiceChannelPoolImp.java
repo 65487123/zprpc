@@ -2,13 +2,17 @@ package com.lzp.connectionpool;
 
 import com.lzp.ServiceFactory;
 import com.lzp.netty.NettyClient;
+import com.lzp.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GenericFutureListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.*;
 
 /**
  * Description:固定数量连接池实现类
@@ -17,9 +21,15 @@ import java.util.concurrent.ThreadLocalRandom;
  * @date: 2020/10/9 17:53
  */
 public class ServiceChannelPoolImp implements FixedShareableChannelPool {
+    private final Logger logger = LoggerFactory.getLogger(ServiceChannelPoolImp.class);
+    private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
+
+
     private Map<ServiceFactory.HostAndPort, List<Channel>> hostAndPortChannelsMap = new HashMap<>();
     private final int SIZE;
-
+    {
+        heartBeatThreadPool.execute(this::hearBeat);
+    }
     public ServiceChannelPoolImp(int size) {
         this.SIZE = size;
     }
@@ -38,11 +48,13 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                     * */
                     channels = new CopyOnWriteArrayList<>();
                     Channel channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    updateChannelWhenClosed(channel,channels,hostAndPort);
                     channels.add(channel);
                     hostAndPortChannelsMap.put(hostAndPort,channels);
                     return channel;
                 } else if (channels.size() < SIZE) {
                     Channel channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    updateChannelWhenClosed(channel,channels,hostAndPort);
                     channels.add(channel);
                     return channel;
                 } else {
@@ -53,6 +65,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
             synchronized (this) {
                 if ((channels = hostAndPortChannelsMap.get(hostAndPort)).size() < SIZE) {
                     Channel channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    updateChannelWhenClosed(channel,channels,hostAndPort);
                     channels.add(channel);
                     return channel;
                 } else {
@@ -61,6 +74,60 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
             }
         } else {
             return channels.get(ThreadLocalRandom.current().nextInt(SIZE));
+        }
+    }
+
+    /**
+     * Description:给channel添加事件监听，当连接不可用了，用新的channel替换
+     *
+     * @author: Lu ZePing
+     * @date: 2020/9/27 18:32
+     */
+    private void updateChannelWhenClosed(Channel channel, List<Channel> channels, ServiceFactory.HostAndPort hostAndPort) {
+        channel.closeFuture().addListener(new GenericFutureListener<Future<? super Void>>() {
+            @Override
+            public void operationComplete(Future<? super Void> future) {
+                /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
+                所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/
+                new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+                        new ThreadFactoryImpl("get new Channel when closed")).execute(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                synchronized (this) {
+                                    channels.remove(channel);
+                                    Channel channel1 = null;
+                                    try {
+                                        channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                                    } catch (InterruptedException e) {
+                                        logger.error(e.getMessage(), e);
+                                    }
+                                    channels.add(channel1);
+                                    updateChannelWhenClosed(channel1, channels, hostAndPort);
+                                }
+                            }
+                        }
+                );
+            }
+        });
+    }
+
+    /**
+     * Description ：每四秒发送一个心跳包
+     **/
+    private void hearBeat() {
+        while (true) {
+            byte[] emptyPackage = new byte[0];
+            for (Map.Entry<ServiceFactory.HostAndPort, List<Channel>> entry : hostAndPortChannelsMap.entrySet()) {
+                for (Channel channel : entry.getValue()) {
+                    channel.writeAndFlush(emptyPackage);
+                }
+            }
+            try {
+                Thread.sleep(4000);
+            } catch (InterruptedException e) {
+                logger.error(e.getMessage(), e);
+            }
         }
     }
 }

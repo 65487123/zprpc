@@ -28,7 +28,7 @@ public class NettyClient implements AutoCloseable{
 
     
     public static Channel getChannel(String ip, int port) throws InterruptedException {
-        return bootstrap.bind(ip, port).sync().channel();
+        return bootstrap.connect(ip, port).sync().channel();
     }
 
     @Override

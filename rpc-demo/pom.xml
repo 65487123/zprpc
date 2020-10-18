@@ -6,12 +6,13 @@
         <artifactId>zprpc-parent</artifactId>
         <groupId>com.lzp.zprpc</groupId>
         <version>1.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <packaging>pom</packaging>
     <modules>
         <module>rpc-demo-api</module>
-        <module>rpc-demo-client</module>
-        <module>rpc-demo-server</module>
+        <module>rpc-demo-consumer</module>
+        <module>rpc-demo-producer</module>
     </modules>
     <modelVersion>4.0.0</modelVersion>
 

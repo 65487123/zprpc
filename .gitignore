@@ -1,1 +1,11 @@
 /.idea/
+/rpc-common/rpc-common.iml
+/rpc-demo/rpc-demo-api/rpc-demo-api.iml
+/rpc-demo/rpc-demo-consumer/rpc-demo-consumer.iml
+/rpc-demo/rpc-demo-producer/rpc-demo-producer.iml
+/rpc-demo/rpc-demo.iml
+/rpc-server/rpc-server.iml
+/zprpc-parent.iml
+/rpc-client/rpc-client.iml
+/zprpc-registry/zprpc-registry.iml
+/artifacts/artifacts.iml

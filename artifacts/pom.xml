@@ -6,8 +6,9 @@
         <groupId>com.lzp.zprpc</groupId>
         <artifactId>zprpc-parent</artifactId>
         <version>1.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>artifacts</artifactId>

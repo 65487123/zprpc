@@ -58,29 +58,24 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
      */
     public static Map<Long, ThreadResultAndTime> reqIdThreadMap = new ConcurrentHashMap<>();
 
-    private ExecutorService checkTimeoutThreadPoll = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("timeoutCheck"));
-
 
     static {
-        executorService.execute(new Runnable() {
-            @Override
-            public void run() {
-                long now;
-                while (true) {
-                    now = System.currentTimeMillis();
-                    for (Map.Entry<Long, ThreadResultAndTime> entry : reqIdThreadMap.entrySet()) {
-                        //漏网之鱼会在下次被揪出来
-                        if (entry.getValue().deadLine < now) {
-                            ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(entry.getKey());
-                            threadResultAndTime.result = "exceptionÈtimeout";
-                            LockSupport.unpark(threadResultAndTime.thread);
-                        }
+        executorService.execute(() -> {
+            long now;
+            while (true) {
+                now = System.currentTimeMillis();
+                for (Map.Entry<Long, ThreadResultAndTime> entry : reqIdThreadMap.entrySet()) {
+                    //漏网之鱼会在下次被揪出来
+                    if (entry.getValue().deadLine < now) {
+                        ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(entry.getKey());
+                        threadResultAndTime.result = "exceptionÈtimeout";
+                        LockSupport.unpark(threadResultAndTime.thread);
                     }
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException e) {
-                        logger.error(e.getMessage(),e);
-                    }
+                }
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    logger.error(e.getMessage(),e);
                 }
             }
         });

@@ -11,15 +11,34 @@
     <groupId>com.lzp.zprpc</groupId>
     <artifactId>zprpc-parent</artifactId>
     <packaging>pom</packaging>
-    <version>${project.version}</version>
+    <version>1.0</version>
     <modules>
         <module>artifacts</module>
         <module>rpc-client</module>
         <module>rpc-server</module>
         <module>rpc-demo</module>
         <module>rpc-common</module>
-        <module>zprpc-registry</module>
+        <module>rpc-registry</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

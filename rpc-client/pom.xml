@@ -6,6 +6,7 @@
         <artifactId>zprpc-parent</artifactId>
         <groupId>com.lzp.zprpc</groupId>
         <version>1.0</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <packaging>jar</packaging>
 
@@ -20,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>zprpc-registry</artifactId>
+            <artifactId>rpc-registry</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -40,7 +40,6 @@ import java.util.concurrent.locks.LockSupport;
 public class ServiceFactory {
     private static final Logger logger = LoggerFactory.getLogger(ServiceFactory.class);
 
-    private static Map<String, Channel> serviceIdChannelMap = new ConcurrentHashMap<>();
     private static Map<String, BeanAndAllHostAndPort> serviceIdInstanceMap = new ConcurrentHashMap<>();
     private static NamingService naming;
     private static FixedShareableChannelPool channelPool;
@@ -111,7 +110,6 @@ public class ServiceFactory {
             this.beanWithTimeOut = beanWithTimeOut;
         }
     }
-    //System.out.println(naming.selectInstances("nacos.test.3", true));
 
 
     /**
@@ -244,30 +242,28 @@ public class ServiceFactory {
     }
 
     private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout) {
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                //根据serviceid找到所有提供这个服务的ip+port
-                List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
-                Thread thisThread = Thread.currentThread();
-                ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
-                ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-                channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size()))).writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
-                Object result;
-                //用while，防止虚假唤醒
-                while ((result = threadResultAndTime.getResult()) == null) {
-                    LockSupport.park(thisThread);
-                }
-                if (result instanceof String && ((String) result).startsWith("exceptionÈ")) {
-                    String message;
-                    if ("timeout".equals(message = ((String) result).substring(10))) {
-                        throw new TimeoutException();
-                    } else {
-                        throw new RpcException(message);
-                    }
-                }
-                return result;
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, (proxy, method, args) -> {
+            //根据serviceid找到所有提供这个服务的ip+port
+            List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+            Thread thisThread = Thread.currentThread();
+            ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
+            ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+            channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size()))).writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+            Object result;
+            //用while，防止虚假唤醒
+            while ((result = threadResultAndTime.getResult()) == null) {
+                LockSupport.park(thisThread);
             }
+            if (result instanceof String && ((String) result).startsWith("exceptionÈ")) {
+                String message;
+                if ("timeout".equals(message = ((String) result).substring(10))) {
+                    throw new TimeoutException();
+                } else {
+                    throw new RpcException(message);
+                }
+            }
+            return result;
         });
     }
+
 }

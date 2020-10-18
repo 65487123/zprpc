@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,7 +26,11 @@ public class SpringUtil implements ApplicationContextAware {
 
 
     public static <T> Map<String, T> getBeansOfType(Class<T> baseType) {
-        return applicationContext.getBeansOfType(baseType);
+        if (applicationContext != null) {
+            return applicationContext.getBeansOfType(baseType);
+        } else {
+            return new HashMap<>();
+        }
     }
 }
 

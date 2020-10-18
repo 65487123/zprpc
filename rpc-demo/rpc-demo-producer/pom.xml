@@ -3,25 +3,25 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>zprpc-parent</artifactId>
+        <artifactId>rpc-demo</artifactId>
         <groupId>com.lzp.zprpc</groupId>
         <version>1.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rpc-server</artifactId>
+    <artifactId>rpc-demo-producer</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-common</artifactId>
+            <artifactId>rpc-demo-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-registry</artifactId>
+            <artifactId>artifacts</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
-
 </project>
