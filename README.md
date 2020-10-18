@@ -1,5 +1,5 @@
 # zprpc
-中文|[English](https://github.com/65487123/LxuCache-Client/blob/master/README-EN.md)
+中文|[English](https://github.com/65487123/zprpc/blob/master/README-EN.md)
 # 功能介绍
     一个高性能rpc框架，暂时只支持nacos做注册中心。
 #### 特点：
