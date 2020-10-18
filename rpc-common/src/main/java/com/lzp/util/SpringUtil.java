@@ -14,7 +14,7 @@ import java.util.Map;
  * @author: Lu ZePing
  * @date: 2020/9/28 19:23
  */
-@Component
+
 public class SpringUtil implements ApplicationContextAware {
 
     private static ApplicationContext applicationContext;
