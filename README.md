@@ -34,7 +34,7 @@
     服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
     
     如果项目用到了spring，并且服务也被注册到了spring容器中， 推荐在spring启动类上加入 @Import(SpringUtil.class) ，全限定名是com.lzp.util.SpringUtil。
-    这样在发布服务时，会先到spring容器中去找，如果spring容器中有服务实例，就会用spring中的。如果没有就会自己初始化一个。
+    先启动spring容器然后再启动rpc服务。这样在发布服务时，会先到spring容器中去找，如果spring容器中有服务实例，就会用spring中的。如果没有就会自己初始化一个。
     7、创建服务消费方工程，依赖提供接口的工程，并导入依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
