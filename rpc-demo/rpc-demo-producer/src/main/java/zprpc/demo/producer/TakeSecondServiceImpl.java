@@ -2,10 +2,14 @@ package zprpc.demo.producer;
 
 import com.lzp.annotation.Service;
 import zprpc.demo.api.DemoService;
+import zprpc.demo.api.TakeSecondService;
 
 
-@Service(id = "blokingServiceProducer", interfaceValue = "zprpc.demo.api.DemoService")
-public class BlokingServiceProducer implements DemoService {
+/**
+ * @author zeping lu
+ */
+@Service(id = "takeSecondService", interfaceValue = "zprpc.demo.api.TakeSecondService")
+public class TakeSecondServiceImpl implements TakeSecondService {
     @Override
     public String sayHello(String name) {
         try {

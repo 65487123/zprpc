@@ -1,17 +1,12 @@
 package com.lzp.connectionpool;
 
 import com.lzp.ServiceFactory;
-import com.lzp.dtos.RequestDTO;
 import com.lzp.netty.NettyClient;
 import com.lzp.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -24,11 +19,12 @@ import java.util.concurrent.*;
 public class SingleChannelPool implements FixedShareableChannelPool {
     private static final Logger logger = LoggerFactory.getLogger(SingleChannelPool.class);
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
-    //用ConcurrentHashMap是为了防止指令重排序而出现半初始化问题
     private Map<ServiceFactory.HostAndPort, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
+
     {
         heartBeatThreadPool.execute(this::hearBeat);
     }
+
     @Override
     public Channel getChannel(ServiceFactory.HostAndPort hostAndPort) throws InterruptedException {
         Channel channel = hostAndPortChannelsMap.get(hostAndPort);
@@ -70,7 +66,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
     private void hearBeat() {
         while (true) {
             byte[] emptyPackage = new byte[0];
-            for (Map.Entry<?,Channel > entry : hostAndPortChannelsMap.entrySet()) {
+            for (Map.Entry<?, Channel> entry : hostAndPortChannelsMap.entrySet()) {
                 entry.getValue().writeAndFlush(emptyPackage);
             }
             try {

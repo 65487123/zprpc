@@ -6,7 +6,7 @@ package zprpc.demo.api;
  * @author: Zeping Lu
  * @date: 2020/10/18 10:21
  */
-public interface DemoService {
+public interface TakeSecondService {
 
     String sayHello(String name);
 
