@@ -21,7 +21,7 @@
          <version>${project.version}</version>
     </dependency>
     3、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.annotation.Service注解;
-    注解有两个参数，分别是服务的id和要接口的全限定名，服务id需要有唯一性
+    注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
     示例：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
     4、在resources包下加入配置文件：zprpc.properties，加入配置项。其中有两项是必配的
     (1)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
@@ -65,6 +65,6 @@
     返回才会发出。而我这个连接机制是同一时间，多个rpc请求可以共用一个连接，没有任何阻塞的。
     3、发起rpc时，不是每次都去nacos中根据serviceid找实例。只有第一次会去nacos中找，找出实例会缓存到本地，然后添加nacos监听事件，
     当有事件会刷新本实例缓存。
-    4、客户端代理对象是单例的，只有第一此获取服务的时候会初始化，之后会保存在容器中。
+    4、客户端代理对象是单例的，只有第一次获取服务的时候会初始化，之后会保存在容器中。
     5、通过自定义协议解决粘包拆包，序列化用的protostuff
     
