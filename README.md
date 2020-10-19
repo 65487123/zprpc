@@ -17,7 +17,7 @@
     2、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <artifactId>artifacts</artifactId>
+         <artifactId>rpc-artifacts</artifactId>
          <version>${project.version}</version>
     </dependency>
     3、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.annotation.Service注解;
@@ -38,7 +38,7 @@
     7、创建服务消费方工程，依赖提供接口的工程，并导入依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <artifactId>artifacts</artifactId>
+         <artifactId>rpc-artifacts</artifactId>
          <version>${zprpc.version}</version>
     </dependency>
     8、编写配置文件，有一项是必写的：
