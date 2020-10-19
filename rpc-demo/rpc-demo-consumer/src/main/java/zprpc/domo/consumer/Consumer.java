@@ -28,7 +28,7 @@ public class Consumer {
 
         //多线程rpc调用测试性能
         //服务端线程池数量设置得比逻辑cpu要多，因为实际场景service很有可能会进行io操作。而这里没有，所以这里的测试出的并不是最好结果
-        ExecutorService executorService = new ThreadPoolExecutor(20, 20, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("rpc call"));
+        ExecutorService executorService = new ThreadPoolExecutor(25, 25, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("rpc call"));
         now = System.currentTimeMillis();
         CountDownLatch countDownLatch = new CountDownLatch(100000);
         for (int i = 0; i < 100000; i++) {
