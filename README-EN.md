@@ -20,7 +20,7 @@
     2、Create a service provider project, rely on the project that provides the interface, and import the maven dependency
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <artifactId>artifacts</artifactId>
+         <artifactId>rpc-artifacts</artifactId>
          <version>${project.version}</version>
     </dependency>
     3、Create an interface implementation class, implement specific methods of the interface, and add com.lzp.annotation.Service 
@@ -46,7 +46,7 @@
     7、Create service consumer projects, rely on projects that provide interfaces, and import dependencies
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <artifactId>artifacts</artifactId>
+         <artifactId>rpc-artifacts</artifactId>
          <version>${zprpc.version}</version>
     </dependency>
     8、To write a configuration file, one item must be written:
