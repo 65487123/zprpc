@@ -81,5 +81,6 @@
     3、When initiating rpc, it is not every time to find an instance in nacos based on serviceid. Only the first time I will go to nacos to find, find out 
 	the instance will be cached locally, and then add nacos to monitor events, When there is an event, the cache of this instance will be refreshed.
     4、The client proxy object is a singleton, and only the first time it gets the service will be initialized, and then it will be stored in the container.
-    5、Solve sticky package and unpack through custom protocol, protostuff for serial number
+    5、Solve sticky package and unpack through custom protocol, Protostuff for serialization
+
     
