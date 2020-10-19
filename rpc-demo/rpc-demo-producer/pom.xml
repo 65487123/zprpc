@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>artifacts</artifactId>
+            <artifactId>rpc-artifacts</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

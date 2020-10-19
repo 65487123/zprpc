@@ -13,7 +13,7 @@
     <packaging>pom</packaging>
     <version>1.0</version>
     <modules>
-        <module>artifacts</module>
+        <module>rpc-artifacts</module>
         <module>rpc-client</module>
         <module>rpc-server</module>
         <module>rpc-demo</module>

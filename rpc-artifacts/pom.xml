@@ -11,7 +11,7 @@
     <packaging>jar</packaging>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>artifacts</artifactId>
+    <artifactId>rpc-artifacts</artifactId>
 
     <dependencies>
         <dependency>
