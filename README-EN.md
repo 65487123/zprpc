@@ -40,7 +40,7 @@
 	after initialization, and publishes the services to nacos.
     
     If the project uses spring and the service is also registered in the spring container, it is recommended to add @Import(SpringUtil.class) 
-	to the spring boot class, the fully qualified name is com.lzp.util.SpringUtil.
+    to the spring boot class, the fully qualified name is com.lzp.util.SpringUtil.Start the spring container first and then start the rpc service.
     In this way, when publishing a service, you will first find it in the spring container. If there is a service instance in the spring 
 	container, it will use the spring. If not, it will initialize one itself.
     7、Create service consumer projects, rely on projects that provide interfaces, and import dependencies
