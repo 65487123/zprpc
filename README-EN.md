@@ -25,7 +25,7 @@
     </dependency>
     3、Create an interface implementation class, implement specific methods of the interface, and add com.lzp.annotation.Service 
 	annotation to the interface implementation class;
-    The annotation has two parameters, namely the id of the service and the fully qualified name of the interface to be used. 
+    The annotation has two parameters,the id of the service and the fully qualified name of the interface. 
 	The id of the service must be unique
     Example：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
     4、Add the configuration file: zprpc.properties under the resources package, and add configuration items. Two of them are mandatory
