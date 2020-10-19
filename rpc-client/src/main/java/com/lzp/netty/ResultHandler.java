@@ -50,9 +50,9 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
     private static final Logger logger = LoggerFactory.getLogger(ResultHandler.class);
 
     /**
-     * Description:单线程的线程池，用来检测rpc超时
+     * Description:线程池
      */
-    private static ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("rpc timeout check"));
+    private static ExecutorService rpcClientThreadPool;
     /**
      * Description:key是发起rpc请求后被阻塞的线程id，value是待唤醒的线程和超时时间
      */
@@ -60,7 +60,13 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
 
 
     static {
-        executorService.execute(() -> {
+        rpcClientThreadPool = new ThreadPoolExecutor(3, 3, 0, TimeUnit.SECONDS, new ArrayBlockingQueue<>(1000),
+                new ThreadFactoryImpl("rpc client"), (r, executor) -> r.run());
+
+
+
+        //一个线程专门用来检测rpc超时
+        rpcClientThreadPool.execute(() -> {
             long now;
             while (true) {
                 now = System.currentTimeMillis();
@@ -83,11 +89,13 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
-        ResponseDTO responseDTO = ResponseSearialUtil.deserialize(bytes);
-        ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(responseDTO.getThreadId());
-        if (threadResultAndTime != null) {
-            threadResultAndTime.result = responseDTO.getResult();
-            LockSupport.unpark(threadResultAndTime.thread);
-        }
+        rpcClientThreadPool.execute(() -> {
+            ResponseDTO responseDTO = ResponseSearialUtil.deserialize(bytes);
+            ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(responseDTO.getThreadId());
+            if (threadResultAndTime != null) {
+                threadResultAndTime.result = responseDTO.getResult();
+                LockSupport.unpark(threadResultAndTime.thread);
+            }
+        });
     }
 }

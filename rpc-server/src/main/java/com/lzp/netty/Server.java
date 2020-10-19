@@ -45,7 +45,7 @@ public class Server {
         startRpcServer(null, port);
     }
 
-    public static void closeServer(){
+    public static void closeServer() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }
@@ -64,7 +64,7 @@ public class Server {
             InetAddress ip;
             while (allNetInterfaces.hasMoreElements()) {
                 NetworkInterface netInterface = allNetInterfaces.nextElement();
-                if (!netInterface.isLoopback() && !netInterface.isVirtual() && netInterface.isUp()) {
+                if (!netInterface.isLoopback() && !netInterface.isVirtual() && netInterface.isUp() && !netInterface.getDisplayName().contains("docker")) {
                     Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
                     while (addresses.hasMoreElements()) {
                         ip = addresses.nextElement();

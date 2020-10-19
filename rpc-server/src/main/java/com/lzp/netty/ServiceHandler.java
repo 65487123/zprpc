@@ -6,12 +6,14 @@ import com.lzp.registry.nacos.NacosClient;
 import com.lzp.util.PropertyUtil;
 import com.lzp.util.RequestSearialUtil;
 import com.lzp.util.ResponseSearialUtil;
+import com.lzp.util.ThreadFactoryImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.concurrent.*;
 
 /**
  * Description:根据消息调用相应服务的handler
@@ -24,16 +26,28 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
 
     private static Map<String, Object> idServiceMap;
 
+    private static ExecutorService serviceThreadPool;
+
+    static {
+        int logicalCpuCore = Runtime.getRuntime().availableProcessors();
+        //被调用的服务可能会涉及到io操作，所以核心线程数设置比逻辑处理器个数多点
+        serviceThreadPool = new ThreadPoolExecutor(logicalCpuCore + 1, 2 * logicalCpuCore,
+                100, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100000),
+                new ThreadFactoryImpl("rpc service"), (r, executor) -> r.run());
+    }
+
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
-        RequestDTO requestDTO = RequestSearialUtil.deserialize(bytes);
-        try {
-            channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(requestDTO.getMethod()
-                    .invoke(idServiceMap.get(requestDTO.getServiceId()), requestDTO.getPrams()), requestDTO.getThreadId())));
-        } catch (Exception e) {
-            channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO("exceptionÈ" + e.getMessage(), requestDTO.getThreadId())));
-        }
+        serviceThreadPool.execute(() -> {
+            RequestDTO requestDTO = RequestSearialUtil.deserialize(bytes);
+            try {
+                channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(requestDTO.getMethod()
+                        .invoke(idServiceMap.get(requestDTO.getServiceId()), requestDTO.getPrams()), requestDTO.getThreadId())));
+            } catch (Exception e) {
+                channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO("exceptionÈ" + e.getMessage(), requestDTO.getThreadId())));
+            }
+        });
     }
 
 
