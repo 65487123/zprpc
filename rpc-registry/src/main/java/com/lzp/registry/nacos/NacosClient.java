@@ -5,6 +5,7 @@ import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.lzp.annotation.Service;
 import com.lzp.registry.api.RegistryClient;
+import com.lzp.registry.util.ClazzUtils;
 import com.lzp.util.PropertyUtil;
 import com.lzp.util.SpringUtil;
 import org.slf4j.Logger;
@@ -55,16 +56,10 @@ public class NacosClient implements RegistryClient {
      */
 
 
-    private Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService,String ip,int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
-        Map<String, Object> idServiceMap = new HashMap();
-        String classpath = NacosClient.class.getResource("/").getPath();
-        basePack = basePack.replace(".", File.separator);
-        String searchPath = classpath + basePack;
-        List<String> classPaths = new ArrayList<String>();
-        doPath(new File(searchPath), classPaths);
-        for (String s : classPaths) {
-            s = s.replace(classpath.replace("/", "\\").replaceFirst("\\\\", ""), "").replace("\\", ".").replace(".class", "");
-            Class cls = Class.forName(s);
+    private Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService, String ip, int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
+        Map<String, Object> idServiceMap = new HashMap(16);
+        for (String path : ClazzUtils.getClazzName(basePack)) {
+            Class cls = Class.forName(path);
             if (cls.isAnnotationPresent(Service.class)) {
                 Service service = (Service) cls.getAnnotation(Service.class);
                 Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);
