@@ -82,7 +82,7 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
     }
 
     @Override
-    protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) throws Exception {
+    protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
         ResponseDTO responseDTO = ResponseSearialUtil.deserialize(bytes);
         ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(responseDTO.getThreadId());
         if (threadResultAndTime != null) {

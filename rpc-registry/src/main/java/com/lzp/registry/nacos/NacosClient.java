@@ -74,20 +74,4 @@ public class NacosClient implements RegistryClient {
         return idServiceMap;
     }
 
-    /**
-     * 该方法会得到所有的类，将类的绝对路径写入到容器中
-     * @param file
-     */
-    private static void doPath(File file, List<String> classPaths) {
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            for (File f1 : files) {
-                doPath(f1,classPaths);
-            }
-        } else {
-            if (file.getName().endsWith(".class")) {
-                classPaths.add(file.getPath());
-            }
-        }
-    }
 }
