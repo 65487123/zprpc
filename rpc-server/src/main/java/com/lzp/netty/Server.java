@@ -1,6 +1,7 @@
 package com.lzp.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -31,6 +32,7 @@ public class Server {
         Server.port = port;
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                ///测了下，禁用Nagle算法并没有带来明显的性能提升，考虑到会占用更多带宽，暂时就不开启
                 /*.childOption(ChannelOption.TCP_NODELAY,true)*/
                 .childHandler(new SocketChannelInitializerForServer());
         try {
@@ -75,7 +77,7 @@ public class Server {
                 }
             }
         } catch (Exception e) {
-            System.err.println("IP地址获取失败" + e.toString());
+            logger.error("failed to find ip", e);
         }
         return null;
     }

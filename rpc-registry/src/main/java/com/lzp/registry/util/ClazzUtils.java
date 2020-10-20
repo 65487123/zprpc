@@ -74,7 +74,7 @@ public class ClazzUtils {
                 File[] listFiles = file.listFiles();
                 if (listFiles != null && listFiles.length > 0) {
                     for (File f : listFiles) {
-                            result.addAll(getAllClassNameByFile(f));
+                        result.addAll(getAllClassNameByFile(f));
                     }
                 }
             }
@@ -82,7 +82,7 @@ public class ClazzUtils {
         return result;
     }
 
-    private static void findClazzName(File file,List<String> result){
+    private static void findClazzName(File file, List<String> result) {
         String path = file.getPath();
         // 注意：这里替换文件分割符要用replace。因为replaceAll里面的参数是正则表达式,而windows环境中File.separator="\\"的,因此会有问题
         if (path.endsWith(CLASS_SUFFIX)) {
@@ -95,6 +95,7 @@ public class ClazzUtils {
             }
         }
     }
+
     /**
      * 递归获取jar所有class文件的名字
      *

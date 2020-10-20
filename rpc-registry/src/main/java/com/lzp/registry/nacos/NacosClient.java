@@ -11,10 +11,7 @@ import com.lzp.util.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,30 +26,31 @@ public class NacosClient implements RegistryClient {
 
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        return searchAndRegiInstance(basePack,NamingFactory.createNamingService(PropertyUtil.getNacosIpList()),ip,port);
+        return searchAndRegiInstance(basePack, NamingFactory.createNamingService(PropertyUtil.getNacosIpList()), ip, port);
     }
 
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.com.lzp.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
-     *   Spring容器中找，找不到才自己初始化一个),并注册到注册中心中
+     * Spring容器中找，找不到才自己初始化一个),并注册到注册中心中
+     * <p>
+     * ______________________________________________
+     * |               namespace                     |
+     * |   ————————————————————————————————————————  |
+     * |  | ____________ group____________________ | |
+     * |  || |------------service--------------| | | |
+     * |  || | |cluser |          | cluster|   | | | |
+     * |  || | |_______|          |________|   | | | |
+     * |  || |_________________________________| | | |
+     * |  ||_____________________________________| | |
+     * |  |_______________________________________ | |
+     * ———————————————————————————————————————————————
+     * group和serviceid决定一个服务，一个service包含多个cluster，每个cluster
+     * 里包含多个instance
      *
-     *   ______________________________________________
-     *   |               namespace                     |
-     *   |   ————————————————————————————————————————  |
-     *   |  | ____________ group____________________ | |
-     *   |  || |------------service--------------| | | |
-     *   |  || | |cluser |          | cluster|   | | | |
-     *   |  || | |_______|          |________|   | | | |
-     *   |  || |_________________________________| | | |
-     *   |  ||_____________________________________| | |
-     *   |  |_______________________________________ | |
-     *   ———————————————————————————————————————————————
-     *   group和serviceid决定一个服务，一个service包含多个cluster，每个cluster
-     *   里包含多个instance
-     * @param basePack  要扫描的包
+     * @param basePack      要扫描的包
      * @param namingService 注册中心
-     * @param ip  要注册进注册中心的实例（instance)ip
-     * @param port  要注册进注册中心的实例（instance)port
+     * @param ip            要注册进注册中心的实例（instance)ip
+     * @param port          要注册进注册中心的实例（instance)port
      */
 
 
