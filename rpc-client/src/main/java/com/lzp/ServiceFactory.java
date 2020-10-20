@@ -16,12 +16,9 @@ import com.lzp.exception.RpcException;
 import com.lzp.netty.ResultHandler;
 import com.lzp.util.PropertyUtil;
 import com.lzp.util.RequestSearialUtil;
-import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
