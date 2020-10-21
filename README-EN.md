@@ -10,12 +10,12 @@
 	   mechanism is realized, and multiple RPC calls can share a connection at the same time (non-blocking), 
 	   singleton proxy object, code details pay attention to performance.                  
 # 	How to use：
-### 一、Environment setup
+### Environment setup
     1、Pull the code to the local, execute the maven compilation command in the project root directory: mvn clean install
     2、Set up the nacos environment: find the nacos source code on github, pull it locally, compile and start.
      For those who are not familiar with the specific operation, please refer to the nacos official website 
    [nacos official website](https://nacos.io/zh-cn/docs/quick-start.html)
-### 二、Create project, import dependencies, write configuration and code
+### Create project, import dependencies, write configuration and code
     1、Create a new project and define a public interface for service providers and service consumers to rely on
     2、Create a service provider project, rely on the project that provides the interface, and import the maven dependency
     <dependency>
@@ -66,7 +66,10 @@
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
     To obtain the proxy object, remote calls through this object will have a timeout limit, and a timeout exception will be thrown if no result 
 	is returned after the specified number of seconds.
-
+### Demo 
+    The demo is provided in the source code. Under the rpc-demo project, the service provider project and the service consumer project are included. 
+    After the code is pulled down and compiled, it can be run directly, configure nacosIpList,Start the service provider first and then start the service 
+    consumer to see the result.
 #### Main realization principle:
     Similar to other mainstream RPCs, the service provider registers the service in the registry, and the service consumer finds the corresponding 
 	service in the registry, and then establishes a connection to initiate an rpc call. But for performance, this rpc has made many optimizations.
