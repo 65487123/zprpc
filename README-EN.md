@@ -72,21 +72,38 @@
     consumer to see the result.
 #### Main realization principle:
     Similar to other mainstream RPCs, the service provider registers the service in the registry, and the service consumer finds the corresponding 
-	service in the registry, and then establishes a connection to initiate an rpc call. But for performance, this rpc has made many optimizations.
+    service in the registry, and then establishes a connection to initiate an rpc call. But for performance, this rpc framework has made many optimizations.
     1、Not every time rpc will re-establish the connection, the connection pool mechanism is implemented, and the connections in the connection pool 
-	can be shared, not just take out one less, and then put in one more.It is a fixed number of connection pools, the number can be configured through 
-	the configuration file. The connection in the connection pool is not fully established at one time, but after the client finds the corresponding 
-	instance in the registry,Take it from the connection pool and find that the number of connection pools is not full, it will initialize a connection, 
-	put it into the connection pool and return. The connection in the connection pool will have a heartbeat keep-alive mechanism. When the connection is 
-	unavailable, it will be disconnected.Drop this connection to initiate a new connection and add it to the connection pool. The technical details 
-	involve the issue of multi-thread concurrency, which is similar to the singleton mode, such as visibility, semi-initialization, etc.
+       can be shared, not just take out one less, and then put in one more.It is a fixed number of connection pools, the number can be configured through 
+       the configuration file. The connection in the connection pool is not fully established at one time, but after the client finds the corresponding 
+       instance in the registry,Take it from the connection pool and find that the number of connection pools is not full, it will initialize a connection, 
+       put it into the connection pool and return. The connection in the connection pool will have a heartbeat keep-alive mechanism. When the connection is 
+       unavailable, it will be disconnected.Drop this connection to initiate a new connection and add it to the connection pool. The technical details 
+       involve the issue of multi-thread concurrency, which is similar to the singleton mode, such as visibility, semi-initialization, etc.
     2、Not every rpc call will block a connection. Like http1.0, every http request creates a new connection, and then closes the connection after the 
 	request is initiated. During this time, this connection only serves this one A http request. Although http1.1 has keepalive and pipeling mechanisms, 
 	at the same time, the connection can only serve one http request, and the next http request must wait for the previous http request Will be sent back. 
 	And my connection mechanism is at the same time, multiple rpc requests can share a connection without any blocking.
+	For example, there are two projects A and B each containing a set of services, which are deployed on different machines. Method a in project A will 
+	call method e in project B, method b will call method f, and method c will call method g.
+         _____________________                                      _____________________        
+         | A     a ➝➝➝➝➝ |➝➝                      ➝➝➝➝➝➝ |➝➝➝➝➝e         B|  
+         |                   |    ↘                 ↗             |                    |   
+         |       b ➝➝➝➝➝ |➝➝ ➨➨➨➨➨➨➨➨➨➨➝➝➝➝➝➝➝  |➝➝➝➝➝f          |   
+         |                   |    ↗                 ↘             |                    |   
+         |       c ➝➝➝➝➝ |➝➝                      ➝➝➝➝➝➝ |➝➝➝➝➝g          |   
+         |___________________|                                      |____________________| 
+
+        During the calling process, they will find the connection between Project A and Project B from the pool, and then make RPC calls through this connection. 
+	This process is almost disorderly and non-blocking. A, b, and c methods only need to issue a call instruction, and then Just wait to get the rpc result.
+        Since all service communication between the two instances (ip+port) is through a fixed number of connections (the default is one), this method has another 
+	advantage in addition to the fast call speed: when there are a large number of services, the rpc call is occupied The resources will be much less, such as 
+	cpu resources, memory resources, the number of ports on the client, the number of file handles on the server, and so on.
     3、When initiating rpc, it is not every time to find an instance in nacos based on serviceid. Only the first time I will go to nacos to find, find out 
 	the instance will be cached locally, and then add nacos to monitor events, When there is an event, the cache of this instance will be refreshed.
     4、The client proxy object is a singleton, and only the first time it gets the service will be initialized, and then it will be stored in the container.
-    5、Solve sticky package and unpack through custom protocol, Protostuff for serialization
+    5. The server-side service object instance is also singleton, and will be stored in the container after the service is started. If the project uses spring, 
+    it will first go to the spring container to find it, and then initialize it by itself.
+    6、Solve sticky package and unpack through custom protocol, Protostuff for serialization
 
     
