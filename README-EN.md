@@ -96,9 +96,9 @@
 
         During the calling process, they will find the connection between Project A and Project B from the pool, and then make RPC calls through this connection. 
 	This process is almost disorderly and non-blocking. A, b, and c methods only need to issue a call instruction, and then Just wait to get the rpc result.
-        Since all service communication between the two instances (ip+port) is through a fixed number of connections (the default is one), this method has another 
-	advantage in addition to the fast call speed: when there are a large number of services, the rpc call is occupied The resources will be much less, such as 
-	cpu resources, memory resources, the number of ports on the client, the number of file handles on the server, and so on.
+        Since all service communication between the two instances (ip+port) is through a fixed number of connections (the default is one), every connection is fully 
+	utilized, When there are a large number of services, rpc calls occupied CPU resources, memory resources, the number of client ports, the number of file 
+	handles on the server and other resources will be much less 
     3、When initiating rpc, it is not every time to find an instance in nacos based on serviceid. Only the first time I will go to nacos to find, find out 
 	the instance will be cached locally, and then add nacos to monitor events, When there is an event, the cache of this instance will be refreshed.
     4、The client proxy object is a singleton, and only the first time it gets the service will be initialized, and then it will be stored in the container.
