@@ -46,6 +46,7 @@
     还可以配置和每台实例的连接池连接数。
     示例：connetionPoolSize：2
     不配置，默认连接池里的数量就是一。 也就是这个消费方和某个服务实例里的所有服务通信都是走这一个连接，但是不会有任何阻塞。
+    推荐不配置连接池连接数，使用默认单个连接的连接池。因为客户端开了一个Reactor，也就是只有一个线程服务所有连接，多个连接没多大意义
     9.得到代理对象，通过代理对象可以发起远程调用，就和调用本地方法一样
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
     serviceId就是服务的唯一id，interfaceCls是接口的Class对象。返回一个实例，强转成接口类型就行。
