@@ -54,7 +54,10 @@
     You can also configure the number of connections to the connection pool for each instance.
     Example: connetionPoolSize: 2
     Without configuration, the number in the default connection pool is one. That is, the consumer communicates with all services in a 
-	certain service instance through this connection, but there will be no blockage.
+    certain service instance through this connection, but there will be no blockage.
+    It is recommended not to configure the number of connections in the connection pool and use the default connection pool of a single 
+    connection. Because the client opens just one Reactor, that is, there is only one thread to serve all connections, and multiple 
+    connections do not make much sense
     9.Get the proxy object, through the proxy object you can initiate a remote call, just like calling a local method
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
     serviceId is the unique id of the service, and interfaceCls is the Class object of the interface. Return an instance and force it to be an 
