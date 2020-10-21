@@ -53,6 +53,9 @@
     也可以通过
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
     来获取代理对象，通过这个对象远程调用会有超时限制，超过指定秒数没返回结果就会抛出超时异常。
+ ### 三、Demo 
+    源码中提供了demo，在rpc-demo工程下，包含了服务提供方工程和服务消费方工程，代码拉下来编译后直接就能跑，配置一下nacosIpList，
+    先启动服务提供方再启动服务消费方就能看到结果。
 
 #### 主要实现原理：
     和其他主流rpc类似，服务提供方把服务注册到注册中心，服务消费方到注册中心找到相应服务，然后建立连接发起rpc调用。
