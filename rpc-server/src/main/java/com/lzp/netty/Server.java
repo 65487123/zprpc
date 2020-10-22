@@ -38,6 +38,7 @@ public class Server {
         try {
             serverBootstrap.bind(Server.ip, port).sync();
             ServiceHandler.rigiService();
+            logger.info("publish service successfully");
         } catch (InterruptedException e) {
             logger.error(e.getMessage(), e);
         }
