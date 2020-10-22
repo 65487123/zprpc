@@ -149,13 +149,16 @@ public class ServiceFactory {
 
 
     /**
-     * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样，增加了超时时间设置，指定时间内没返回结果，则抛出异常
+     * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样，
+     * 增加了超时时间设置，指定时间内没返回结果，则抛出异常.
      *
+     * 注意：由于对象是单例保存，只有第一次获取实例设置的超时时间参数是有效的，后面再次获取都会返回第一次生成的对象。
      * @param serviceId    需要远程调用的服务id
      * @param interfaceCls 本地和远程服务实现的接口
      * @param timeout      超时时间，单位是秒
      */
     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+        checkTimeOut(timeout);
         if (serviceIdInstanceMap.get(serviceId) == null) {
             synchronized (ServiceFactory.class) {
                 if (serviceIdInstanceMap.get(serviceId) == null) {
@@ -164,25 +167,34 @@ public class ServiceFactory {
                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
                     }
                     addListener(serviceId);
-                    Object bean = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
-                    serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, bean));
-                    return bean;
+                    Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
+                    serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
+                    return beanWithTimeOut;
                 } else {
-                    return serviceIdInstanceMap.get(serviceId).bean;
+                    return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
                 }
             }
         } else {
             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
-            if (beanAndAllHostAndPort.bean == null) {
+            if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                 synchronized (ServiceFactory.class) {
                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
                         beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
                     }
-                    return beanAndAllHostAndPort.bean;
+                    return beanAndAllHostAndPort.beanWithTimeOut;
                 }
             } else {
-                return beanAndAllHostAndPort.bean;
+                return beanAndAllHostAndPort.beanWithTimeOut;
             }
+        }
+    }
+
+    /**
+     * Description:校验参数
+     **/
+    private static void checkTimeOut(int timeout) {
+        if (timeout <= 0) {
+            throw new IllegalArgumentException("timeout need to be greater than 0");
         }
     }
 

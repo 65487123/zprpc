@@ -19,7 +19,7 @@ public class Consumer {
         System.out.println(demoService.sayHello("zeping"));
         System.out.println(demoService.sayHello("zeping"));
 
-        //单线程调用测性能
+        //单线程调用测性能。 第一次会慢点，因为server端需要初始化线程池中的线程
         long now = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
             demoService.sayHello("zeping");
@@ -40,9 +40,12 @@ public class Consumer {
         countDownLatch.await();
         System.out.println(System.currentTimeMillis() - now);
 
-        //获取带超时事件的rpc代理对象
+        //获取带超时时间的rpc代理对象
         TakeSecondService demoService1 = (TakeSecondService) ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 1);
+
         //超时没返回会抛出异常
         demoService1.sayHello("zeping");
+
+
     }
 }
