@@ -69,7 +69,7 @@
     返回才会发出。而我这个连接机制是同一时间，多个rpc请求可以共用一个连接，没有任何阻塞的。
     
     举个例子，有A、B两个工程里面各包含了一组服务，分别部署在不同的机器上。A工程里的a方法会调用B工程里的e方法，b方法调用f方法，c方法调用g方法。
-![example](https://github.com/65487123/zprpc/blob/master/readme0.png)
+![example](https://gitee.com/zeping-lu/pngs-for-readme/blob/master/readme0.png)
 
     调用过程中他们都会从池中找出A工程和B工程的连接，然后通过这个连接进行RPC调用，这个过程是几乎是无序无阻塞的，a、b、c方法只要发出调用指令，然后
     等着拿到rpc结果就行。
