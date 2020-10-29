@@ -86,7 +86,7 @@
 	And my connection mechanism is at the same time, multiple rpc requests can share a connection without any blocking.
 	For example, there are two projects A and B each containing a set of services, which are deployed on different machines. Method a in project A will 
 	call method e in project B, method b will call method f, and method c will call method g.
- ![example](https://github.com/65487123/zprpc/blob/master/readme0.png)
+![example](https://gitee.com/zeping-lu/pngs-for-readme/raw/master/readme0.png)
  
         During the calling process, they will find the connection between Project A and Project B from the pool, and then make RPC calls through this connection. 
 	This process is almost disorderly and non-blocking. A, b, and c methods only need to issue a call instruction, and then Just wait to get the rpc result.
