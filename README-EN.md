@@ -21,7 +21,7 @@
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
-         <version>${project.version}</version>
+         <version>1.0</version>
     </dependency>
     3、Create an interface implementation class, implement specific methods of the interface, and add com.lzp.annotation.Service 
 	annotation to the interface implementation class;
@@ -47,7 +47,7 @@
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
-         <version>${zprpc.version}</version>
+         <version>1.0</version>
     </dependency>
     8、To write a configuration file, one item must be written:
     nacos ip: nacosIpList. Example: nacosIpList=192.168.0.101:8848
