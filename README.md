@@ -18,7 +18,7 @@
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
-         <version>${project.version}</version>
+         <version>1.0</version>
     </dependency>
     3、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.annotation.Service注解;
     注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
@@ -39,7 +39,7 @@
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
-         <version>${zprpc.version}</version>
+         <version>1.0</version>
     </dependency>
     8、编写配置文件，有一项是必写的：
     nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
