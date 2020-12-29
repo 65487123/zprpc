@@ -16,10 +16,12 @@
 package com.lzp.netty;
 
 import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.ChannelOption;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.util.concurrent.GenericFutureListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +41,7 @@ public class Server {
     private static EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private static EventLoopGroup workerGroup = new NioEventLoopGroup(1);
 
-    public static void startRpcServer(String ip, int port) {
+    public synchronized static void startRpcServer(String ip, int port) {
         if (Server.port != 0) {
             throw new RuntimeException("The server has started");
         }
@@ -51,7 +53,8 @@ public class Server {
                 /*.childOption(ChannelOption.TCP_NODELAY,true)*/
                 .childHandler(new SocketChannelInitializerForServer());
         try {
-            serverBootstrap.bind(Server.ip, port).sync();
+            Channel channel = serverBootstrap.bind(Server.ip, port).sync().channel();
+            channel.closeFuture().addListener((GenericFutureListener<ChannelFuture>) future -> Server.closeServer());
             ServiceHandler.rigiService();
             logger.info("publish service successfully");
         } catch (InterruptedException e) {
