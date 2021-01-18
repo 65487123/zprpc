@@ -26,6 +26,7 @@ import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.lzp.connectionpool.FixedShareableChannelPool;
 import com.lzp.connectionpool.ServiceChannelPoolImp;
 import com.lzp.connectionpool.SingleChannelPool;
+import com.lzp.constant.Cons;
 import com.lzp.dtos.RequestDTO;
 import com.lzp.exception.RpcException;
 import com.lzp.netty.ResultHandler;
@@ -278,9 +279,9 @@ public class ServiceFactory {
             while ((result = threadResultAndTime.getResult()) == null) {
                 LockSupport.park(thisThread);
             }
-            if (result instanceof String && ((String) result).startsWith("exceptionÈ")) {
+            if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTIONÈ)) {
                 String message;
-                if ("timeout".equals(message = ((String) result).substring(10))) {
+                if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
                     throw new TimeoutException();
                 } else {
                     throw new RpcException(message);

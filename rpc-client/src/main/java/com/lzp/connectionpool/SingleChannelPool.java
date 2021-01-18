@@ -61,8 +61,9 @@ public class SingleChannelPool implements FixedShareableChannelPool {
         channel.closeFuture().addListener(future -> {
             /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
             所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/
-            new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
-                    new ThreadFactoryImpl("get new Channel when closed")).execute(() -> {
+            ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
+                    new ThreadFactoryImpl("get new Channel when closed"));
+            executorService.execute(() -> {
                 Channel channel1 = null;
                 try {
                     channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
@@ -71,6 +72,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
                 }
                 hostAndPortChannelsMap.put(hostAndPort, channel1);
                 updateChannelWhenClosed(hostAndPort, channel1);
+                executorService.shutdown();
             });
         });
     }

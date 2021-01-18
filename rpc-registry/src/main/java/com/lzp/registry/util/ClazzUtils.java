@@ -35,7 +35,9 @@ public class ClazzUtils {
     private static final String CLASS_SUFFIX = ".class";
     private static final String CLASS_FILE_PREFIX = File.separator + "classes" + File.separator;
     private static final String PACKAGE_SEPARATOR = ".";
-
+    private static final String FILE = "file";
+    private static final String JAR = "jar";
+    private static final String DOLLAR = "$";
     /**
      * 查找包下的所有类的名字
      *
@@ -52,10 +54,10 @@ public class ClazzUtils {
                 URL url = urls.nextElement();
                 if (url != null) {
                     String protocol = url.getProtocol();
-                    if ("file".equals(protocol)) {
+                    if (ClazzUtils.FILE.equals(protocol)) {
                         String path = url.getPath();
                         result.addAll(getAllClassNameByFile(new File(path)));
-                    } else if ("jar".equals(protocol)) {
+                    } else if (ClazzUtils.JAR.equals(protocol)) {
                         JarFile jarFile = null;
                         try {
                             jarFile = ((JarURLConnection) url.openConnection()).getJarFile();
@@ -105,7 +107,7 @@ public class ClazzUtils {
             // 从"/classes/"后面开始截取
             String clazzName = path.substring(path.indexOf(CLASS_FILE_PREFIX) + CLASS_FILE_PREFIX.length())
                     .replace(File.separator, PACKAGE_SEPARATOR);
-            if (!clazzName.contains("$")) {
+            if (!clazzName.contains(ClazzUtils.DOLLAR)) {
                 result.add(clazzName);
             }
         }
@@ -129,7 +131,7 @@ public class ClazzUtils {
             if (name.endsWith(CLASS_SUFFIX)) {
                 name = name.replace(CLASS_SUFFIX, "").replace("/", ".");
                 // 如果要子包的文件,那么就只要开头相同且不是内部类就ok
-                if (name.startsWith(packageName) && !name.contains("$")) {
+                if (name.startsWith(packageName) && !name.contains(ClazzUtils.DOLLAR)) {
                     result.add(name);
                 }
             }
