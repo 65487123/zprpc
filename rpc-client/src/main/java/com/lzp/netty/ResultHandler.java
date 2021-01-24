@@ -1,5 +1,6 @@
 package com.lzp.netty;
 
+import com.lzp.constant.Cons;
 import com.lzp.dtos.ResponseDTO;
 import com.lzp.util.ResponseSearialUtil;
 import com.lzp.util.ThreadFactoryImpl;
@@ -74,7 +75,7 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
                     //漏网之鱼会在下次被揪出来
                     if (entry.getValue().deadLine < now) {
                         ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(entry.getKey());
-                        threadResultAndTime.result = "exceptionÈtimeout";
+                        threadResultAndTime.result = Cons.EXCEPTION + Cons.TIMEOUT;
                         LockSupport.unpark(threadResultAndTime.thread);
                     }
                 }

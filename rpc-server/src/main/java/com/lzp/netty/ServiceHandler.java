@@ -15,6 +15,7 @@
 
 package com.lzp.netty;
 
+import com.lzp.constant.Cons;
 import com.lzp.dtos.RequestDTO;
 import com.lzp.dtos.ResponseDTO;
 import com.lzp.registry.nacos.NacosClient;
@@ -60,7 +61,7 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(requestDTO.getMethod()
                         .invoke(idServiceMap.get(requestDTO.getServiceId()), requestDTO.getPrams()), requestDTO.getThreadId())));
             } catch (Exception e) {
-                channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO("exceptionÈ" + e.getMessage(), requestDTO.getThreadId())));
+                channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + e.getMessage(), requestDTO.getThreadId())));
             }
         });
     }

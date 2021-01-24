@@ -26,6 +26,7 @@ package com.lzp.constant;
  */
 public class Cons {
     public static final String TIMEOUT = "timeout";
-    public static final String EXCEPTIONÈ = "exceptionÈ";
+    public static final String EXCEPTION = "exceptionÈ";
+    public static final String DOCKER_NAME = "docker";
     public static final int TEN = 10;
 }
