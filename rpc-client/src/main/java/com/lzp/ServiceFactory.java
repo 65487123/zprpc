@@ -279,7 +279,7 @@ public class ServiceFactory {
             while ((result = threadResultAndTime.getResult()) == null) {
                 LockSupport.park(thisThread);
             }
-            if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTIONÈ)) {
+            if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
                 String message;
                 if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
                     throw new TimeoutException();
