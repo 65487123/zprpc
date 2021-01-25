@@ -30,7 +30,7 @@
     Server.startRpcServer(ip,port);
     或者
     Server.startRpcServer(port);
-    不写ip，默认就是本机ip。
+    不写ip，默认就是本机ip。ip和port都不写，默认就是本机ip加随机可用端口
     服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
  
     如果项目用到了spring，并且服务也被注册到了spring容器中， 推荐在spring启动类上加入 @Import(SpringUtil.class) ，全限定名是com.lzp.util.SpringUtil。
