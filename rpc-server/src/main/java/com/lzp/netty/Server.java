@@ -46,15 +46,31 @@ public class Server {
         if (Server.port != 0) {
             throw new RuntimeException("The server has started");
         }
-        Server.ip = ip == null ? getIpAddress() : ip;
-        Server.port = port;
+        Server.ip = ip == null ? getIpAddress("") : ip;
         ServerBootstrap serverBootstrap = new ServerBootstrap();
         serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                 ///测了下，禁用Nagle算法并没有带来明显的性能提升，考虑到会占用更多带宽，暂时就不开启
                 /*.childOption(ChannelOption.TCP_NODELAY,true)*/
                 .childHandler(new SocketChannelInitializerForServer());
         try {
-            Channel channel = serverBootstrap.bind(Server.ip, port).sync().channel();
+            Channel channel;
+            if (port == 0){
+                for (;;) {
+                    try {
+                        channel = bind(Server.ip, serverBootstrap);
+                        break;
+                    } catch (RuntimeException e) {
+                        //进到这里说明,上一个ip的端口已经被占用完了，如果是指定ip的,直接抛异常
+                        if (ip == null) {
+                            Server.ip = getIpAddress(Server.ip);
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+            }else {
+                channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
+            }
             channel.closeFuture().addListener((GenericFutureListener<ChannelFuture>) future -> Server.closeServer());
             ServiceHandler.rigiService();
             logger.info("publish service successfully");
@@ -67,6 +83,9 @@ public class Server {
         startRpcServer(null, port);
     }
 
+    public static void startRpcServer() {
+        startRpcServer(null, 0);
+    }
     public static void closeServer() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
@@ -80,7 +99,7 @@ public class Server {
         return port;
     }
 
-    public static String getIpAddress() {
+    public static String getIpAddress(String excludedIp) {
         try {
             Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
             InetAddress ip;
@@ -90,8 +109,9 @@ public class Server {
                     Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
                     while (addresses.hasMoreElements()) {
                         ip = addresses.nextElement();
-                        if (ip instanceof Inet4Address) {
-                            return ip.getHostAddress();
+                        String address;
+                        if (ip instanceof Inet4Address && !excludedIp.equals(address=ip.getHostAddress())) {
+                            return address;
                         }
                     }
                 }
@@ -102,4 +122,17 @@ public class Server {
         return null;
     }
 
+
+    public static Channel bind(String ip, ServerBootstrap serverBootstrap) {
+        Channel channel;
+        for (int i = Cons.MIN_PORT; i < Cons.MAX_PORT; i++) {
+            try {
+                channel = serverBootstrap.bind(ip, i).sync().channel();
+                Server.port = i;
+                return channel;
+            } catch (Exception ignored) {
+            }
+        }
+        throw new RuntimeException("No free port");
+    }
 }

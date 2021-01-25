@@ -34,7 +34,7 @@ public class Main {
     public static void main(String[] args) throws InterruptedException {
         ///如果需要用到spring，就加入下面这行，这里不需要
         //SpringApplication.run(Main.class, args);
-        Server.startRpcServer(5555);
+        Server.startRpcServer();
         new CountDownLatch(1).await();
     }
 }
