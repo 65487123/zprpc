@@ -33,5 +33,9 @@ import java.lang.annotation.Target;
 
 public @interface Service {
     String id();
+
+    /**
+     * @Description 这个参数暂时没什么用，后续可能用作注入时校验
+     */
     String interfaceValue();
 }
