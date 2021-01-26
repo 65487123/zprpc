@@ -37,7 +37,7 @@ public class PropertyUtil {
         try {
             properties.load(in);
         } catch (IOException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("zprpc.properties was not found", e);
         }
     }
 
