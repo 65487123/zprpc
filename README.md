@@ -9,7 +9,8 @@
 # 	使用方法：
 ### 一、环境搭建
     1、拉取代码到本地,在项目根目录执行maven编译命令:mvn clean install
-    2、搭建nacos环境：到github找到nacos源码，拉取到本地，编译并启动。
+	2、上传到私服仓库(可忽略,如果做了,后续就不用执行第1步了，直接依赖maven坐标就行)
+    3、搭建nacos环境：到github找到nacos源码，拉取到本地，编译并部署。
     具体操作不熟悉的可以参照nacos官网  
    [nacos官网](https://nacos.io/zh-cn/docs/quick-start.html)
 ### 二、创建工程、导入依赖、编写配置与代码
