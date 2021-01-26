@@ -34,9 +34,9 @@
     (2)nacos ip: nacosIpList. Example: nacosIpList=192.168.0.101:8848
     5、Start the service provider through code:
     Server.startRpcServer(ip,port);
-    or
-    Server.startRpcServer(port);
-    Do not write ip, the default is the local ip.
+    or Server.startRpcServer(port);
+    or Server.startRpcServer();
+    No ip is written, the default is the local ip.Neither ip nor port is written, the default is the local ip plus random available port
     After the service provider is started, it scans the services modified by the @Service annotation, saves them locally (all singletons) 
 	after initialization, and publishes the services to nacos.
     
