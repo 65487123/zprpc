@@ -16,6 +16,8 @@
 package com.lzp.netty;
 
 import com.lzp.constant.Cons;
+import com.lzp.exception.NoFreeIpException;
+import com.lzp.exception.NoFreePortException;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -59,7 +61,7 @@ public class Server {
                     try {
                         channel = bind(Server.ip, serverBootstrap);
                         break;
-                    } catch (RuntimeException e) {
+                    } catch (NoFreePortException e) {
                         //进到这里说明,上一个ip的端口已经被占用完了，如果是指定ip的,直接抛异常
                         if (ip == null) {
                             Server.ip = getIpAddress(Server.ip);
@@ -119,7 +121,7 @@ public class Server {
         } catch (Exception e) {
             logger.error("failed to find ip", e);
         }
-        return null;
+        throw new NoFreeIpException("All ip ports are occupied");
     }
 
 
@@ -133,6 +135,6 @@ public class Server {
             } catch (Exception ignored) {
             }
         }
-        throw new RuntimeException("No free port");
+        throw new NoFreePortException("No free port");
     }
 }
