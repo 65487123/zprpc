@@ -29,8 +29,8 @@
     (2)nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
     5、通过代码启动服务提供方：
     Server.startRpcServer(ip,port);
-    或者
-    Server.startRpcServer(port);
+    或 Server.startRpcServer(port);
+    或 Server.startRpcServer();
     不写ip，默认就是本机ip。ip和port都不写，默认就是本机ip加随机可用端口
     服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
  
