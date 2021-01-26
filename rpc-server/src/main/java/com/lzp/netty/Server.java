@@ -56,8 +56,8 @@ public class Server {
                 .childHandler(new SocketChannelInitializerForServer());
         try {
             Channel channel;
-            if (port == 0){
-                for (;;) {
+            if (port == 0) {
+                for (; ; ) {
                     try {
                         channel = bind(Server.ip, serverBootstrap);
                         break;
@@ -70,7 +70,7 @@ public class Server {
                         }
                     }
                 }
-            }else {
+            } else {
                 channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
             }
             channel.closeFuture().addListener((GenericFutureListener<ChannelFuture>) future -> Server.closeServer());
@@ -88,6 +88,7 @@ public class Server {
     public static void startRpcServer() {
         startRpcServer(null, 0);
     }
+
     public static void closeServer() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
@@ -112,7 +113,7 @@ public class Server {
                     while (addresses.hasMoreElements()) {
                         ip = addresses.nextElement();
                         String address;
-                        if (ip instanceof Inet4Address && !excludedIp.equals(address=ip.getHostAddress())) {
+                        if (ip instanceof Inet4Address && !excludedIp.equals(address = ip.getHostAddress())) {
                             return address;
                         }
                     }
