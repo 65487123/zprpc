@@ -36,7 +36,7 @@ package com.lzp.util;
          try {
              properties.load(in);
          } catch (Exception e) {
-             logger.error("load utrpc.properties failed", e)
+             logger.error("zprpc.properties", e);
          }
      }
 
