@@ -27,6 +27,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import util.LogoUtil;
 
 import java.util.Map;
 import java.util.concurrent.*;
@@ -38,7 +39,7 @@ import java.util.concurrent.*;
  * @date: 2020/9/29 21:31
  */
 public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
-    private static final Logger logger = LoggerFactory.getLogger(ServiceHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceHandler.class);
 
     private static Map<String, Object> idServiceMap;
 
@@ -81,8 +82,10 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
                 }
             */
             idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(), Server.getIp(), Server.getPort());
+            LogoUtil.printLogo();
+            LOGGER.info("publish service successfully");
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }

@@ -28,7 +28,7 @@ package com.lzp.util;
   * @date: 2020/9/28 10:44
   */
  public class PropertyUtil {
-     private static final Logger logger = LoggerFactory.getLogger(PropertyUtil.class);
+     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyUtil.class);
      private static Properties properties = new Properties();
 
      static {
@@ -36,7 +36,7 @@ package com.lzp.util;
          try {
              properties.load(in);
          } catch (Exception e) {
-             logger.error("load zprpc.properties failed", e);
+             LOGGER.error("load zprpc.properties failed", e);
          }
      }
 
