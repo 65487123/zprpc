@@ -13,7 +13,7 @@
 ### Environment setup(If the environment has been set up, you can skip)
     1、Pull the code to the local, execute the maven compilation command in the project root directory: mvn clean install
     2、Upload to Nexus (can be ignored, if you do, you don't need to perform step 1 in the follow-up, just rely on the maven coordinates)
-    3、Set up the nacos environment: find the nacos source code on github, pull it locally, compile and start.
+    3、Set up the nacos environment: find the nacos source code on github, pull it locally, compile and start.（If there is already a nacos environment, skip)
      For those who are not familiar with the specific operation, please refer to the nacos official website 
    [nacos official website](https://nacos.io/zh-cn/docs/quick-start.html)
 ### Create project, import dependencies, write configuration and code
