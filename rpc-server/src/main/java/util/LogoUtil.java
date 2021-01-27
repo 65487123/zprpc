@@ -17,6 +17,7 @@
 package util;
 
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Description:启动时打印logo
@@ -25,12 +26,12 @@ import java.io.InputStream;
  * @date: 2021/1/27 12:10
  */
 public class LogoUtil {
-    public static void printLogo(){
+    public static void printLogo() {
         byte[] bytes;
         try {
             InputStream inputStream = LogoUtil.class.getClassLoader().getResourceAsStream("banner.txt");
             inputStream.read(bytes = new byte[inputStream.available()]);
-            System.out.println(new String(bytes));
+            System.out.println(new String(bytes, StandardCharsets.UTF_8));
         } catch (Exception ignored) {
         }
     }
