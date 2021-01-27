@@ -16,8 +16,7 @@
 
 package util;
 
-import java.io.FileReader;
-import java.io.Reader;
+import java.io.InputStream;
 
 /**
  * Description:启动时打印logo
@@ -27,12 +26,11 @@ import java.io.Reader;
  */
 public class LogoUtil {
     public static void printLogo(){
-        //创建字符输入流对象，负责读取文件
-        int length = 0;
-        char[] ch = new char[10 * 1024];
-        try (Reader fr = new FileReader(LogoUtil.class.getClassLoader().getResource("banner.txt").getPath())) {
-            length = fr.read(ch);
-            System.out.println(new String(ch, 0, length));
+        byte[] bytes;
+        try {
+            InputStream inputStream = LogoUtil.class.getClassLoader().getResourceAsStream("banner.txt");
+            inputStream.read(bytes = new byte[inputStream.available()]);
+            System.out.println(new String(bytes));
         } catch (Exception ignored) {
         }
     }
