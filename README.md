@@ -11,7 +11,7 @@
     1、拉取代码到本地,在项目根目录执行maven安装命令:mvn clean install
     2、上传到私服仓库(可跳过,如果做了,后续就不用执行第1步了，直接依赖maven坐标就行)
     3、搭建nacos环境：到github找到nacos源码，拉取到本地，编译并部署。(如果有nacos环境，跳过)
-    具体操作不熟悉的可以参照nacos官网  
+    nacos具体部署操作不熟悉的可以参照nacos官网 
    [nacos官网](https://nacos.io/zh-cn/docs/quick-start.html)
 ### 二、创建工程、导入依赖、编写配置与代码
     1、新建一个工程，定义公共接口，供服务提供方和服务消费方依赖
