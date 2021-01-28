@@ -32,11 +32,15 @@
     或 Server.startRpcServer(port);
     或 Server.startRpcServer();
     不写ip，默认就是本机ip。ip和port都不写，默认就是本机ip加随机可用端口
+    一般情况下,自己写的类或配置文件都在classpath下面,通过上述启动方式就能正常发布服务,
+    但是如果自己项目里的类或配置文件需要特殊的类加载器才能加载(自定义了类加载器，比如项目基于OSGI框架的,加载不同bundle
+    需要不同类加载器)则需要在启动服务方法上加个类加载器参数:
+    Server.startRpcServer(ip,port,classLoader);或Server.startRpcServer(port,classLoader);或Server.startRpcServer(classLoader);
     服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
  
     如果项目用到了spring，并且服务也被注册到了spring容器中， 推荐在spring启动类上加入 @Import(SpringUtil.class) ，全限定名是com.lzp.util.SpringUtil。
     先启动spring容器然后再启动rpc服务。这样在发布服务时，会先到spring容器中去找，如果spring容器中有服务实例，就会用spring中的。如果没有就会自己初始化一个。
-    
+   
     如果集群部署的话，建议同一个服务发布的个数为2的整次方，这样客户端在负载均衡时性能能更高
     7、创建服务消费方工程，依赖提供接口的工程，并导入依赖
     <dependency>
@@ -56,6 +60,8 @@
     也可以通过
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
     来获取代理对象，通过这个对象远程调用会有超时限制，超过指定秒数没返回结果就会抛出超时异常。
+    和发布服务时一样,如果自己项目打成的包需要用特殊类加载器才能加载,则需要在获取代理对象的方法上加个类加载器参数。
+    ServiceFactory.getServiceBean(serviceId,interfaceCls,loader);或ServiceFactory.getServiceBean(serviceId,interfaceCls,timeOut,loader);
  ### 三、Demo 
     源码中提供了demo，在rpc-demo工程下，包含了服务提供方工程和服务消费方工程，代码拉下来编译后直接就能跑，配置一下nacosIpList，
     先启动服务提供方再启动服务消费方就能看到结果。
