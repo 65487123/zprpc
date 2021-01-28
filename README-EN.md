@@ -37,6 +37,10 @@
     or Server.startRpcServer(port);
     or Server.startRpcServer();
     No ip is written, the default is the local ip.Neither ip nor port is written, the default is the local ip plus random available port
+    
+    In general, the classes or configuration files written by yourself are under the classpath, and the service can be published normally through the above startup           method.But if the class or configuration file in your own project needs a special class loader to load (customized class loader, for example, the project is based on     the OSGI framework, load different bundles A different class loader is required), you need to add a class loader parameter to the startup service method:
+     Server.startRpcServer(ip,port,classLoader); or Server.startRpcServer(port,classLoader); or Server.startRpcServer(classLoader);
+   
     After the service provider is started, it scans the services modified by the @Service annotation, saves them locally (all singletons) 
 	after initialization, and publishes the services to nacos.
     
@@ -67,6 +71,8 @@
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
     To obtain the proxy object, remote calls through this object will have a timeout limit, and a timeout exception will be thrown if no result 
 	is returned after the specified number of seconds.
+    Just like when publishing a service, if the package of your own project needs to be loaded with a special class loader, you need to add a class loader parameter to        the method of obtaining the proxy object.
+     ServiceFactory.getServiceBean(serviceId,interfaceCls,loader); or ServiceFactory.getServiceBean(serviceId,interfaceCls,timeOut,loader);
 ### Demo 
     The demo is provided in the source code. Under the rpc-demo project, the service provider project and the service consumer project are included. 
     After the code is pulled down and compiled, it can be run directly, configure nacosIpList,Start the service provider first and then start the service 
