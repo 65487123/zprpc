@@ -44,6 +44,11 @@ public class NacosClient implements RegistryClient {
         return searchAndRegiInstance(basePack, NamingFactory.createNamingService(PropertyUtil.getNacosIpList()), ip, port);
     }
 
+    @Override
+    public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port, ClassLoader classLoader) throws Exception {
+        return searchAndRegiInstance(basePack, NamingFactory.createNamingService(PropertyUtil.getNacosIpList(classLoader)), ip, port,classLoader);
+    }
+
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.com.lzp.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
      * Spring容器中找，找不到才自己初始化一个),并注册到注册中心中
@@ -72,19 +77,30 @@ public class NacosClient implements RegistryClient {
     private Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService, String ip, int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
         Map<String, Object> idServiceMap = new HashMap(16);
         for (String path : ClazzUtils.getClazzName(basePack)) {
-            Class cls = Class.forName(path);
-            if (cls.isAnnotationPresent(Service.class)) {
-                Service service = (Service) cls.getAnnotation(Service.class);
-                Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);
-                if (nameInstanceMap.size() != 0) {
-                    idServiceMap.put(service.id(), nameInstanceMap.entrySet().iterator().next().getValue());
-                } else {
-                    idServiceMap.put(service.id(), cls.newInstance());
-                }
-                namingService.registerInstance(service.id(), ip, port);
-            }
+            regiInstance(namingService, ip, port, idServiceMap, Class.forName(path));
         }
         return idServiceMap;
+    }
+
+    private Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService, String ip, int port, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
+        Map<String, Object> idServiceMap = new HashMap(16);
+        for (String path : ClazzUtils.getClazzName(basePack, classLoader)) {
+            regiInstance(namingService, ip, port, idServiceMap, Class.forName(path, true, classLoader));
+        }
+        return idServiceMap;
+    }
+
+    private void regiInstance(NamingService namingService, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException, NacosException {
+        if (cls.isAnnotationPresent(Service.class)) {
+            Service service = (Service) cls.getAnnotation(Service.class);
+            Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);
+            if (nameInstanceMap.size() != 0) {
+                idServiceMap.put(service.id(), nameInstanceMap.entrySet().iterator().next().getValue());
+            } else {
+                idServiceMap.put(service.id(), cls.newInstance());
+            }
+            namingService.registerInstance(service.id(), ip, port);
+        }
     }
 
 }

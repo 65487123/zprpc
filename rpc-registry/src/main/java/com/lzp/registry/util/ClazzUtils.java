@@ -45,9 +45,23 @@ public class ClazzUtils {
      * @return List集合，内容为类的全名
      */
     public static List<String> getClazzName(String packageName) {
+        return getClazzName0(packageName,Thread.currentThread().getContextClassLoader());
+    }
+
+    /**
+     * 查找包下的所有类的名字
+     *
+     * @param packageName
+     * @return List集合，内容为类的全名
+     */
+    public static List<String> getClazzName(String packageName,ClassLoader loader) {
+        return getClazzName0(packageName,loader);
+    }
+
+
+    private static List<String> getClazzName0(String packageName,ClassLoader loader){
         List<String> result = new ArrayList<>();
         String suffixPath = packageName.replaceAll("\\.", "/");
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
         try {
             Enumeration<URL> urls = loader.getResources(suffixPath);
             while (urls.hasMoreElements()) {
@@ -75,7 +89,6 @@ public class ClazzUtils {
         }
         return result;
     }
-
     /**
      * 递归获取所有class文件的名字
      *

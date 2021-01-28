@@ -38,46 +38,15 @@ import java.util.Enumeration;
  * @date: 2020/9/27 18:32
  */
 public class Server {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
+    private static final Logger logger = LoggerFactory.getLogger(Server.class);
     private static String ip;
     private static int port;
     private static EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private static EventLoopGroup workerGroup = new NioEventLoopGroup(1);
 
     public synchronized static void startRpcServer(String ip, int port) {
-        if (Server.port != 0) {
-            throw new RuntimeException("The server has started");
-        }
-        Server.ip = ip == null ? getIpAddress("") : ip;
-        ServerBootstrap serverBootstrap = new ServerBootstrap();
-        serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
-                ///测了下，禁用Nagle算法并没有带来明显的性能提升，考虑到会占用更多带宽，暂时就不开启
-                /*.childOption(ChannelOption.TCP_NODELAY,true)*/
-                .childHandler(new SocketChannelInitializerForServer());
-        try {
-            Channel channel;
-            if (port == 0) {
-                for (; ; ) {
-                    try {
-                        channel = bind(Server.ip, serverBootstrap);
-                        break;
-                    } catch (NoFreePortException e) {
-                        //进到这里说明,上一个ip的端口已经被占用完了，如果是指定ip的,直接抛异常
-                        if (ip == null) {
-                            Server.ip = getIpAddress(Server.ip);
-                        } else {
-                            throw e;
-                        }
-                    }
-                }
-            } else {
-                channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
-            }
-            channel.closeFuture().addListener((GenericFutureListener<ChannelFuture>) future -> Server.closeServer());
-            ServiceHandler.rigiService();
-        } catch (InterruptedException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        startServer0(ip, port);
+        ServiceHandler.rigiService();
     }
 
     public static void startRpcServer(int port) {
@@ -88,6 +57,19 @@ public class Server {
         startRpcServer(null, 0);
     }
 
+
+    public synchronized static void startRpcServer(String ip, int port,ClassLoader classLoader) {
+        startServer0(ip,port);
+        ServiceHandler.rigiService(classLoader);
+    }
+
+    public static void startRpcServer(int port,ClassLoader classLoader) {
+        startRpcServer(null, port,classLoader);
+    }
+
+    public static void startRpcServer(ClassLoader classLoader) {
+        startRpcServer(null, 0,classLoader);
+    }
     public static void closeServer() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
@@ -119,11 +101,45 @@ public class Server {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("failed to find ip", e);
+            logger.error("failed to find ip", e);
         }
         throw new NoFreeIpException("All ip ports are occupied");
     }
 
+    private static synchronized void startServer0(String ip, int port){
+        if (Server.port != 0) {
+            throw new RuntimeException("The server has started");
+        }
+        Server.ip = ip == null ? getIpAddress("") : ip;
+        ServerBootstrap serverBootstrap = new ServerBootstrap();
+        serverBootstrap.group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                ///测了下，禁用Nagle算法并没有带来明显的性能提升，考虑到会占用更多带宽，暂时就不开启
+                /*.childOption(ChannelOption.TCP_NODELAY,true)*/
+                .childHandler(new SocketChannelInitializerForServer());
+        try {
+            Channel channel;
+            if (port == 0) {
+                for (; ; ) {
+                    try {
+                        channel = bind(Server.ip, serverBootstrap);
+                        break;
+                    } catch (NoFreePortException e) {
+                        //进到这里说明,上一个ip的端口已经被占用完了，如果是指定ip的,直接抛异常
+                        if (ip == null) {
+                            Server.ip = getIpAddress(Server.ip);
+                        } else {
+                            throw e;
+                        }
+                    }
+                }
+            } else {
+                channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
+            }
+            channel.closeFuture().addListener((GenericFutureListener<ChannelFuture>) future -> Server.closeServer());
+        } catch (InterruptedException e) {
+            logger.error(e.getMessage(), e);
+        }
+    }
 
     public static Channel bind(String ip, ServerBootstrap serverBootstrap) {
         Channel channel;
