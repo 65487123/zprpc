@@ -2,6 +2,9 @@
 [中文](https://github.com/65487123/zprpc/blob/master/README.md)|English
 # Introduction
     A high-performance rpc framework, temporarily only supports nacos as the registry.
+    
+#  Architecture
+![architecture](https://github.com/65487123/zprpc/raw/master/architecture.png)
 #### Features：
     1、Simple configuration and easy to use.
     2、The application scenarios are rich
