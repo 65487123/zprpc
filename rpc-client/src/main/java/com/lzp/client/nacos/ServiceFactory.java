@@ -57,6 +57,7 @@ public class ServiceFactory {
     private static Map<String, BeanAndAllHostAndPort> serviceIdInstanceMap = new ConcurrentHashMap<>();
     private static NamingService naming;
     private static FixedShareableChannelPool channelPool;
+
     static {
         try {
             //如果被依赖的包和这个不在同一个classpath下,这段代码就没用了
@@ -142,7 +143,7 @@ public class ServiceFactory {
                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
                     }
                     addListener(serviceId);
-                    Object bean = getBeanCore(serviceId, interfaceCls,classLoader);
+                    Object bean = getBeanCore(serviceId, interfaceCls, classLoader);
                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
                     return bean;
                 } else {
@@ -154,7 +155,7 @@ public class ServiceFactory {
             if (beanAndAllHostAndPort.bean == null) {
                 synchronized (ServiceFactory.class) {
                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
-                        beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls,classLoader);
+                        beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls, classLoader);
                     }
                     return beanAndAllHostAndPort.bean;
                 }
@@ -185,7 +186,7 @@ public class ServiceFactory {
                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
                     }
                     addListener(serviceId);
-                    Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
+                    Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout, classLoader);
                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
                     return beanWithTimeOut;
                 } else {
@@ -197,7 +198,7 @@ public class ServiceFactory {
             if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                 synchronized (ServiceFactory.class) {
                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
-                        beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
+                        beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout, classLoader);
                     }
                     return beanAndAllHostAndPort.beanWithTimeOut;
                 }
@@ -322,8 +323,8 @@ public class ServiceFactory {
         });
     }
 
-    private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout) {
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, (proxy, method, args) -> {
+    private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
+        return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader, new Class[]{interfaceCls}, (proxy, method, args) -> {
             //根据serviceid找到所有提供这个服务的ip+port
             List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
             Thread thisThread = Thread.currentThread();
