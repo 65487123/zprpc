@@ -224,7 +224,7 @@ public class ServiceFactory {
      * 初始化不加锁是因为初始化操作是幂等操作
      */
     private static void initialNameServiceAndChannelPool(ClassLoader classLoader) throws NacosException {
-        if (naming != null) {
+        if (naming == null) {
             naming = createNamingServiceBySpecifiedloader(PropertyUtil.getNacosIpList(classLoader));
             String connectionPoolSize;
             if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
