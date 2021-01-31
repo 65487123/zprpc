@@ -16,7 +16,7 @@
 package zprpc.domo.consumer;
 
 import com.alibaba.nacos.api.exception.NacosException;
-import com.lzp.ServiceFactory;
+import com.lzp.client.nacos.ServiceFactory;
 import com.lzp.util.ThreadFactoryImpl;
 import zprpc.demo.api.DemoService;
 import zprpc.demo.api.TakeSecondService;
@@ -60,7 +60,6 @@ public class Consumer {
 
         //超时没返回会抛出异常
         demoService1.sayHello("zeping");
-
 
     }
 }

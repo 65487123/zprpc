@@ -15,7 +15,7 @@
 
 package com.lzp.connectionpool;
 
-import com.lzp.ServiceFactory;
+import com.lzp.client.nacos.ServiceFactory;
 import com.lzp.netty.NettyClient;
 import com.lzp.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;

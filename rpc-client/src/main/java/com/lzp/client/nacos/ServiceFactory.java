@@ -13,7 +13,7 @@
   *  limitations under the License.
   */
 
-package com.lzp;
+package com.lzp.client.nacos;
 
 
 import com.alibaba.nacos.api.exception.NacosException;
@@ -35,6 +35,7 @@ import com.lzp.util.RequestSearialUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,9 +57,9 @@ public class ServiceFactory {
     private static Map<String, BeanAndAllHostAndPort> serviceIdInstanceMap = new ConcurrentHashMap<>();
     private static NamingService naming;
     private static FixedShareableChannelPool channelPool;
-
     static {
         try {
+            //如果被依赖的包和这个不在同一个classpath下,这段代码就没用了
             naming = NamingFactory.createNamingService(PropertyUtil.getNacosIpList());
             String connectionPoolSize;
             if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
@@ -67,7 +68,7 @@ public class ServiceFactory {
                 channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
             }
         } catch (NacosException e) {
-            logger.error(e.getMessage(), e);
+            logger.error("Throw an exception when initializing NamingService", e);
         }
     }
 
@@ -132,7 +133,7 @@ public class ServiceFactory {
      * @param serviceId    需要远程调用的服务id
      * @param interfaceCls 本地和远程服务实现的接口
      */
-    public static Object getServiceBean(String serviceId, Class interfaceCls) throws NacosException {
+    public static Object getServiceBean0(String serviceId, Class interfaceCls, ClassLoader classLoader) throws NacosException {
         if (serviceIdInstanceMap.get(serviceId) == null) {
             synchronized (ServiceFactory.class) {
                 if (serviceIdInstanceMap.get(serviceId) == null) {
@@ -141,7 +142,7 @@ public class ServiceFactory {
                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
                     }
                     addListener(serviceId);
-                    Object bean = getBeanCore(serviceId, interfaceCls);
+                    Object bean = getBeanCore(serviceId, interfaceCls,classLoader);
                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
                     return bean;
                 } else {
@@ -153,7 +154,7 @@ public class ServiceFactory {
             if (beanAndAllHostAndPort.bean == null) {
                 synchronized (ServiceFactory.class) {
                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
-                        beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls);
+                        beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls,classLoader);
                     }
                     return beanAndAllHostAndPort.bean;
                 }
@@ -167,13 +168,14 @@ public class ServiceFactory {
     /**
      * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样，
      * 增加了超时时间设置，指定时间内没返回结果，则抛出异常.
-     *
+     * <p>
      * 注意：由于对象是单例保存，只有第一次获取实例设置的超时时间参数是有效的，后面再次获取都会返回第一次生成的对象。
+     *
      * @param serviceId    需要远程调用的服务id
      * @param interfaceCls 本地和远程服务实现的接口
      * @param timeout      超时时间，单位是秒
      */
-    public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+    public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
         checkTimeOut(timeout);
         if (serviceIdInstanceMap.get(serviceId) == null) {
             synchronized (ServiceFactory.class) {
@@ -205,27 +207,59 @@ public class ServiceFactory {
         }
     }
 
-    public static Object getServiceBean(String serviceId, Class interfaceCls,ClassLoader classLoader) throws NacosException {
-        naming = NamingFactory.createNamingService(PropertyUtil.getNacosIpList(classLoader));
-        return getServiceBean(serviceId,interfaceCls);
+    public static Object getServiceBean(String serviceId, Class interfaceCls, ClassLoader classLoader) throws NacosException {
+        initialNameServiceAndChannelPool(classLoader);
+        return getServiceBean0(serviceId, interfaceCls, classLoader);
     }
 
+
+    public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
+        initialNameServiceAndChannelPool(classLoader);
+        return getServiceBean0(serviceId, interfaceCls, timeout, classLoader);
+    }
 
     /**
-     * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样，
-     * 增加了超时时间设置，指定时间内没返回结果，则抛出异常.
-     *
-     * 注意：由于对象是单例保存，只有第一次获取实例设置的超时时间参数是有效的，后面再次获取都会返回第一次生成的对象。
-     * @param serviceId    需要远程调用的服务id
-     * @param interfaceCls 本地和远程服务实现的接口
-     * @param timeout      超时时间，单位是秒
+     * Description:指定类加载器获取代理类,说明用到这个rpc框架的包和这个包肯定不在同一个classpath下,那么这个类加载时的初始化肯定报错,
+     * naming肯定为null,在第一次获取代理类时初始化就行，如果已经初始化过了，就不用再初始化了,因为跑在一个jvm中的类，配置肯定一样.
+     * 初始化不加锁是因为初始化操作是幂等操作
      */
-    public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout,ClassLoader classLoader) throws NacosException {
-        naming = NamingFactory.createNamingService(PropertyUtil.getNacosIpList(classLoader));
-        return getServiceBean(serviceId,interfaceCls,timeout);
+    private static void initialNameServiceAndChannelPool(ClassLoader classLoader) throws NacosException {
+        if (naming != null) {
+            naming = createNamingServiceBySpecifiedloader(PropertyUtil.getNacosIpList(classLoader));
+            String connectionPoolSize;
+            if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
+                channelPool = new SingleChannelPool();
+            } else {
+                channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
+            }
+        }
+    }
+
+    public static Object getServiceBean(String serviceId, Class interfaceCls) throws NacosException {
+        return getServiceBean0(serviceId, interfaceCls, null);
     }
 
 
+    public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+        return getServiceBean0(serviceId, interfaceCls, timeout, null);
+    }
+
+    /**
+     * Description:如果没有指定类加载器获取代理类，获取代理类的包和这个包应该是同一个classpath下，而基本能判定nacos-client和nacos-api
+     * 也在同一个classpath下，所以直接用nacos提供的方法就能加载到(nacos提供的方法是通过反射加载Class,并且不能指定类加载器，默认就是NamingFactory的类加载器)
+     * 而如果指定类加载器获取代理类，获取代理类的包和这个包应该不在同一个classpath下,nacos-client和nacos-api也很大可能不在同一个classpath下
+     * 所以nacos提供的方法是加载不到的
+     */
+    private static NamingService createNamingServiceBySpecifiedloader(String serverList) throws NacosException {
+        try {
+            Class<?> driverImplClass = com.alibaba.nacos.client.naming.NacosNamingService.class;
+            Constructor constructor = driverImplClass.getConstructor(String.class);
+            NamingService vendorImpl = (NamingService) constructor.newInstance(serverList);
+            return vendorImpl;
+        } catch (Throwable var4) {
+            throw new NacosException(-400, var4);
+        }
+    }
 
     /**
      * Description:校验参数
@@ -271,8 +305,8 @@ public class ServiceFactory {
     }
 
 
-    private static Object getBeanCore(String serviceId, Class interfaceCls) {
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, (proxy, method, args) -> {
+    private static Object getBeanCore(String serviceId, Class interfaceCls, ClassLoader classLoader) {
+        return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader, new Class[]{interfaceCls}, (proxy, method, args) -> {
             //根据serviceid找到所有提供这个服务的ip+port
             List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
             Thread thisThread = Thread.currentThread();

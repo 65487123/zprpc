@@ -26,6 +26,7 @@ import com.lzp.util.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -46,8 +47,28 @@ public class NacosClient implements RegistryClient {
 
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port, ClassLoader classLoader) throws Exception {
-        return searchAndRegiInstance(basePack, NamingFactory.createNamingService(PropertyUtil.getNacosIpList(classLoader)), ip, port,classLoader);
+        return searchAndRegiInstance(basePack, createNamingServiceBySpecifiedloader(PropertyUtil.getNacosIpList(classLoader)), ip, port,classLoader);
     }
+
+
+    /**
+     * Description:如果没有指定类加载器获取代理类，获取代理类的包和这个包应该是同一个classpath下，而基本能判定nacos-client和nacos-api
+     * 也在同一个classpath下，所以直接用nacos提供的方法就能加载到(nacos提供的方法是通过反射加载Class,并且不能指定类加载器，默认就是NamingFactory的类加载器)
+     * 而如果指定类加载器获取代理类，获取代理类的包和这个包应该不在同一个classpath下,nacos-client和nacos-api也很大可能不在同一个classpath下
+     * 所以nacos提供的方法是加载不到的
+     */
+    private NamingService createNamingServiceBySpecifiedloader(String serverList) throws NacosException {
+        try {
+            Class<?> driverImplClass = com.alibaba.nacos.client.naming.NacosNamingService.class;
+            Constructor constructor = driverImplClass.getConstructor(String.class);
+            NamingService vendorImpl = (NamingService) constructor.newInstance(serverList);
+            return vendorImpl;
+        } catch (Throwable var4) {
+            throw new NacosException(-400, var4);
+        }
+    }
+
+
 
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.com.lzp.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
