@@ -14,6 +14,7 @@
     nacos具体部署操作不熟悉的可以参照nacos官网 
    [nacos官网](https://nacos.io/zh-cn/docs/quick-start.html)
 ### 二、创建工程、导入依赖、编写配置与代码
+##### 服务提供方
     1、新建一个工程，定义公共接口，供服务提供方和服务消费方依赖
     2、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
     <dependency>
@@ -42,20 +43,21 @@
     先启动spring容器然后再启动rpc服务。这样在发布服务时，会先到spring容器中去找，如果spring容器中有服务实例，就会用spring中的。如果没有就会自己初始化一个。
    
     如果集群部署的话，建议同一个服务发布的个数为2的整次方，这样客户端在负载均衡时性能能更高
-    7、创建服务消费方工程，依赖提供接口的工程，并导入依赖
+##### 服务消费方   
+    1、创建服务消费方工程，依赖提供接口的工程，并导入依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
          <version>1.0</version>
     </dependency>
-    8、编写配置文件，有一项是必写的：
+    2、编写配置文件，有一项是必写的：
     nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
     还可以配置和每台实例的连接池连接数。
     示例：connetionPoolSize：2
     不配置，默认连接池里的数量就是一。 也就是这个消费方和某个服务实例里的所有服务通信都是走这一个连接，但是不会有任何阻塞。
     推荐不配置连接池连接数，使用默认单个连接的连接池。因为客户端开了一个Reactor，也就是只有一个线程服务所有连接，多个连接没多大意义
-    9.得到代理对象，通过代理对象可以发起远程调用，就和调用本地方法一样
-    ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
+    3.得到代理对象，通过代理对象可以发起远程调用，就和调用本地方法一样
+    com.lzp.client.nacos.ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
     serviceId就是服务的唯一id，interfaceCls是接口的Class对象。返回一个实例，强转成接口类型就行。
     也可以通过
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
