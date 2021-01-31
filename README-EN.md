@@ -17,6 +17,7 @@
      For those who are not familiar with the specific operation, please refer to the nacos official website 
    [nacos official website](https://nacos.io/zh-cn/docs/quick-start.html)
 ### Create project, import dependencies, write configuration and code
+##### producer
     1、Create a new project and define a public interface for service providers and service consumers to rely on
     2、Create a service provider project, rely on the project that provides the interface, and import the maven dependency
     <dependency>
@@ -48,13 +49,14 @@
     to the spring boot class, the fully qualified name is com.lzp.util.SpringUtil.Start the spring container first and then start the rpc service.
     In this way, when publishing a service, you will first find it in the spring container. If there is a service instance in the spring 
 	container, it will use the spring. If not, it will initialize one itself.
-    7、Create service consumer projects, rely on projects that provide interfaces, and import dependencies
+ ##### consumer  
+    1、Create service consumer projects, rely on projects that provide interfaces, and import dependencies
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
          <version>1.0</version>
     </dependency>
-    8、To write a configuration file, one item must be written:
+    2、To write a configuration file, one item must be written:
     nacos ip: nacosIpList. Example: nacosIpList=192.168.0.101:8848
     You can also configure the number of connections to the connection pool for each instance.
     Example: connetionPoolSize: 2
@@ -63,8 +65,8 @@
     It is recommended not to configure the number of connections in the connection pool and use the default connection pool of a single 
     connection. Because the client opens just one Reactor, that is, there is only one thread to serve all connections, and multiple 
     connections do not make much sense
-    9.Get the proxy object, through the proxy object you can initiate a remote call, just like calling a local method
-    ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
+    3.Get the proxy object, through the proxy object you can initiate a remote call, just like calling a local method
+    com.utstar.client.nacos.ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
     serviceId is the unique id of the service, and interfaceCls is the Class object of the interface. Return an instance and force it to be an 
 	interface type.
     Can also
