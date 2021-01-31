@@ -2,6 +2,8 @@
 中文|[English](https://github.com/65487123/zprpc/blob/master/README-EN.md)
 # 功能介绍
     一个高性能rpc框架，暂时只支持nacos做注册中心。
+# 项目整体架构
+![architecture](https://gitee.com/zeping-lu/pngs-for-readme/raw/master/readme0.png)
 #### 特点：
     1、配置简单，上手容易。
     2、适用场景丰富
