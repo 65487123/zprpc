@@ -31,14 +31,14 @@
          <artifactId>rpc-artifacts</artifactId>
          <version>1.0</version>
     </dependency>
-    3、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.annotation.Service注解;
+    3、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
     注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
     示例：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
     4、在resources包下加入配置文件：zprpc.properties，加入配置项。其中有两项是必配的
     (1)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
     (2)nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
     5、通过代码启动服务提供方：
-    Server.startRpcServer(ip,port);
+    com.lzp.zprpc.server.netty.Server.startRpcServer(ip,port);
     或 Server.startRpcServer(port);
     或 Server.startRpcServer();
     不写ip，默认就是本机ip。ip和port都不写，默认就是本机ip加随机可用端口
@@ -48,7 +48,7 @@
     Server.startRpcServer(ip,port,classLoader);或Server.startRpcServer(port,classLoader);或Server.startRpcServer(classLoader);
     服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
  
-    如果项目用到了spring，并且服务也被注册到了spring容器中， 推荐在spring启动类上加入 @Import(SpringUtil.class) ，全限定名是com.lzp.util.SpringUtil。
+    如果项目用到了spring,并且服务也被注册到了spring容器中,推荐在spring启动类上加入@Import(com.lzp.zprpc.common.util.SpringUtil.class)。
     先启动spring容器然后再启动rpc服务。这样在发布服务时，会先到spring容器中去找，如果spring容器中有服务实例，就会用spring中的。如果没有就会自己初始化一个。
    
     如果集群部署的话，建议同一个服务发布的个数为2的整次方，这样客户端在负载均衡时性能能更高
@@ -66,7 +66,7 @@
     不配置，默认连接池里的数量就是一。 也就是这个消费方和某个服务实例里的所有服务通信都是走这一个连接，但是不会有任何阻塞。
     推荐不配置连接池连接数，使用默认单个连接的连接池。因为客户端开了一个Reactor，也就是只有一个线程服务所有连接，多个连接没多大意义
     3.得到代理对象，通过代理对象可以发起远程调用，就和调用本地方法一样
-    com.lzp.client.nacos.ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
+    com.lzp.zprpc.client.nacos.ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
     serviceId就是服务的唯一id，interfaceCls是接口的Class对象。返回一个实例，强转成接口类型就行。
     也可以通过
     ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
