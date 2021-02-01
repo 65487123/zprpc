@@ -15,11 +15,8 @@
 
 package zprpc.demo.producer;
 
-import com.lzp.netty.Server;
-import com.lzp.util.SpringUtil;
-import org.springframework.boot.SpringApplication;
+import com.lzp.zprpc.server.netty.Server;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
 
 import java.util.concurrent.CountDownLatch;
 

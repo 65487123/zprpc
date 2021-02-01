@@ -13,23 +13,16 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
-
-
-import com.lzp.zprpc.common.annotation.Service;
-import org.springframework.stereotype.Component;
-import zprpc.demo.api.DemoService;
+package com.lzp.zprpc.common.exception;
 
 /**
- * @author zeping lu
+ * Description:远程调用出现异常
+ *
+ * @author: Zeping Lu
+ * @date: 2020/10/16 20:40
  */
-@Component
-@Service(id = "demoService", interfaceValue = "zprpc.demo.api.DemoService")
-public class DemoServiceImpl implements DemoService {
-
-    @Override
-    public String sayHello(String name) {
-        return "hello " + name;
+public class RpcException extends RuntimeException {
+    public RpcException(String message) {
+        super(message);
     }
-
 }

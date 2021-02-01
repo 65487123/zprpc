@@ -13,23 +13,23 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
+package com.lzp.zprpc.common.annotation;
 
-
-import com.lzp.zprpc.common.annotation.Service;
-import org.springframework.stereotype.Component;
-import zprpc.demo.api.DemoService;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * @author zeping lu
+ * Description:用来注入远程服务对象
+ *
+ * @author: Lu ZePing
+ * @date: 2020/9/27 12:32
  */
-@Component
-@Service(id = "demoService", interfaceValue = "zprpc.demo.api.DemoService")
-public class DemoServiceImpl implements DemoService {
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.TYPE)
 
-    @Override
-    public String sayHello(String name) {
-        return "hello " + name;
-    }
-
+public @interface Reference {
+    String id();
+    String interfaceValue();
 }

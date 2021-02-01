@@ -16,8 +16,8 @@
 package zprpc.domo.consumer;
 
 import com.alibaba.nacos.api.exception.NacosException;
-import com.lzp.client.nacos.ServiceFactory;
-import com.lzp.util.ThreadFactoryImpl;
+import com.lzp.zprpc.client.nacos.ServiceFactory;
+import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import zprpc.demo.api.DemoService;
 import zprpc.demo.api.TakeSecondService;
 

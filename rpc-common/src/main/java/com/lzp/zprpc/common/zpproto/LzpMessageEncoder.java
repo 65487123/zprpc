@@ -13,23 +13,19 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
+package com.lzp.zprpc.common.zpproto;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToByteEncoder;
 
 
-import com.lzp.zprpc.common.annotation.Service;
-import org.springframework.stereotype.Component;
-import zprpc.demo.api.DemoService;
+public class LzpMessageEncoder extends MessageToByteEncoder<byte[]> {
 
-/**
- * @author zeping lu
- */
-@Component
-@Service(id = "demoService", interfaceValue = "zprpc.demo.api.DemoService")
-public class DemoServiceImpl implements DemoService {
 
     @Override
-    public String sayHello(String name) {
-        return "hello " + name;
+    protected void encode(ChannelHandlerContext channelHandlerContext, byte[] content, ByteBuf byteBuf)  {
+        byteBuf.writeInt(content.length);
+        byteBuf.writeBytes(content);
     }
-
 }

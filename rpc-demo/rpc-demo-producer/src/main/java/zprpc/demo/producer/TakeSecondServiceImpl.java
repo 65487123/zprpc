@@ -15,8 +15,7 @@
 
 package zprpc.demo.producer;
 
-import com.lzp.annotation.Service;
-import zprpc.demo.api.DemoService;
+import com.lzp.zprpc.common.annotation.Service;
 import zprpc.demo.api.TakeSecondService;
 
 

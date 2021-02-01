@@ -1,5 +1,5 @@
-import com.lzp.dtos.ResponseDTO;
-import com.lzp.util.ResponseSearialUtil;
+import com.lzp.zprpc.common.dtos.ResponseDTO;
+import com.lzp.zprpc.common.util.ResponseSearialUtil;
 
 /**
  * Description:
