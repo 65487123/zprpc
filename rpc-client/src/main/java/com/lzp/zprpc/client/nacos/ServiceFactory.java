@@ -307,45 +307,49 @@ public class ServiceFactory {
 
 
     private static Object getBeanCore(String serviceId, Class interfaceCls, ClassLoader classLoader) {
-        return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader, new Class[]{interfaceCls}, (proxy, method, args) -> {
-            //根据serviceid找到所有提供这个服务的ip+port
-            List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
-            Thread thisThread = Thread.currentThread();
-            ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(Long.MAX_VALUE, thisThread);
-            ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-            channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size()))).writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
-            Object result;
-            //用while，防止虚假唤醒
-            while ((result = threadResultAndTime.getResult()) == null) {
-                LockSupport.park(thisThread);
-            }
-            return result;
-        });
+        return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
+                new Class[]{interfaceCls}, (proxy, method, args) -> {
+                    //根据serviceid找到所有提供这个服务的ip+port
+                    List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+                    Thread thisThread = Thread.currentThread();
+                    ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(Long.MAX_VALUE, thisThread);
+                    ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+                    channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
+                            .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+                    Object result;
+                    //用while，防止虚假唤醒
+                    while ((result = threadResultAndTime.getResult()) == null) {
+                        LockSupport.park(thisThread);
+                    }
+                    return result;
+                });
     }
 
     private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
-        return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader, new Class[]{interfaceCls}, (proxy, method, args) -> {
-            //根据serviceid找到所有提供这个服务的ip+port
-            List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
-            Thread thisThread = Thread.currentThread();
-            ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
-            ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-            channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size()))).writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
-            Object result;
-            //用while，防止虚假唤醒
-            while ((result = threadResultAndTime.getResult()) == null) {
-                LockSupport.park(thisThread);
-            }
-            if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
-                String message;
-                if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
-                    throw new TimeoutException();
-                } else {
-                    throw new RpcException(message);
-                }
-            }
-            return result;
-        });
+        return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
+                new Class[]{interfaceCls}, (proxy, method, args) -> {
+                    //根据serviceid找到所有提供这个服务的ip+port
+                    List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+                    Thread thisThread = Thread.currentThread();
+                    ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
+                    ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+                    channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
+                            .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+                    Object result;
+                    //用while，防止虚假唤醒
+                    while ((result = threadResultAndTime.getResult()) == null) {
+                        LockSupport.park(thisThread);
+                    }
+                    if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
+                        String message;
+                        if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
+                            throw new TimeoutException();
+                        } else {
+                            throw new RpcException(message);
+                        }
+                    }
+                    return result;
+                });
     }
 
 }
