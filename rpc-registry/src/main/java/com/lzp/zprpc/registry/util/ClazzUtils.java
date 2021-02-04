@@ -45,7 +45,7 @@ public class ClazzUtils {
      * @return List集合，内容为类的全名
      */
     public static List<String> getClazzName(String packageName) {
-        return getClazzName0(packageName,Thread.currentThread().getContextClassLoader());
+        return getClazzName0(packageName, ClazzUtils.class.getClassLoader());
     }
 
     /**
