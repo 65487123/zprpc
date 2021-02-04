@@ -20,22 +20,23 @@
     nacos具体部署操作不熟悉的可以参照nacos官网 
    [nacos官网](https://nacos.io/zh-cn/docs/quick-start.html)
 ### 二、创建工程、导入依赖、编写配置与代码
-##### 服务提供方
+##### 定义公共接口
     1、新建一个工程，定义公共接口，供服务提供方和服务消费方依赖
-    2、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
+##### 服务提供方
+    1、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <!--如果既是服务服务方又是服务消费方,artifactId为rpc-artifacts就行-->
          <artifactId>rpc-server</artifactId>
          <version>1.0</version>
     </dependency>
-    3、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
+    2、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
     注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
     示例：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
-    4、在resources包下加入配置文件：zprpc.properties，加入配置项。其中有两项是必配的
+    3、在resources包下加入配置文件：zprpc.properties，加入配置项。其中有两项是必配的
     (1)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
     (2)nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
-    5、通过代码启动服务提供方：
+    4、通过代码启动服务提供方：
     com.lzp.zprpc.server.netty.Server.startRpcServer(ip,port);
     或 Server.startRpcServer(port);
     或 Server.startRpcServer();
