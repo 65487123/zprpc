@@ -25,23 +25,24 @@
      For those who are not familiar with the specific operation, please refer to the nacos official website 
    [nacos official website](https://nacos.io/zh-cn/docs/quick-start.html)
 ### Create project, import dependencies, write configuration and code
+##### define public interfaces
+    1、Create a new project and define public interfaces for service providers and service consumers to rely on
 ##### producer
-    1、Create a new project and define a public interface for service providers and service consumers to rely on
-    2、Create a service provider project, rely on the project that provides the interface, and import the maven dependency
+    1、Create a service provider project, rely on the project that provides the interface, and import the maven dependency
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
          <artifactId>rpc-artifacts</artifactId>
          <version>1.0</version>
     </dependency>
-    3、Create an interface implementation class, implement specific methods of the interface, and add com.lzp.annotation.Service 
+    2、Create an interface implementation class, implement specific methods of the interface, and add com.lzp.annotation.Service 
 	annotation to the interface implementation class;
     The annotation has two parameters,the id of the service and the fully qualified name of the interface. 
 	The id of the service must be unique
     Example：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
-    4、Add the configuration file: zprpc.properties under the resources package, and add configuration items. Two of them are mandatory
+    3、Add the configuration file: zprpc.properties under the resources package, and add configuration items. Two of them are mandatory
     (1)The path of the package to be scanned: basePack. Example: basePack=zprpc.demo.producer
     (2)nacos ip: nacosIpList. Example: nacosIpList=192.168.0.101:8848
-    5、Start the service provider through code:
+    4、Start the service provider through code:
     Server.startRpcServer(ip,port);
     or Server.startRpcServer(port);
     or Server.startRpcServer();
