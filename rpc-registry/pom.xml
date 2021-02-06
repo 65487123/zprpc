@@ -22,5 +22,10 @@
             <groupId>com.lzp.zprpc</groupId>
             <artifactId>rpc-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+            <artifactId>org.eclipse.equinox.common</artifactId>
+            <version>3.6.0</version>
+        </dependency>
     </dependencies>
 </project>

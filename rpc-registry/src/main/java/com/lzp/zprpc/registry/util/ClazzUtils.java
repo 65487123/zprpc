@@ -15,6 +15,8 @@
 
 package com.lzp.zprpc.registry.util;
 
+import org.eclipse.core.runtime.FileLocator;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
@@ -33,11 +35,12 @@ import java.util.jar.JarFile;
  */
 public class ClazzUtils {
     private static final String CLASS_SUFFIX = ".class";
-    private static final String CLASS_FILE_PREFIX = File.separator + "classes" + File.separator;
     private static final String PACKAGE_SEPARATOR = ".";
     private static final String FILE = "file";
     private static final String JAR = "jar";
     private static final String DOLLAR = "$";
+    private static final String BUNDLE_RESOURCE = "bundleresource";
+
     /**
      * 查找包下的所有类的名字
      *
@@ -70,17 +73,14 @@ public class ClazzUtils {
                     String protocol = url.getProtocol();
                     if (ClazzUtils.FILE.equals(protocol)) {
                         String path = url.getPath();
-                        result.addAll(getAllClassNameByFile(new File(path)));
+                        result.addAll(getAllClassNameByFile(new File(path),packageName));
                     } else if (ClazzUtils.JAR.equals(protocol)) {
-                        JarFile jarFile = null;
-                        try {
-                            jarFile = ((JarURLConnection) url.openConnection()).getJarFile();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+                        JarFile jarFile = ((JarURLConnection) url.openConnection()).getJarFile();
                         if (jarFile != null) {
                             result.addAll(getAllClassNameByJar(jarFile, packageName));
                         }
+                    } else if (ClazzUtils.BUNDLE_RESOURCE.equals(protocol)) {
+                        result.addAll(getAllClassNameByFile(new File(FileLocator.toFileURL(url).getPath()),packageName));
                     }
                 }
             }
@@ -95,16 +95,16 @@ public class ClazzUtils {
      * @param file
      * @return List
      */
-    private static List<String> getAllClassNameByFile(File file) {
+    private static List<String> getAllClassNameByFile(File file,String packageName) {
         List<String> result = new ArrayList<>();
         if (file.exists()) {
             if (file.isFile()) {
-                findClazzName(file, result);
+                findClazzName(file, result, packageName);
             } else {
                 File[] listFiles = file.listFiles();
                 if (listFiles != null && listFiles.length > 0) {
                     for (File f : listFiles) {
-                        result.addAll(getAllClassNameByFile(f));
+                        result.addAll(getAllClassNameByFile(f,packageName));
                     }
                 }
             }
@@ -112,14 +112,13 @@ public class ClazzUtils {
         return result;
     }
 
-    private static void findClazzName(File file, List<String> result) {
+    private static void findClazzName(File file, List<String> result, String packageName) {
         String path = file.getPath();
         // 注意：这里替换文件分割符要用replace。因为replaceAll里面的参数是正则表达式,而windows环境中File.separator="\\"的,因此会有问题
         if (path.endsWith(CLASS_SUFFIX)) {
             path = path.replace(CLASS_SUFFIX, "");
             // 从"/classes/"后面开始截取
-            String clazzName = path.substring(path.indexOf(CLASS_FILE_PREFIX) + CLASS_FILE_PREFIX.length())
-                    .replace(File.separator, PACKAGE_SEPARATOR);
+            String clazzName = (path = path.replace(File.separator, PACKAGE_SEPARATOR)).substring(path.indexOf(packageName));
             if (!clazzName.contains(ClazzUtils.DOLLAR)) {
                 result.add(clazzName);
             }
