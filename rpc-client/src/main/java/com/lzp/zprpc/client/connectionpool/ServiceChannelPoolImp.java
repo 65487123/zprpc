@@ -34,7 +34,7 @@ import java.util.concurrent.*;
  * @date: 2020/10/9 17:53
  */
 public class ServiceChannelPoolImp implements FixedShareableChannelPool {
-    private final Logger LOGGER = LoggerFactory.getLogger(ServiceChannelPoolImp.class);
+    private final Logger logger = LoggerFactory.getLogger(ServiceChannelPoolImp.class);
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
 
 
@@ -105,14 +105,13 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         channel.closeFuture().addListener(future -> executorService.execute(() -> {
             synchronized (this) {
                 channels.remove(channel);
-                Channel channel1 = null;
                 try {
-                    channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    Channel channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    channels.add(channel1);
+                    updateChannelWhenClosed(channel1, channels, hostAndPort);
                 } catch (InterruptedException e) {
-                    LOGGER.error(e.getMessage(), e);
+                    logger.error(e.getMessage(), e);
                 }
-                channels.add(channel1);
-                updateChannelWhenClosed(channel1, channels, hostAndPort);
             }
             executorService.shutdown();
         }));
@@ -132,7 +131,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
             try {
                 Thread.sleep(4000);
             } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
+                logger.error(e.getMessage(), e);
             }
         }
     }

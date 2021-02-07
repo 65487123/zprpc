@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 /**
- * Description:单线程的线程池
+ * Description:单连接的连接池
  *
  * @author: Zeping Lu
  * @date: 2020/10/13 16:34
@@ -64,15 +64,17 @@ public class SingleChannelPool implements FixedShareableChannelPool {
             ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
                     new ThreadFactoryImpl("get new Channel when closed"));
             executorService.execute(() -> {
-                Channel channel1 = null;
                 try {
-                    channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
-                } catch (InterruptedException e) {
+                    //如果没有可用服务了,建连接会抛异常,捕捉到异常把连接从池中清除.建连接期间连接处于不可用状态
+                    Channel channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    hostAndPortChannelsMap.put(hostAndPort, channel1);
+                    updateChannelWhenClosed(hostAndPort, channel1);
+                } catch (Exception e) {
+                    hostAndPortChannelsMap.remove(hostAndPort);
                     logger.error(e.getMessage(), e);
+                } finally {
+                    executorService.shutdown();
                 }
-                hostAndPortChannelsMap.put(hostAndPort, channel1);
-                updateChannelWhenClosed(hostAndPort, channel1);
-                executorService.shutdown();
             });
         });
     }
