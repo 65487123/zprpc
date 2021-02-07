@@ -142,9 +142,9 @@ public class ServiceFactory {
                     for (Instance instance : naming.selectInstances(serviceId, true)) {
                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
                     }
-                    addListener(serviceId);
                     Object bean = getBeanCore(serviceId, interfaceCls, classLoader);
                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
+                    addListener(serviceId);
                     return bean;
                 } else {
                     return serviceIdInstanceMap.get(serviceId).bean;
@@ -185,9 +185,9 @@ public class ServiceFactory {
                     for (Instance instance : naming.selectInstances(serviceId, true)) {
                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
                     }
-                    addListener(serviceId);
                     Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout, classLoader);
                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
+                    addListener(serviceId);
                     return beanWithTimeOut;
                 } else {
                     return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
