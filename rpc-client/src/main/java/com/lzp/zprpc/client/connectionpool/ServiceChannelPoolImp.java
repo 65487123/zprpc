@@ -15,7 +15,7 @@
 
 package com.lzp.zprpc.client.connectionpool;
 
-import com.lzp.zprpc.client.nacos.ServiceFactory;
+import com.lzp.zprpc.client.HostAndPort;
 import com.lzp.zprpc.client.netty.NettyClient;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
@@ -38,7 +38,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
 
 
-    private Map<ServiceFactory.HostAndPort, List<Channel>> hostAndPortChannelsMap = new HashMap<>();
+    private Map<HostAndPort, List<Channel>> hostAndPortChannelsMap = new HashMap<>();
     private final int SIZE;
 
     {
@@ -50,7 +50,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     }
 
     @Override
-    public Channel getChannel(ServiceFactory.HostAndPort hostAndPort) throws InterruptedException {
+    public Channel getChannel(HostAndPort hostAndPort) throws InterruptedException {
         List<Channel> channels = hostAndPortChannelsMap.get(hostAndPort);
         if (channels == null) {
             synchronized (this) {
@@ -98,7 +98,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
      * @author: Lu ZePing
      * @date: 2020/9/27 18:32
      */
-    private void updateChannelWhenClosed(Channel channel, List<Channel> channels, ServiceFactory.HostAndPort hostAndPort) {
+    private void updateChannelWhenClosed(Channel channel, List<Channel> channels, HostAndPort hostAndPort) {
         /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
           所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/
         ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("get new Channel when closed"));
@@ -123,7 +123,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     private void hearBeat() {
         while (true) {
             byte[] emptyPackage = new byte[0];
-            for (Map.Entry<ServiceFactory.HostAndPort, List<Channel>> entry : hostAndPortChannelsMap.entrySet()) {
+            for (Map.Entry<HostAndPort, List<Channel>> entry : hostAndPortChannelsMap.entrySet()) {
                 for (Channel channel : entry.getValue()) {
                     channel.writeAndFlush(emptyPackage);
                 }

@@ -15,7 +15,7 @@
 
 package com.lzp.zprpc.client.connectionpool;
 
-import com.lzp.zprpc.client.nacos.ServiceFactory;
+import com.lzp.zprpc.client.HostAndPort;
 import com.lzp.zprpc.client.netty.NettyClient;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
@@ -34,14 +34,14 @@ import java.util.concurrent.*;
 public class SingleChannelPool implements FixedShareableChannelPool {
     private static final Logger logger = LoggerFactory.getLogger(SingleChannelPool.class);
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
-    private Map<ServiceFactory.HostAndPort, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
+    private Map<HostAndPort, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
 
     {
         heartBeatThreadPool.execute(this::hearBeat);
     }
 
     @Override
-    public Channel getChannel(ServiceFactory.HostAndPort hostAndPort) throws InterruptedException {
+    public Channel getChannel(HostAndPort hostAndPort) throws InterruptedException {
         Channel channel = hostAndPortChannelsMap.get(hostAndPort);
         if (channel == null) {
             synchronized (this) {
@@ -57,7 +57,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
         }
     }
 
-    private void updateChannelWhenClosed(ServiceFactory.HostAndPort hostAndPort, Channel channel) {
+    private void updateChannelWhenClosed(HostAndPort hostAndPort, Channel channel) {
         channel.closeFuture().addListener(future -> {
             /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
             所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/

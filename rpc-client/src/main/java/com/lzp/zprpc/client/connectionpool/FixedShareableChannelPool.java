@@ -16,7 +16,7 @@
 package com.lzp.zprpc.client.connectionpool;
 
 
-import com.lzp.zprpc.client.nacos.ServiceFactory;
+import com.lzp.zprpc.client.HostAndPort;
 import io.netty.channel.Channel;
 
 /**
@@ -37,5 +37,5 @@ public interface FixedShareableChannelPool {
      * @Date 10:24 2020/10/13
      * @Param hostAndPort ip和端口
      */
-    Channel getChannel(ServiceFactory.HostAndPort hostAndPort) throws InterruptedException;
+    Channel getChannel(HostAndPort hostAndPort) throws InterruptedException;
 }
