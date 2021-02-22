@@ -61,9 +61,9 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
             RequestDTO requestDTO = RequestSearialUtil.deserialize(bytes);
             try {
                 Object service = idServiceMap.get(requestDTO.getServiceId());
-                Method method = service.getClass().getMethod(requestDTO.getMethodName(),requestDTO.getParamTypes());
+                Method method = service.getClass().getMethod(requestDTO.getMethodName(), requestDTO.getParamTypes());
                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(method
-                        .invoke(service,requestDTO.getParams()), requestDTO.getThreadId())));
+                        .invoke(service, requestDTO.getParams()), requestDTO.getThreadId())));
             } catch (Exception e) {
                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + e.getMessage(), requestDTO.getThreadId())));
             }
@@ -105,7 +105,7 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
                     ...
                 }
             */
-            idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(classLoader), Server.getIp(), Server.getPort(),classLoader);
+            idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(classLoader), Server.getIp(), Server.getPort(), classLoader);
             LogoUtil.printLogo();
             LOGGER.info("publish service successfully");
         } catch (Exception e) {
