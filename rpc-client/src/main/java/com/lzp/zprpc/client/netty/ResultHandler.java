@@ -48,7 +48,7 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
         }
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(ResultHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResultHandler.class);
 
     /**
      * Description:线程池
@@ -82,7 +82,7 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
                 try {
                     Thread.sleep(50);
                 } catch (InterruptedException e) {
-                    logger.error(e.getMessage(),e);
+                    LOGGER.error(e.getMessage(),e);
                 }
             }
         });

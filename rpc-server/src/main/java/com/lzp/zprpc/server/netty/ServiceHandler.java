@@ -29,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.lzp.zprpc.server.util.LogoUtil;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -39,7 +40,7 @@ import java.util.concurrent.*;
  * @date: 2020/9/29 21:31
  */
 public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
-    private static final Logger logger = LoggerFactory.getLogger(ServiceHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServiceHandler.class);
 
     private static Map<String, Object> idServiceMap;
 
@@ -59,8 +60,10 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
         serviceThreadPool.execute(() -> {
             RequestDTO requestDTO = RequestSearialUtil.deserialize(bytes);
             try {
-                channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(requestDTO.getMethod()
-                        .invoke(idServiceMap.get(requestDTO.getServiceId()), requestDTO.getPrams()), requestDTO.getThreadId())));
+                Object service = idServiceMap.get(requestDTO.getServiceId());
+                Method method = service.getClass().getMethod(requestDTO.getMethodName(),requestDTO.getParamTypes());
+                channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(method
+                        .invoke(service,requestDTO.getParams()), requestDTO.getThreadId())));
             } catch (Exception e) {
                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + e.getMessage(), requestDTO.getThreadId())));
             }
@@ -83,9 +86,9 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
             */
             idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(), Server.getIp(), Server.getPort());
             LogoUtil.printLogo();
-            logger.info("publish service successfully");
+            LOGGER.info("publish service successfully");
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 
@@ -104,9 +107,9 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
             */
             idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(classLoader), Server.getIp(), Server.getPort(),classLoader);
             LogoUtil.printLogo();
-            logger.info("publish service successfully");
+            LOGGER.info("publish service successfully");
         } catch (Exception e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 }

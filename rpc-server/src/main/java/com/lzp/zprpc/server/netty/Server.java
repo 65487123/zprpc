@@ -38,7 +38,7 @@ import java.util.Enumeration;
  * @date: 2020/9/27 18:32
  */
 public class Server {
-    private static final Logger logger = LoggerFactory.getLogger(Server.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Server.class);
     private static String ip;
     private static int port;
     private static EventLoopGroup bossGroup = new NioEventLoopGroup(1);
@@ -101,7 +101,7 @@ public class Server {
                 }
             }
         } catch (Exception e) {
-            logger.error("failed to find ip", e);
+            LOGGER.error("failed to find ip", e);
         }
         throw new NoFreeIpException("All ip ports are occupied");
     }
@@ -137,7 +137,7 @@ public class Server {
             }
             channel.closeFuture().addListener((GenericFutureListener<ChannelFuture>) future -> Server.closeServer());
         } catch (InterruptedException e) {
-            logger.error(e.getMessage(), e);
+            LOGGER.error(e.getMessage(), e);
         }
     }
 

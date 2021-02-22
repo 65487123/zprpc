@@ -32,7 +32,7 @@ import java.util.concurrent.*;
  * @date: 2020/10/13 16:34
  */
 public class SingleChannelPool implements FixedShareableChannelPool {
-    private static final Logger logger = LoggerFactory.getLogger(SingleChannelPool.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleChannelPool.class);
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
     private Map<HostAndPort, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
 
@@ -71,7 +71,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
                     updateChannelWhenClosed(hostAndPort, channel1);
                 } catch (Exception e) {
                     hostAndPortChannelsMap.remove(hostAndPort);
-                    logger.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 } finally {
                     executorService.shutdown();
                 }
@@ -91,7 +91,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
             try {
                 Thread.sleep(4000);
             } catch (InterruptedException e) {
-                logger.error(e.getMessage(), e);
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }

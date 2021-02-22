@@ -29,7 +29,7 @@ package com.lzp.zprpc.common.util;
   * @date: 2020/9/28 10:44
   */
  public class PropertyUtil {
-     private static final Logger logger = LoggerFactory.getLogger(PropertyUtil.class);
+     private static final Logger LOGGER = LoggerFactory.getLogger(PropertyUtil.class);
      private static Properties properties = new Properties();
 
      static {
@@ -37,7 +37,7 @@ package com.lzp.zprpc.common.util;
          try {
              properties.load(in);
          } catch (Exception e) {
-             logger.error("load zprpc.properties failed", e);
+             LOGGER.error("load zprpc.properties failed", e);
          }
      }
 
@@ -60,7 +60,7 @@ package com.lzp.zprpc.common.util;
          try {
              properties.load(classLoader.getResourceAsStream("zprpc.properties"));
          } catch (IOException e) {
-             logger.error("load zprpc.properties failed", e);
+             LOGGER.error("load zprpc.properties failed", e);
          }
          return properties.getProperty("basePack");
      }
@@ -70,7 +70,7 @@ package com.lzp.zprpc.common.util;
          try {
              properties.load(classLoader.getResourceAsStream("zprpc.properties"));
          } catch (IOException e) {
-             logger.error("load zprpc.properties failed", e);
+             LOGGER.error("load zprpc.properties failed", e);
          }
          return properties.getProperty("connetionPoolSize");
      }
@@ -81,7 +81,7 @@ package com.lzp.zprpc.common.util;
          try {
              properties.load(classLoader.getResourceAsStream("zprpc.properties"));
          } catch (IOException e) {
-             logger.error("load zprpc.properties failed", e);
+             LOGGER.error("load zprpc.properties failed", e);
          }
          return properties.getProperty("nacosIpList");
      }

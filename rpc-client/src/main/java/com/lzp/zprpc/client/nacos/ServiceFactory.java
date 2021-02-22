@@ -53,7 +53,7 @@ import java.util.concurrent.locks.LockSupport;
   * @date: 2020/9/27 18:32
   */
  public class ServiceFactory {
-     private static final Logger logger = LoggerFactory.getLogger(ServiceFactory.class);
+     private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
 
      private static Map<String, BeanAndAllHostAndPort> serviceIdInstanceMap = new ConcurrentHashMap<>();
      private static NamingService naming;
@@ -70,7 +70,7 @@ import java.util.concurrent.locks.LockSupport;
                  channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
              }
          } catch (NacosException e) {
-             logger.error("Throw an exception when initializing NamingService", e);
+             LOGGER.error("Throw an exception when initializing NamingService", e);
          }
      }
 
@@ -104,7 +104,7 @@ import java.util.concurrent.locks.LockSupport;
       *
       * @param serviceId    需要远程调用的服务id
       * @param interfaceCls 本地和远程服务实现的接口
-      * @param timeout rpc调用的超时时间,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
+      * @param timeout      rpc调用的超时时间,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
          return getServiceBean0(serviceId, interfaceCls, timeout, null);
@@ -117,7 +117,7 @@ import java.util.concurrent.locks.LockSupport;
       *
       * @param serviceId    需要远程调用的服务id
       * @param interfaceCls 本地和远程服务实现的接口
-      * @param classLoader 加载nacos类的类加载器
+      * @param classLoader  加载nacos类的类加载器
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, ClassLoader classLoader) throws NacosException {
          initialNameServiceAndChannelPool(classLoader);
@@ -131,8 +131,8 @@ import java.util.concurrent.locks.LockSupport;
       *
       * @param serviceId    需要远程调用的服务id
       * @param interfaceCls 本地和远程服务实现的接口
-      * @param timeout rpc调用的超时时间,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
-      * @param classLoader 加载nacos类的类加载器
+      * @param timeout      rpc调用的超时时间,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
+      * @param classLoader  加载nacos类的类加载器
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
          initialNameServiceAndChannelPool(classLoader);
@@ -170,7 +170,6 @@ import java.util.concurrent.locks.LockSupport;
              }
          }
      }
-
 
 
      public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
@@ -261,7 +260,6 @@ import java.util.concurrent.locks.LockSupport;
 
      /**
       * Description:监听指定服务。当被监听的服务实例列表发生变化，更新本地缓存
-      *
       **/
      private static void addListener(String serviceId) throws NacosException {
          naming.subscribe(serviceId, new EventListener() {
@@ -290,7 +288,7 @@ import java.util.concurrent.locks.LockSupport;
                      ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(Long.MAX_VALUE, thisThread);
                      ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
                      channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                             .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+                             .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
                      Object result;
                      //用while，防止虚假唤醒
                      while ((result = threadResultAndTime.getResult()) == null) {
@@ -309,7 +307,7 @@ import java.util.concurrent.locks.LockSupport;
                      ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
                      ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
                      channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                             .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method, args)));
+                             .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
                      Object result;
                      //用while，防止虚假唤醒
                      while ((result = threadResultAndTime.getResult()) == null) {

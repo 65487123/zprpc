@@ -35,11 +35,17 @@ public class RequestDTO {
     /**
      * 被调用的方法
      */
-    private Method method;
+    private String methodName;
+
+    /**
+     * 方法参数类型
+     */
+    private Class[] paramTypes;
+
     /**
      * 调用参数
      */
-    private Object[] prams;
+    private Object[] params;
     /**
      * 调用的服务id
      */
@@ -48,20 +54,32 @@ public class RequestDTO {
     public RequestDTO() {
     }
 
-    public RequestDTO(long threadId, String serviceId, Method method, Object... prams) {
+    public RequestDTO(long threadId, String serviceId, String methodName, Class[] paramTypes, Object... prams) {
         this.threadId = threadId;
-        this.prams = prams;
         this.serviceId = serviceId;
-        this.method = method;
+        this.methodName = methodName;
+        this.paramTypes = paramTypes;
+        this.params = prams;
     }
 
-    public Method getMethod() {
-        return method;
+    public String getMethodName() {
+        return methodName;
     }
 
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
+    }
 
-    public Object[] getPrams() {
-        return prams;
+    public Class[] getParamTypes() {
+        return paramTypes;
+    }
+
+    public void setParamTypes(Class[] pramTypes) {
+        this.paramTypes = pramTypes;
+    }
+
+    public Object[] getParams() {
+        return params;
     }
 
     public long getThreadId() {
@@ -72,12 +90,12 @@ public class RequestDTO {
         this.threadId = threadId;
     }
 
-    public void setMethod(Method method) {
-        this.method = method;
+    public void setMethod(String methodName) {
+        this.methodName = methodName;
     }
 
     public void setPrams(Object[] prams) {
-        this.prams = prams;
+        this.params = prams;
     }
 
     public String getServiceId() {
@@ -92,8 +110,8 @@ public class RequestDTO {
     public String toString() {
         return "RequestDTO{" +
                 "threadId=" + threadId +
-                ", method=" + method +
-                ", prams=" + Arrays.toString(prams) +
+                ", method=" + methodName +
+                ", params=" + Arrays.toString(params) +
                 ", serviceId='" + serviceId + '\'' +
                 '}';
     }
