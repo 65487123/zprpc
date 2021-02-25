@@ -42,12 +42,14 @@ public class NacosClient implements RegistryClient {
 
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        return searchAndRegiInstance(basePack, NamingFactory.createNamingService(PropertyUtil.getNacosIpList()), ip, port);
+        String nacosIpFromEnv;
+        return searchAndRegiInstance(basePack, NamingFactory.createNamingService((nacosIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv), ip, port);
     }
 
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port, ClassLoader classLoader) throws Exception {
-        return searchAndRegiInstance(basePack, createNamingServiceBySpecifiedloader(PropertyUtil.getNacosIpList(classLoader)), ip, port,classLoader);
+        String nacosIpFromEnv;
+        return searchAndRegiInstance(basePack, createNamingServiceBySpecifiedloader((nacosIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getNacosIpList(classLoader) : nacosIpFromEnv), ip, port, classLoader);
     }
 
 
