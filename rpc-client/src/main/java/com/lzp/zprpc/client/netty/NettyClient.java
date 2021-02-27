@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  */
 public class NettyClient implements AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(NettyClient.class);
     public static EventLoopGroup workerGroup = new NioEventLoopGroup(1);
     private static Bootstrap bootstrap = new Bootstrap();
 
@@ -28,8 +28,12 @@ public class NettyClient implements AutoCloseable {
     }
 
 
-    public static Channel getChannel(String ip, int port) throws InterruptedException {
-        return bootstrap.connect(ip, port).sync().channel();
+    public static Channel getChannel(String ip, int port) {
+        try {
+            return bootstrap.connect(ip, port).sync().channel();
+        } catch (InterruptedException e) {
+            return getChannel(ip, port);
+        }
     }
 
     @Override

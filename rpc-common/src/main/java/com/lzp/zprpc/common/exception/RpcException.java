@@ -16,7 +16,7 @@
 package com.lzp.zprpc.common.exception;
 
 /**
- * Description:远程调用出现异常
+ * Description:远程调用出现异常,当远程方法抛出异常后,会返回这个异常
  *
  * @author: Zeping Lu
  * @date: 2020/10/16 20:40

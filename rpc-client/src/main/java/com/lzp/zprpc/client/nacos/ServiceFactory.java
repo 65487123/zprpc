@@ -29,6 +29,7 @@ import com.lzp.zprpc.client.connectionpool.ServiceChannelPoolImp;
 import com.lzp.zprpc.client.connectionpool.SingleChannelPool;
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.dtos.RequestDTO;
+import com.lzp.zprpc.common.exception.CallException;
 import com.lzp.zprpc.common.exception.RpcException;
 import com.lzp.zprpc.client.netty.ResultHandler;
 import com.lzp.zprpc.common.util.PropertyUtil;
@@ -37,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,7 +134,7 @@ import java.util.concurrent.locks.LockSupport;
       *
       * @param serviceId    需要远程调用的服务id
       * @param interfaceCls 本地和远程服务实现的接口
-      * @param timeout      rpc调用的超时时间,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
+      * @param timeout      rpc调用的超时时间,单位是毫秒，超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
       * @param classLoader  加载nacos类的类加载器
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
@@ -282,47 +285,65 @@ import java.util.concurrent.locks.LockSupport;
      private static Object getBeanCore(String serviceId, Class interfaceCls, ClassLoader classLoader) {
          return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
-                     //根据serviceid找到所有提供这个服务的ip+port
-                     List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
-                     Thread thisThread = Thread.currentThread();
-                     ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(Long.MAX_VALUE, thisThread);
-                     ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-                     channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                             .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
-                     Object result;
-                     //用while，防止虚假唤醒
-                     while ((result = threadResultAndTime.getResult()) == null) {
-                         LockSupport.park(thisThread);
+                     try {
+                         Object result;
+                         if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
+                                 ((String) result).startsWith(Cons.EXCEPTION)) {
+                             throw new RpcException(((String) result).substring(Cons.TEN));
+                         }
+                         return result;
+                     } catch (Exception e) {
+                         if (e instanceof ConnectException) {
+                             //当服务缩容时,服务关闭后,nacos没刷新
+                             e = new CallException("the service is not available");
+                         } else if (e instanceof IllegalArgumentException) {
+                             e = new CallException("no service available");
+                         }
+                         throw e;
                      }
-                     return result;
                  });
      }
 
      private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
          return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
-                     //根据serviceid找到所有提供这个服务的ip+port
-                     List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
-                     Thread thisThread = Thread.currentThread();
-                     ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(System.currentTimeMillis() + (timeout * 1000), thisThread);
-                     ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-                     channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                             .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
-                     Object result;
-                     //用while，防止虚假唤醒
-                     while ((result = threadResultAndTime.getResult()) == null) {
-                         LockSupport.park(thisThread);
-                     }
-                     if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
-                         String message;
-                         if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
-                             throw new TimeoutException();
-                         } else {
-                             throw new RpcException(message);
+                     try {
+                         Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
+                         if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
+                             String message;
+                             if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
+                                 throw new TimeoutException();
+                             } else {
+                                 throw new RpcException(message);
+                             }
                          }
+                         return result;
+                     } catch (Exception e) {
+                         if (e instanceof ConnectException) {
+                             //当服务缩容时,服务关闭后,nacos没刷新
+                             e = new CallException("the service is not available");
+                         } else if (e instanceof IllegalArgumentException) {
+                             e = new CallException("no service available");
+                         }
+                         throw e;
                      }
-                     return result;
                  });
+     }
+
+     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) {
+         //根据serviceid找到所有提供这个服务的ip+port
+         List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+         Thread thisThread = Thread.currentThread();
+         ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
+         ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+         channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
+                 .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
+         Object result;
+         //用while，防止虚假唤醒
+         while ((result = threadResultAndTime.getResult()) == null) {
+             LockSupport.park(thisThread);
+         }
+         return result;
      }
 
  }

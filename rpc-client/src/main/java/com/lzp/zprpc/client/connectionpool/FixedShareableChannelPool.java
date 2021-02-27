@@ -37,5 +37,5 @@ public interface FixedShareableChannelPool {
      * @Date 10:24 2020/10/13
      * @Param hostAndPort ip和端口
      */
-    Channel getChannel(HostAndPort hostAndPort) throws InterruptedException;
+    Channel getChannel(HostAndPort hostAndPort);
 }

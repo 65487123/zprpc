@@ -50,7 +50,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     }
 
     @Override
-    public Channel getChannel(HostAndPort hostAndPort) throws InterruptedException {
+    public Channel getChannel(HostAndPort hostAndPort)  {
         List<Channel> channels = hostAndPortChannelsMap.get(hostAndPort);
         if (channels == null) {
             synchronized (this) {
@@ -105,13 +105,9 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         channel.closeFuture().addListener(future -> executorService.execute(() -> {
             synchronized (this) {
                 channels.remove(channel);
-                try {
-                    Channel channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
-                    channels.add(channel1);
-                    updateChannelWhenClosed(channel1, channels, hostAndPort);
-                } catch (InterruptedException e) {
-                    LOGGER.error(e.getMessage(), e);
-                }
+                Channel channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                channels.add(channel1);
+                updateChannelWhenClosed(channel1, channels, hostAndPort);
             }
             executorService.shutdown();
         }));

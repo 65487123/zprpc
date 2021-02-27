@@ -41,13 +41,13 @@ public class SingleChannelPool implements FixedShareableChannelPool {
     }
 
     @Override
-    public Channel getChannel(HostAndPort hostAndPort) throws InterruptedException {
+    public Channel getChannel(HostAndPort hostAndPort) {
         Channel channel = hostAndPortChannelsMap.get(hostAndPort);
         if (channel == null) {
             synchronized (this) {
                 if ((channel = hostAndPortChannelsMap.get(hostAndPort)) == null) {
                     channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
-                    updateChannelWhenClosed(hostAndPort, channel);
+                    channel.closeFuture().addListener(future -> hostAndPortChannelsMap.remove(hostAndPort));
                     hostAndPortChannelsMap.put(hostAndPort, channel);
                 }
                 return channel;
@@ -57,27 +57,6 @@ public class SingleChannelPool implements FixedShareableChannelPool {
         }
     }
 
-    private void updateChannelWhenClosed(HostAndPort hostAndPort, Channel channel) {
-        channel.closeFuture().addListener(future -> {
-            /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
-            所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/
-            ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(),
-                    new ThreadFactoryImpl("get new Channel when closed"));
-            executorService.execute(() -> {
-                try {
-                    //如果没有可用服务了,建连接会抛异常,捕捉到异常把连接从池中清除.建连接期间连接处于不可用状态
-                    Channel channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
-                    hostAndPortChannelsMap.put(hostAndPort, channel1);
-                    updateChannelWhenClosed(hostAndPort, channel1);
-                } catch (Exception e) {
-                    hostAndPortChannelsMap.remove(hostAndPort);
-                    LOGGER.error(e.getMessage(), e);
-                } finally {
-                    executorService.shutdown();
-                }
-            });
-        });
-    }
 
     /**
      * Description ：每四秒发送一个心跳包
