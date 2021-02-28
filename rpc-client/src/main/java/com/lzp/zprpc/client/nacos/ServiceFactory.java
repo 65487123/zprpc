@@ -107,7 +107,7 @@ import java.util.concurrent.locks.LockSupport;
       *
       * @param serviceId    需要远程调用的服务id
       * @param interfaceCls 本地和远程服务实现的接口
-      * @param timeout      rpc调用的超时时间,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
+      * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
          return getServiceBean0(serviceId, interfaceCls, timeout, null);
