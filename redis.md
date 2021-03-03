@@ -15,7 +15,7 @@
          <groupId>com.lzp.zprpc</groupId>
          <!--如果既是服务服务方又是服务消费方,artifactId为rpc-artifacts就行-->
          <artifactId>rpc-server</artifactId>
-         <version>1.0</version>
+         <version>version</version>
     </dependency>
     2、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
     注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
