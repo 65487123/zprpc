@@ -1,7 +1,7 @@
 # zprpc
 中文|[English](https://github.com/65487123/zprpc/blob/master/README-EN.md)
 # 功能介绍
-    一个高性能rpc框架，暂时只支持nacos做注册中心。
+    一个高性能rpc框架，暂时只支持nacos和redis做注册中心。
 # 项目整体架构
 ![architecture](https://github.com/65487123/zprpc/raw/master/architecture.png)
 # 特点：
