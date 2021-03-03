@@ -31,4 +31,10 @@ public class Cons {
     public static final int MIN_PORT = 1024;
     public static final int MAX_PORT = 49152;
     public static final String DOCKER_NAME = "docker";
+    public static final String COMMA = ",";
+    public static final String COLON = ":";
+    public static final String NACOS = "nacos";
+    public static final String REDIS = "redis";
+    public static final String REGISTRY = "registry";
+    public static final String REDIS_IP_LIST = "redisIpList";
 }

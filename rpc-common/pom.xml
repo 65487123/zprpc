@@ -5,7 +5,7 @@
     <parent>
         <artifactId>zprpc-parent</artifactId>
         <groupId>com.lzp.zprpc</groupId>
-        <version>1.0</version>
+        <version>1.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <packaging>jar</packaging>

@@ -37,7 +37,7 @@ import java.util.Map;
  * @date: 2020/10/9 14:10
  */
 public class NacosClient implements RegistryClient {
-    private static final Logger logger = LoggerFactory.getLogger(NacosClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NacosClient.class);
 
 
     @Override

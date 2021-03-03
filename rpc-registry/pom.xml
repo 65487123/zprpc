@@ -5,7 +5,7 @@
     <parent>
         <artifactId>zprpc-parent</artifactId>
         <groupId>com.lzp.zprpc</groupId>
-        <version>1.0</version>
+        <version>1.1</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -21,6 +21,11 @@
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
             <artifactId>rpc-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.birt.runtime.3_7_1</groupId>

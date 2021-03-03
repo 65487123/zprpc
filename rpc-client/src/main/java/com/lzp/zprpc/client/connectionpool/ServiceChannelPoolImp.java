@@ -15,8 +15,8 @@
 
 package com.lzp.zprpc.client.connectionpool;
 
-import com.lzp.zprpc.client.HostAndPort;
 import com.lzp.zprpc.client.netty.NettyClient;
+import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -38,7 +38,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
 
 
-    private Map<HostAndPort, List<Channel>> hostAndPortChannelsMap = new HashMap<>();
+    private Map<String, List<Channel>> hostAndPortChannelsMap = new HashMap<>();
     private final int SIZE;
 
     {
@@ -50,7 +50,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     }
 
     @Override
-    public Channel getChannel(HostAndPort hostAndPort)  {
+    public Channel getChannel(String hostAndPort)  {
         List<Channel> channels = hostAndPortChannelsMap.get(hostAndPort);
         if (channels == null) {
             synchronized (this) {
@@ -62,13 +62,13 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                      *    步骤，所以性能比ArrayList高。
                      * */
                     channels = new CopyOnWriteArrayList<>();
-                    Channel channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     updateChannelWhenClosed(channel, channels, hostAndPort);
                     channels.add(channel);
                     hostAndPortChannelsMap.put(hostAndPort, channels);
                     return channel;
                 } else if (channels.size() < SIZE) {
-                    Channel channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     updateChannelWhenClosed(channel, channels, hostAndPort);
                     channels.add(channel);
                     return channel;
@@ -79,7 +79,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         } else if (channels.size() < SIZE) {
             synchronized (this) {
                 if ((channels = hostAndPortChannelsMap.get(hostAndPort)).size() < SIZE) {
-                    Channel channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     updateChannelWhenClosed(channel, channels, hostAndPort);
                     channels.add(channel);
                     return channel;
@@ -98,14 +98,14 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
      * @author: Lu ZePing
      * @date: 2020/9/27 18:32
      */
-    private void updateChannelWhenClosed(Channel channel, List<Channel> channels, HostAndPort hostAndPort) {
+    private void updateChannelWhenClosed(Channel channel, List<Channel> channels, String hostAndPort) {
         /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
           所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/
         ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("get new Channel when closed"));
         channel.closeFuture().addListener(future -> executorService.execute(() -> {
             synchronized (this) {
                 channels.remove(channel);
-                Channel channel1 = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                Channel channel1 = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                 channels.add(channel1);
                 updateChannelWhenClosed(channel1, channels, hostAndPort);
             }
@@ -119,7 +119,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     private void hearBeat() {
         while (true) {
             byte[] emptyPackage = new byte[0];
-            for (Map.Entry<HostAndPort, List<Channel>> entry : hostAndPortChannelsMap.entrySet()) {
+            for (Map.Entry<String, List<Channel>> entry : hostAndPortChannelsMap.entrySet()) {
                 for (Channel channel : entry.getValue()) {
                     channel.writeAndFlush(emptyPackage);
                 }

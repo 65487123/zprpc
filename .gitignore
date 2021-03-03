@@ -12,3 +12,11 @@
 /rpc-artifacts/rpc-artifacts.iml
 /rpc-registry/rpc-registry.iml
 /zprpc.iml
+/rpc-demo/rpc-demo-nacos/rpc-demo-nacos.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-redis.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-nacos-api/rpc-demo-nacos-api.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-nacos-consumer/rpc-demo-nacos-consumer.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-nacos-producer/rpc-demo-nacos-producer.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-redis-api/rpc-demo-redis-api.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-redis-producer/rpc-demo-redis-producer.iml
+/rpc-demo/rpc-demo-redis/rpc-demo-redis-consumer/rpc-demo-redis-consumer.iml

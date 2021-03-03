@@ -18,11 +18,13 @@ package com.lzp.zprpc.server.netty;
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.dtos.RequestDTO;
 import com.lzp.zprpc.common.dtos.ResponseDTO;
+import com.lzp.zprpc.registry.api.RegistryClient;
 import com.lzp.zprpc.registry.nacos.NacosClient;
 import com.lzp.zprpc.common.util.PropertyUtil;
 import com.lzp.zprpc.common.util.RequestSearialUtil;
 import com.lzp.zprpc.common.util.ResponseSearialUtil;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
+import com.lzp.zprpc.registry.redis.RedisClient;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import org.slf4j.Logger;
@@ -74,17 +76,21 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
     static void rigiService() {
         try {
             //默认用nacos做注册中心
-            //暂时也只实现了用nacos做注册中心，如果后续有时间可以加入其他注册中心实现，那么就需要配置文件中加配置，然后这里读取配置，选择new具体的注册中心
-            /*
-                RegistryClient registryClient;
-                switch(配置文件读出的注册中心配置){
-                    case "xxx":registryClient = xxxClient();
+            RegistryClient registryClient;
+            String regi;
+            switch ((regi = PropertyUtil.getProperties().getProperty(Cons.REGISTRY)) == null ? Cons.NACOS : regi) {
+                case Cons.NACOS: {
+                    registryClient = new NacosClient();
                     break;
-                    ...
-                    ...
                 }
-            */
-            idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(), Server.getIp(), Server.getPort());
+                case Cons.REDIS: {
+                    registryClient = new RedisClient();
+                    break;
+                }
+                default:
+                    registryClient = new NacosClient();
+            }
+            idServiceMap = registryClient.searchAndRegiInstance(PropertyUtil.getBasePack(), Server.getIp(), Server.getPort());
             LogoUtil.printLogo();
             LOGGER.info("publish service successfully");
         } catch (Exception e) {
@@ -95,17 +101,22 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
     static void rigiService(ClassLoader classLoader) {
         try {
             //默认用nacos做注册中心
-            //暂时也只实现了用nacos做注册中心，如果后续有时间可以加入其他注册中心实现，那么就需要配置文件中加配置，然后这里读取配置，选择new具体的注册中心
-            /*
-                RegistryClient registryClient;
-                switch(配置文件读出的注册中心配置){
-                    case "xxx":registryClient = xxxClient();
+            RegistryClient registryClient;
+            String regi;
+            switch ((regi = PropertyUtil.getProperties(classLoader).getProperty(Cons.REGISTRY)) == null ? Cons.NACOS : regi) {
+                case Cons.NACOS: {
+                    registryClient = new NacosClient();
                     break;
-                    ...
-                    ...
                 }
-            */
-            idServiceMap = new NacosClient().searchAndRegiInstance(PropertyUtil.getBasePack(classLoader), Server.getIp(), Server.getPort(), classLoader);
+                case Cons.REDIS: {
+                    registryClient = new RedisClient();
+                    break;
+                }
+                default:
+                    registryClient = new NacosClient();
+            }
+
+            idServiceMap = registryClient.searchAndRegiInstance(PropertyUtil.getBasePack(classLoader), Server.getIp(), Server.getPort(), classLoader);
             LogoUtil.printLogo();
             LOGGER.info("publish service successfully");
         } catch (Exception e) {

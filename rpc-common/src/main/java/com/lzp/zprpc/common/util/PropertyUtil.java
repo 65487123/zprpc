@@ -41,6 +41,21 @@ package com.lzp.zprpc.common.util;
          }
      }
 
+     public static Properties getProperties() {
+         return properties;
+     }
+
+
+     public static Properties getProperties(ClassLoader classLoader) {
+         Properties properties = new Properties();
+         try {
+             properties.load(classLoader.getResourceAsStream("zprpc.properties"));
+         } catch (IOException e) {
+             LOGGER.error("load zprpc.properties failed", e);
+         }
+         return properties;
+     }
+
 
      public static String getBasePack() {
          return properties.getProperty("basePack");

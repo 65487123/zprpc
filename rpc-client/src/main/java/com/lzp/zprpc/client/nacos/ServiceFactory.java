@@ -23,7 +23,6 @@ import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.lzp.zprpc.client.HostAndPort;
 import com.lzp.zprpc.client.connectionpool.FixedShareableChannelPool;
 import com.lzp.zprpc.client.connectionpool.ServiceChannelPoolImp;
 import com.lzp.zprpc.client.connectionpool.SingleChannelPool;
@@ -80,10 +79,10 @@ import java.util.concurrent.locks.LockSupport;
 
      private static final class BeanAndAllHostAndPort {
          private volatile Object bean;
-         private volatile List<HostAndPort> hostAndPorts;
+         private volatile List<String> hostAndPorts;
          private volatile Object beanWithTimeOut;
 
-         public BeanAndAllHostAndPort(Object bean, List<HostAndPort> hostAndPorts, Object beanWithTimeOut) {
+         public BeanAndAllHostAndPort(Object bean, List<String> hostAndPorts, Object beanWithTimeOut) {
              this.bean = bean;
              this.hostAndPorts = hostAndPorts;
              this.beanWithTimeOut = beanWithTimeOut;
@@ -147,9 +146,9 @@ import java.util.concurrent.locks.LockSupport;
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<HostAndPort> hostAndPorts = new ArrayList<>();
+                     List<String> hostAndPorts = new ArrayList<>();
                      for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+                         hostAndPorts.add(instance.getIp()+Cons.COLON+instance.getPort());
                      }
                      Object bean = getBeanCore(serviceId, interfaceCls, classLoader);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
@@ -180,9 +179,9 @@ import java.util.concurrent.locks.LockSupport;
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<HostAndPort> hostAndPorts = new ArrayList<>();
+                     List<String> hostAndPorts = new ArrayList<>();
                      for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
                      }
                      Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout, classLoader);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
@@ -271,9 +270,9 @@ import java.util.concurrent.locks.LockSupport;
              @Override
              public void onEvent(Event event) {
                  if (event instanceof NamingEvent) {
-                     List<HostAndPort> newHostAndPorts = new ArrayList<>();
+                     List<String> newHostAndPorts = new ArrayList<>();
                      for (Instance instance : ((NamingEvent) event).getInstances()) {
-                         newHostAndPorts.add(new HostAndPort(instance.getIp(), instance.getPort()));
+                         newHostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
                      }
                      beanAndAllHostAndPort.hostAndPorts = newHostAndPorts;
                  }
@@ -285,65 +284,55 @@ import java.util.concurrent.locks.LockSupport;
      private static Object getBeanCore(String serviceId, Class interfaceCls, ClassLoader classLoader) {
          return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
-                     try {
-                         Object result;
-                         if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
-                                 ((String) result).startsWith(Cons.EXCEPTION)) {
-                             throw new RpcException(((String) result).substring(Cons.TEN));
-                         }
-                         return result;
-                     } catch (Exception e) {
-                         if (e instanceof ConnectException) {
-                             //当服务缩容时,服务关闭后,nacos没刷新
-                             e = new CallException("the service is not available");
-                         } else if (e instanceof IllegalArgumentException) {
-                             e = new CallException("no service available");
-                         }
-                         throw e;
+                     Object result;
+                     if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
+                             ((String) result).startsWith(Cons.EXCEPTION)) {
+                         throw new RpcException(((String) result).substring(Cons.TEN));
                      }
+                     return result;
                  });
      }
 
      private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
          return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
-                     try {
-                         Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
-                         if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
-                             String message;
-                             if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
-                                 throw new TimeoutException();
-                             } else {
-                                 throw new RpcException(message);
-                             }
+                     Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
+                     if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
+                         String message;
+                         if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
+                             throw new TimeoutException();
+                         } else {
+                             throw new RpcException(message);
                          }
-                         return result;
-                     } catch (Exception e) {
-                         if (e instanceof ConnectException) {
-                             //当服务缩容时,服务关闭后,nacos没刷新
-                             e = new CallException("the service is not available");
-                         } else if (e instanceof IllegalArgumentException) {
-                             e = new CallException("no service available");
-                         }
-                         throw e;
                      }
+                     return result;
                  });
      }
 
-     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) {
-         //根据serviceid找到所有提供这个服务的ip+port
-         List<HostAndPort> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
-         Thread thisThread = Thread.currentThread();
-         ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
-         ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-         channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                 .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
-         Object result;
-         //用while，防止虚假唤醒
-         while ((result = threadResultAndTime.getResult()) == null) {
-             LockSupport.park(thisThread);
+     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) throws Exception {
+         try {
+             //根据serviceid找到所有提供这个服务的ip+port
+             List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+             Thread thisThread = Thread.currentThread();
+             ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
+             ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+             channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
+                     .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
+             Object result;
+             //用while，防止虚假唤醒
+             while ((result = threadResultAndTime.getResult()) == null) {
+                 LockSupport.park(thisThread);
+             }
+             return result;
+         } catch (Exception e) {
+             if (e instanceof ConnectException) {
+                 //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,这里可能就会一直pendding了)
+                 return callAndGetResult(method, serviceId, deadline, args);
+             } else if (e instanceof IllegalArgumentException) {
+                 e = new CallException("no service available");
+             }
+             throw e;
          }
-         return result;
      }
 
  }

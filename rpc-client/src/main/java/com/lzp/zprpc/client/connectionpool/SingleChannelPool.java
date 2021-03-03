@@ -15,8 +15,8 @@
 
 package com.lzp.zprpc.client.connectionpool;
 
-import com.lzp.zprpc.client.HostAndPort;
 import com.lzp.zprpc.client.netty.NettyClient;
+import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -34,19 +34,19 @@ import java.util.concurrent.*;
 public class SingleChannelPool implements FixedShareableChannelPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleChannelPool.class);
     private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
-    private Map<HostAndPort, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
+    private Map<String, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
 
     {
         heartBeatThreadPool.execute(this::hearBeat);
     }
 
     @Override
-    public Channel getChannel(HostAndPort hostAndPort) {
+    public Channel getChannel(String hostAndPort) {
         Channel channel = hostAndPortChannelsMap.get(hostAndPort);
         if (channel == null) {
             synchronized (this) {
                 if ((channel = hostAndPortChannelsMap.get(hostAndPort)) == null) {
-                    channel = NettyClient.getChannel(hostAndPort.getHost(), hostAndPort.getPort());
+                    channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     channel.closeFuture().addListener(future -> hostAndPortChannelsMap.remove(hostAndPort));
                     hostAndPortChannelsMap.put(hostAndPort, channel);
                 }
