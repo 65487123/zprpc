@@ -27,7 +27,7 @@ import java.util.List;
 public interface RedisClient extends AutoCloseable {
 
     /**
-     * @Description 对应redis的lpush
+     * @Description 对应redis的sAdd
      */
     Long sAdd(String var1, String... var2);
 
@@ -37,7 +37,7 @@ public interface RedisClient extends AutoCloseable {
     List<String> getAndTransformToList(String key);
 
     /**
-     * @Description 删除list中的第一个匹配元素
+     * @Description 删除set中的匹配元素
      */
     void sremove(String key,String Value);
 }
