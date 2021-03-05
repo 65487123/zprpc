@@ -68,31 +68,37 @@ public class RedisClient implements RegistryClient {
 
     private Map<String, Object> searchAndRegiInstance(String basePack, com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
         Map<String, Object> idServiceMap = new HashMap(16);
-        for (String path : ClazzUtils.getClazzName(basePack)) {
-            regiInstance(redisClient, ip, port, idServiceMap, Class.forName(path));
-        }
         try {
-            redisClient.close();
-        } catch (Exception e) {
-            LOGGER.error("close redisClient failed", e);
+            for (String path : ClazzUtils.getClazzName(basePack)) {
+                regiInstance(redisClient, ip, port, idServiceMap, Class.forName(path));
+            }
+        } finally {
+            try {
+                redisClient.close();
+            } catch (Exception e) {
+                LOGGER.error("close redisClient failed", e);
+            }
         }
         return idServiceMap;
     }
 
-    private Map<String, Object> searchAndRegiInstance(String basePack, com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
+    private Map<String, Object> searchAndRegiInstance(String basePack, com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
         Map<String, Object> idServiceMap = new HashMap(16);
-        for (String path : ClazzUtils.getClazzName(basePack, classLoader)) {
-            regiInstance(redisClient, ip, port, idServiceMap, Class.forName(path, true, classLoader));
-        }
         try {
-            redisClient.close();
-        } catch (Exception e) {
-            LOGGER.error("close redisClient failed", e);
+            for (String path : ClazzUtils.getClazzName(basePack, classLoader)) {
+                regiInstance(redisClient, ip, port, idServiceMap, Class.forName(path, true, classLoader));
+            }
+        } finally {
+            try {
+                redisClient.close();
+            } catch (Exception e) {
+                LOGGER.error("close redisClient failed", e);
+            }
         }
         return idServiceMap;
     }
 
-    private void regiInstance(com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException, NacosException {
+    private void regiInstance(com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException {
         if (cls.isAnnotationPresent(Service.class)) {
             Service service = (Service) cls.getAnnotation(Service.class);
             Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);
