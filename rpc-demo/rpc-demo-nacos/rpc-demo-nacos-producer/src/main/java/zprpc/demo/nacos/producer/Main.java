@@ -13,7 +13,7 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
+package zprpc.demo.nacos.producer;
 
 import com.lzp.zprpc.server.netty.Server;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

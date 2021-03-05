@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-artifacts</artifactId>
+            <artifactId>rpc-server</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -28,7 +28,6 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
     </dependencies>
-
     <build>
         <plugins>
             <plugin>

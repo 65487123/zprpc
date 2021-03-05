@@ -13,7 +13,7 @@
   *  limitations under the License.
   */
 
- package zprpc.demo.api;
+ package zprpc.demo.nacos.api;
 
  /**
   * Description:示例接口

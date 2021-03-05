@@ -17,11 +17,6 @@ package com.lzp.zprpc.client.redis;
 
 
  import com.alibaba.nacos.api.exception.NacosException;
- import com.alibaba.nacos.api.naming.NamingService;
- import com.alibaba.nacos.api.naming.listener.Event;
- import com.alibaba.nacos.api.naming.listener.EventListener;
- import com.alibaba.nacos.api.naming.listener.NamingEvent;
- import com.alibaba.nacos.api.naming.pojo.Instance;
  import com.lzp.zprpc.client.connectionpool.FixedShareableChannelPool;
  import com.lzp.zprpc.client.connectionpool.ServiceChannelPoolImp;
  import com.lzp.zprpc.client.connectionpool.SingleChannelPool;
@@ -110,7 +105,7 @@ package com.lzp.zprpc.client.redis;
       * @param serviceId    需要远程调用的服务id
       * @param interfaceCls 本地和远程服务实现的接口
       */
-     public static Object getServiceBean(String serviceId, Class interfaceCls) throws NacosException {
+     public static Object getServiceBean(String serviceId, Class interfaceCls) {
          return getServiceBean0(serviceId, interfaceCls, null);
      }
 
@@ -122,7 +117,7 @@ package com.lzp.zprpc.client.redis;
       * @param interfaceCls 本地和远程服务实现的接口
       * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link TimeoutException}
       */
-     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) {
          return getServiceBean0(serviceId, interfaceCls, timeout, null);
      }
 
@@ -150,13 +145,13 @@ package com.lzp.zprpc.client.redis;
       * @param timeout      rpc调用的超时时间,单位是毫秒，超过这个时间没返回则抛 {@link TimeoutException}
       * @param classLoader  加载nacos类的类加载器
       */
-     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
+     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
          initialNameServiceAndChannelPool(classLoader);
          return getServiceBean0(serviceId, interfaceCls, timeout, classLoader);
      }
 
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls, ClassLoader classLoader) throws NacosException {
+     public static Object getServiceBean0(String serviceId, Class interfaceCls, ClassLoader classLoader) {
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
@@ -184,7 +179,7 @@ package com.lzp.zprpc.client.redis;
      }
 
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) throws NacosException {
+     public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
          checkTimeOut(timeout);
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
@@ -217,7 +212,7 @@ package com.lzp.zprpc.client.redis;
       * naming肯定为null,在第一次获取代理类时初始化就行，如果已经初始化过了，就不用再初始化了,因为跑在一个jvm中的类，配置肯定一样.
       * 初始化不加锁是因为初始化操作是幂等操作
       */
-     private static void initialNameServiceAndChannelPool(ClassLoader classLoader) throws NacosException {
+     private static void initialNameServiceAndChannelPool(ClassLoader classLoader) {
          if (redisClient == null) {
              String redisIpList;
              redisClient = RedisClientUtil.newRedisClient(redisIpList = PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST));

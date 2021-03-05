@@ -13,23 +13,24 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
-
+package zprpc.demo.redis.producer;
 
 import com.lzp.zprpc.common.annotation.Service;
-import org.springframework.stereotype.Component;
-import zprpc.demo.api.DemoService;
+import zprpc.demo.redis.api.TakeSecondService;
+
 
 /**
  * @author zeping lu
  */
-@Component
-@Service(id = "demoService", interfaceValue = "zprpc.demo.api.DemoService")
-public class DemoServiceImpl implements DemoService {
-
+@Service(id = "takeSecondService", interfaceValue = "zprpc.demo.redis.api.TakeSecondService")
+public class TakeSecondServiceImpl implements TakeSecondService {
     @Override
     public String sayHello(String name) {
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         return "hello " + name;
     }
-
 }

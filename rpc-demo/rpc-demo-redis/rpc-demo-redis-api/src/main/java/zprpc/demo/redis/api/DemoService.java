@@ -13,7 +13,7 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.api;
+package zprpc.demo.redis.api;
 
 /**
  * Description:示例接口
@@ -21,7 +21,7 @@ package zprpc.demo.api;
  * @author: Zeping Lu
  * @date: 2020/10/18 10:21
  */
-public interface TakeSecondService {
+public interface DemoService {
 
     String sayHello(String name);
 

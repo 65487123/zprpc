@@ -13,19 +13,21 @@
   *  limitations under the License.
   */
 
-package zprpc.domo.consumer;
+package zprpc.domo.nacos.consumer;
 
 import com.alibaba.nacos.api.exception.NacosException;
 import com.lzp.zprpc.client.nacos.ServiceFactory;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
-import zprpc.demo.api.DemoService;
-import zprpc.demo.api.TakeSecondService;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import zprpc.demo.nacos.api.DemoService;
+import zprpc.demo.nacos.api.TakeSecondService;
 
 import java.util.concurrent.*;
 
 /**
  * @author zeping lu
  */
+@SpringBootApplication
 public class Consumer {
     public static void main(String[] args) throws NacosException, InterruptedException {
         //得到远程代理对象
@@ -56,7 +58,7 @@ public class Consumer {
         System.out.println(System.currentTimeMillis() - now);
 
         //获取带超时时间的rpc代理对象
-        TakeSecondService demoService1 = (TakeSecondService) ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 1);
+        TakeSecondService demoService1 = (TakeSecondService) ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 2000);
 
         //超时没返回会抛出异常
         demoService1.sayHello("zeping");

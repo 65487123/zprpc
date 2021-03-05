@@ -80,7 +80,7 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
                     }
                 }
                 try {
-                    Thread.sleep(50);
+                    Thread.sleep(100);
                 } catch (InterruptedException e) {
                     LOGGER.error(e.getMessage(),e);
                 }

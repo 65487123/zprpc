@@ -13,24 +13,16 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
-
-import com.lzp.zprpc.common.annotation.Service;
-import zprpc.demo.api.TakeSecondService;
-
+package zprpc.demo.nacos.api;
 
 /**
- * @author zeping lu
+ * Description:示例接口
+ *
+ * @author: Zeping Lu
+ * @date: 2020/10/18 10:21
  */
-@Service(id = "takeSecondService", interfaceValue = "zprpc.demo.api.TakeSecondService")
-public class TakeSecondServiceImpl implements TakeSecondService {
-    @Override
-    public String sayHello(String name) {
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        return "hello " + name;
-    }
+public interface TakeSecondService {
+
+    String sayHello(String name);
+
 }

@@ -13,23 +13,16 @@
   *  limitations under the License.
   */
 
-package zprpc.demo.producer;
-
-
-import com.lzp.zprpc.common.annotation.Service;
-import org.springframework.stereotype.Component;
-import zprpc.demo.api.DemoService;
+package zprpc.demo.redis.api;
 
 /**
- * @author zeping lu
+ * Description:示例接口
+ *
+ * @author: Zeping Lu
+ * @date: 2020/10/18 10:21
  */
-@Component
-@Service(id = "demoService", interfaceValue = "zprpc.demo.api.DemoService")
-public class DemoServiceImpl implements DemoService {
+public interface TakeSecondService {
 
-    @Override
-    public String sayHello(String name) {
-        return "hello " + name;
-    }
+    String sayHello(String name);
 
 }
