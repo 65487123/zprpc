@@ -17,6 +17,7 @@
 
  import com.lzp.zprpc.client.redis.ServiceFactory;
  import com.lzp.zprpc.common.util.ThreadFactoryImpl;
+ import org.springframework.boot.autoconfigure.SpringBootApplication;
  import zprpc.demo.redis.api.DemoService;
  import zprpc.demo.redis.api.TakeSecondService;
 
@@ -24,7 +25,10 @@
 
  /**
   * @author zeping lu
+  *
+  * 打成jar包独立启动测试结果更准确
   */
+ @SpringBootApplication
  public class Consumer {
      public static void main(String[] args) throws  InterruptedException {
          //得到远程代理对象
