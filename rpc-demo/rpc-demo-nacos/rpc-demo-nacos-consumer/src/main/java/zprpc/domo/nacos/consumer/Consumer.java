@@ -27,7 +27,7 @@ import java.util.concurrent.*;
 /**
  * @author zeping lu
  *
- * * 打成jar包独立启动测试结果更准确
+ * 打成jar包独立启动测试结果更准确
  */
 @SpringBootApplication
 public class Consumer {

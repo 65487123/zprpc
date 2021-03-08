@@ -23,6 +23,8 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * @author zeping lu
+ *
+ * 打成jar包独立启动测试结果更准确
  */
 @SpringBootApplication
 ///把SpringUtil这个类导入到spring容器中，这样在初始化服务的时候，如果spring容器中有实例，就会用spring容器中的实例
