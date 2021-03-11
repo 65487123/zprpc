@@ -17,7 +17,7 @@
 package com.lzp.zprpc.client.redis;
 
 import com.lzp.zprpc.registry.api.RedisClient;
-import com.lzp.zprpc.registry.util.RedisClientUtil;
+import com.lzp.zprpc.registry.util.RedisClientFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class RedisClientPool implements AutoCloseable{
     public RedisClientPool(int num,String redisIpList){
         redisClientList = new ArrayList<>(num);
         for (int i = 0; i < num; i++) {
-            redisClientList.add(RedisClientUtil.newRedisClient(redisIpList));
+            redisClientList.add(RedisClientFactory.newRedisClient(redisIpList));
         }
     }
 

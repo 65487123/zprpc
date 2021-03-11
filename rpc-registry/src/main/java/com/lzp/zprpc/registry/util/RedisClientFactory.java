@@ -34,7 +34,7 @@ import java.util.Set;
  * @author: Zeping Lu
  * @date: 2021/3/2 15:35
  */
-public class RedisClientUtil {
+public class RedisClientFactory {
 
 
     public static RedisClient newRedisClient(String redisIpList) {

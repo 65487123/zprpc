@@ -29,7 +29,7 @@ package com.lzp.zprpc.client.redis;
  import com.lzp.zprpc.common.util.RequestSearialUtil;
  import com.lzp.zprpc.common.util.ThreadFactoryImpl;
  import com.lzp.zprpc.registry.api.RedisClient;
- import com.lzp.zprpc.registry.util.RedisClientUtil;
+ import com.lzp.zprpc.registry.util.RedisClientFactory;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
 
@@ -60,7 +60,7 @@ package com.lzp.zprpc.client.redis;
          try {
              //如果被依赖的包和这个不在同一个classpath下,这段代码就没用了
              String redisIpList;
-             redisClient = RedisClientUtil.newRedisClient(redisIpList = PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST));
+             redisClient = RedisClientFactory.newRedisClient(redisIpList = PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST));
              String connectionPoolSize;
              if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
                  channelPool = new SingleChannelPool();
@@ -215,7 +215,7 @@ package com.lzp.zprpc.client.redis;
      private static void initialNameServiceAndChannelPool(ClassLoader classLoader) {
          if (redisClient == null) {
              String redisIpList;
-             redisClient = RedisClientUtil.newRedisClient(redisIpList = PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST));
+             redisClient = RedisClientFactory.newRedisClient(redisIpList = PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST));
              String connectionPoolSize;
              if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
                  channelPool = new SingleChannelPool();

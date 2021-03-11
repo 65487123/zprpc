@@ -23,7 +23,7 @@ import com.lzp.zprpc.common.util.PropertyUtil;
 import com.lzp.zprpc.common.util.SpringUtil;
 import com.lzp.zprpc.registry.api.RegistryClient;
 import com.lzp.zprpc.registry.util.ClazzUtils;
-import com.lzp.zprpc.registry.util.RedisClientUtil;
+import com.lzp.zprpc.registry.util.RedisClientFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,13 +43,13 @@ public class RedisClient implements RegistryClient {
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
         String redisIpFromEnv;
-        return searchAndRegiInstance(basePack, RedisClientUtil.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port);
+        return searchAndRegiInstance(basePack, RedisClientFactory.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port);
     }
 
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port, ClassLoader classLoader) throws Exception {
         String redisIpFromEnv;
-        return searchAndRegiInstance(basePack, RedisClientUtil.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port, classLoader);
+        return searchAndRegiInstance(basePack, RedisClientFactory.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port, classLoader);
     }
 
 
