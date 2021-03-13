@@ -24,13 +24,23 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+/**
+ * @author zeping lu
+ */
 public class LzpMessageDecoder extends ReplayingDecoder<Void> {
-    private static final Logger logger = LoggerFactory.getLogger(LzpMessageDecoder.class);
+    private boolean isServer;
+
+    public LzpMessageDecoder(boolean isServer) {
+        this.isServer = isServer;
+    }
 
     @Override
     protected void decode(ChannelHandlerContext channelHandlerContext, ByteBuf byteBuf, List<Object> list) {
         int length = byteBuf.readInt();
-        if (length == 0){
+        if (length == 0) {
+            if (isServer) {
+                channelHandlerContext.channel().writeAndFlush(new byte[0]);
+            }
             return;
         }
         byte[] content = new byte[length];
@@ -39,7 +49,7 @@ public class LzpMessageDecoder extends ReplayingDecoder<Void> {
     }
 
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if (evt instanceof IdleStateEvent) {
             ctx.channel().close();
         }

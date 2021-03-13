@@ -29,8 +29,8 @@ import io.netty.handler.timeout.IdleStateHandler;
 public class SocketChannelInitializerForServer extends ChannelInitializer {
     @Override
     protected void initChannel(Channel channel) {
-        channel.pipeline().addLast(new IdleStateHandler(15,Integer.MAX_VALUE,Integer.MAX_VALUE))
-                .addLast(new LzpMessageDecoder()).addLast(new LzpMessageEncoder())
-                .addLast("serviceHandler",new ServiceHandler());
+        channel.pipeline().addLast(new IdleStateHandler(15, Integer.MAX_VALUE, Integer.MAX_VALUE))
+                .addLast(new LzpMessageDecoder(true)).addLast(new LzpMessageEncoder())
+                .addLast("serviceHandler", new ServiceHandler());
     }
 }

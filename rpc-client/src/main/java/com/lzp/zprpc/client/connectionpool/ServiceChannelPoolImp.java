@@ -114,7 +114,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     }
 
     /**
-     * Description ：每四秒发送一个心跳包
+     * Description ：每12秒发送一个心跳包
      **/
     private void hearBeat() {
         while (true) {
@@ -125,7 +125,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                 }
             }
             try {
-                Thread.sleep(4000);
+                Thread.sleep(12000);
             } catch (InterruptedException e) {
                 LOGGER.error(e.getMessage(), e);
             }
