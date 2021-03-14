@@ -8,12 +8,7 @@
 # Features：
     1、Simple configuration and easy to use.
     2、The application scenarios are rich
-    (1) The startup process does not depend on any components, such as tomcat, spring (with or without these components, the usage is the same).
-    (2) Even if the jar of this framework and the jar of the framework itself are not in the same classpath (for example, there is a
-     The old service left over from history is based on OSGI, and it is impossible to completely rewrite it in the short term. I want to add it to the microservice system),
-     It won't have any impact on usage, just add a parameter when publishing service and discovering service. (Many other frameworks
-     Or middleware rely on their projects by default and all modules in their projects are under the same classpath, which will lead to
-     (Causes exceptions in loading classes or configuration files, which brings great troubles to project developers who use these products)
+    The startup process does not depend on any components, such as tomcat, spring (with or without these components, the usage is the same)
     3、High performance: network communication is based on netty, protostuff for serialization. The connection pool 
 	   mechanism is realized, and multiple RPC calls can share a connection at the same time (non-blocking), 
 	   singleton proxy object, code details pay attention to performance.                  
