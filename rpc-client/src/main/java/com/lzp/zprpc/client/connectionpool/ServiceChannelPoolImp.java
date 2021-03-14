@@ -59,7 +59,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                      * 1、synchronized关键词虽然保证原子性和可见性，但是不能防止指令重排序。需要加volatile来防止半初始化问题
                      *    CopyOnWriteArrayList底层的数组刚好就用volatile修饰了。
                      * 2、当连接池满了，基本都是读操作，基本不会有写操作。CopyOnWriteArrayList的读操作相比ArrayList少了校验
-                     *    步骤，所以性能比ArrayList高。
+                     *    步骤，能弥补一些因volatile修饰而损失的性能，总体读性能和ArrayList差不多。
                      * */
                     channels = new CopyOnWriteArrayList<>();
                     Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));

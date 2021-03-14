@@ -135,7 +135,7 @@ package com.lzp.zprpc.client.redis;
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new ArrayList<>(redisClient.getAndTransformToList(serviceId));
+                     List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
                      Object bean = getBeanCore(serviceId, interfaceCls);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
                      return bean;
@@ -164,7 +164,7 @@ package com.lzp.zprpc.client.redis;
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new ArrayList<>(redisClient.getAndTransformToList(serviceId));
+                     List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
                      Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
                      return beanWithTimeOut;
@@ -228,9 +228,9 @@ package com.lzp.zprpc.client.redis;
 
      private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) throws Exception {
          String ipAndport = "";
+         List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
          try {
              //根据serviceid找到所有提供这个服务的ip+port
-             List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
              Thread thisThread = Thread.currentThread();
              ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
              ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
@@ -244,6 +244,7 @@ package com.lzp.zprpc.client.redis;
              return result;
          } catch (Exception e) {
              if (e instanceof ConnectException) {
+                 hostAndPorts.remove(ipAndport);
                  redisClientPool.getClient().sremove(serviceId, ipAndport);
                  return callAndGetResult(method, serviceId, deadline, args);
              } else if (e instanceof IllegalArgumentException) {
