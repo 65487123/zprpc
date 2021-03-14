@@ -16,7 +16,6 @@
 package com.lzp.zprpc.client.redis;
 
 
- import com.alibaba.nacos.api.exception.NacosException;
  import com.lzp.zprpc.client.connectionpool.FixedShareableChannelPool;
  import com.lzp.zprpc.client.connectionpool.ServiceChannelPoolImp;
  import com.lzp.zprpc.client.connectionpool.SingleChannelPool;
@@ -56,9 +55,10 @@ package com.lzp.zprpc.client.redis;
      private static FixedShareableChannelPool channelPool;
      private static ExecutorService refreshServiceThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("refreshService"));
      private static RedisClientPool redisClientPool;
+
      static {
          try {
-             //如果被依赖的包和这个不在同一个classpath下,这段代码就没用了
+             //必须打在同一classpath下(如果是OSGI环境,可以通过插件配置使得依赖的包在同一classpath下)
              String redisIpList;
              redisClient = RedisClientFactory.newRedisClient(redisIpList = PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST));
              String connectionPoolSize;
@@ -106,7 +106,7 @@ package com.lzp.zprpc.client.redis;
       * @param interfaceCls 本地和远程服务实现的接口
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls) {
-         return getServiceBean0(serviceId, interfaceCls, null);
+         return getServiceBean0(serviceId, interfaceCls);
      }
 
      /**
@@ -118,45 +118,25 @@ package com.lzp.zprpc.client.redis;
       * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link TimeoutException}
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) {
-         return getServiceBean0(serviceId, interfaceCls, timeout, null);
+         return getServiceBean0(serviceId, interfaceCls, timeout);
      }
 
-     /**
-      * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样
-      * 代理对象是单例的
-      * 这个方法用在jar包不在同一个classpath的情况下
-      *
-      * @param serviceId    需要远程调用的服务id
-      * @param interfaceCls 本地和远程服务实现的接口
-      * @param classLoader  加载nacos类的类加载器
-      */
-     public static Object getServiceBean(String serviceId, Class interfaceCls, ClassLoader classLoader) throws NacosException {
-         initialNameServiceAndChannelPool(classLoader);
-         return getServiceBean0(serviceId, interfaceCls, classLoader);
-     }
+      /* public static Object getAsyServiceBean(String serviceId, Class interfaceCls, int timeout) {
+        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-     /**
-      * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样
-      * 代理对象是单例的
-      * 这个方法用在jar包不在同一个classpath的情况下
-      *
-      * @param serviceId    需要远程调用的服务id
-      * @param interfaceCls 本地和远程服务实现的接口
-      * @param timeout      rpc调用的超时时间,单位是毫秒，超过这个时间没返回则抛 {@link TimeoutException}
-      * @param classLoader  加载nacos类的类加载器
-      */
-     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
-         initialNameServiceAndChannelPool(classLoader);
-         return getServiceBean0(serviceId, interfaceCls, timeout, classLoader);
-     }
+                return null;
+            }
+        });
+    }*/
 
-
-     public static Object getServiceBean0(String serviceId, Class interfaceCls, ClassLoader classLoader) {
+     public static Object getServiceBean0(String serviceId, Class interfaceCls) {
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new ArrayList<>(redisClient.getAndTransformToList(serviceId));
-                     Object bean = getBeanCore(serviceId, interfaceCls, classLoader);
+                     Object bean = getBeanCore(serviceId, interfaceCls);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
                      return bean;
                  } else {
@@ -168,7 +148,7 @@ package com.lzp.zprpc.client.redis;
              if (beanAndAllHostAndPort.bean == null) {
                  synchronized (ServiceFactory.class) {
                      if (serviceIdInstanceMap.get(serviceId).bean == null) {
-                         beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls, classLoader);
+                         beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls);
                      }
                      return beanAndAllHostAndPort.bean;
                  }
@@ -179,13 +159,13 @@ package com.lzp.zprpc.client.redis;
      }
 
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
+     public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
          checkTimeOut(timeout);
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new ArrayList<>(redisClient.getAndTransformToList(serviceId));
-                     Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout, classLoader);
+                     Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
                      return beanWithTimeOut;
                  } else {
@@ -197,32 +177,13 @@ package com.lzp.zprpc.client.redis;
              if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                  synchronized (ServiceFactory.class) {
                      if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
-                         beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout, classLoader);
+                         beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
                      }
                      return beanAndAllHostAndPort.beanWithTimeOut;
                  }
              } else {
                  return beanAndAllHostAndPort.beanWithTimeOut;
              }
-         }
-     }
-
-     /**
-      * Description:指定类加载器获取代理类,说明用到这个rpc框架的包和这个包肯定不在同一个classpath下,那么这个类加载时的初始化肯定报错,
-      * naming肯定为null,在第一次获取代理类时初始化就行，如果已经初始化过了，就不用再初始化了,因为跑在一个jvm中的类，配置肯定一样.
-      * 初始化不加锁是因为初始化操作是幂等操作
-      */
-     private static void initialNameServiceAndChannelPool(ClassLoader classLoader) {
-         if (redisClient == null) {
-             String redisIpList;
-             redisClient = RedisClientFactory.newRedisClient(redisIpList = PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST));
-             String connectionPoolSize;
-             if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
-                 channelPool = new SingleChannelPool();
-             } else {
-                 channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
-             }
-             redisClientPool = new RedisClientPool(5, redisIpList);
          }
      }
 
@@ -236,19 +197,9 @@ package com.lzp.zprpc.client.redis;
          }
      }
 
-   /* public static Object getAsyServiceBean(String serviceId, Class interfaceCls, int timeout) {
-        return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), new Class[]{interfaceCls}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 
-                return null;
-            }
-        });
-    }*/
-
-
-     private static Object getBeanCore(String serviceId, Class interfaceCls, ClassLoader classLoader) {
-         return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
+     private static Object getBeanCore(String serviceId, Class interfaceCls) {
+         return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result;
                      if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
@@ -259,8 +210,8 @@ package com.lzp.zprpc.client.redis;
                  });
      }
 
-     private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout, ClassLoader classLoader) {
-         return Proxy.newProxyInstance(classLoader == null ? ServiceFactory.class.getClassLoader() : classLoader,
+     private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout) {
+         return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
                      if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {

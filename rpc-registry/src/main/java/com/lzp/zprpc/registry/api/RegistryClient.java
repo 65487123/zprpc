@@ -29,7 +29,9 @@ public interface RegistryClient {
 
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.annotation.@Service修饰的类，返回实例。如果项目用到了Spring，就到
-     * Spring容器中找，找不到才自己初始化一个,并注册到注册中心中
+     * Spring容器中找，找不到才自己初始化一个,并注册到注册中心中(jar包需要打到同一classpath下)
+     *
+     *
      *
      * @param basePack 要扫描的包
      * @param ip       要注册进注册中心的实例（instance)ip
@@ -37,18 +39,6 @@ public interface RegistryClient {
      * @return key是服务的唯一id，value是实例
      */
     Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws Exception;
-
-    /**
-     * 扫描指定包下所有类，获得所有被com.lzp.annotation.@Service修饰的类，返回实例。如果项目用到了Spring，就到
-     * Spring容器中找，找不到才自己初始化一个,并注册到注册中心中
-     *
-     * @param basePack 要扫描的包
-     * @param ip       要注册进注册中心的实例（instance)ip
-     * @param port     要注册进注册中心的实例（instance)port
-     * @param classLoader   指定类加载器加载类和配置文件
-     * @return key是服务的唯一id，value是实例
-     */
-    Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port, ClassLoader classLoader) throws Exception;
 
 
 }

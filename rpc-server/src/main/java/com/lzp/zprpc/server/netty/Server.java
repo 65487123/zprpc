@@ -58,18 +58,6 @@ public class Server {
     }
 
 
-    public synchronized static void startRpcServer(String ip, int port,ClassLoader classLoader) {
-        startServer0(ip,port);
-        ServiceHandler.rigiService(classLoader);
-    }
-
-    public static void startRpcServer(int port,ClassLoader classLoader) {
-        startRpcServer(null, port,classLoader);
-    }
-
-    public static void startRpcServer(ClassLoader classLoader) {
-        startRpcServer(null, 0,classLoader);
-    }
     public static void closeServer() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();

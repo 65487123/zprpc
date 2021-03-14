@@ -46,23 +46,16 @@ public class RedisClient implements RegistryClient {
         return searchAndRegiInstance(basePack, RedisClientFactory.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port);
     }
 
-    @Override
-    public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port, ClassLoader classLoader) throws Exception {
-        String redisIpFromEnv;
-        return searchAndRegiInstance(basePack, RedisClientFactory.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties(classLoader).getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port, classLoader);
-    }
-
-
 
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.com.lzp.zprpc.common.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
      * Spring容器中找，找不到才自己初始化一个),并注册到redis中
      * <p>
      *
-     * @param basePack      要扫描的包
-     * @param redisClient   redis客户端
-     * @param ip            要注册进注册中心的实例（instance)ip
-     * @param port          要注册进注册中心的实例（instance)port
+     * @param basePack    要扫描的包
+     * @param redisClient redis客户端
+     * @param ip          要注册进注册中心的实例（instance)ip
+     * @param port        要注册进注册中心的实例（instance)port
      */
 
 
@@ -82,21 +75,6 @@ public class RedisClient implements RegistryClient {
         return idServiceMap;
     }
 
-    private Map<String, Object> searchAndRegiInstance(String basePack, com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, ClassLoader classLoader) throws ClassNotFoundException, InstantiationException, IllegalAccessException {
-        Map<String, Object> idServiceMap = new HashMap(16);
-        try {
-            for (String path : ClazzUtils.getClazzName(basePack, classLoader)) {
-                regiInstance(redisClient, ip, port, idServiceMap, Class.forName(path, true, classLoader));
-            }
-        } finally {
-            try {
-                redisClient.close();
-            } catch (Exception e) {
-                LOGGER.error("close redisClient failed", e);
-            }
-        }
-        return idServiceMap;
-    }
 
     private void regiInstance(com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException {
         if (cls.isAnnotationPresent(Service.class)) {

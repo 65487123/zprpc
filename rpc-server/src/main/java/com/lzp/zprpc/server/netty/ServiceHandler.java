@@ -98,29 +98,4 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
         }
     }
 
-    static void rigiService(ClassLoader classLoader) {
-        try {
-            //默认用nacos做注册中心
-            RegistryClient registryClient;
-            String regi;
-            switch ((regi = PropertyUtil.getProperties(classLoader).getProperty(Cons.REGISTRY)) == null ? Cons.NACOS : regi) {
-                case Cons.NACOS: {
-                    registryClient = new NacosClient();
-                    break;
-                }
-                case Cons.REDIS: {
-                    registryClient = new RedisClient();
-                    break;
-                }
-                default:
-                    registryClient = new NacosClient();
-            }
-
-            idServiceMap = registryClient.searchAndRegiInstance(PropertyUtil.getBasePack(classLoader), Server.getIp(), Server.getPort(), classLoader);
-            LogoUtil.printLogo();
-            LOGGER.info("publish service successfully");
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-    }
 }
