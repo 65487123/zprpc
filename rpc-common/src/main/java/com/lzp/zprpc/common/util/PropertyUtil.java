@@ -13,12 +13,11 @@
   *  limitations under the License.
   */
 
-package com.lzp.zprpc.common.util;
+ package com.lzp.zprpc.common.util;
 
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
 
- import java.io.IOException;
  import java.io.InputStream;
  import java.util.Properties;
 
@@ -46,17 +45,6 @@ package com.lzp.zprpc.common.util;
      }
 
 
-     public static Properties getProperties(ClassLoader classLoader) {
-         Properties properties = new Properties();
-         try {
-             properties.load(classLoader.getResourceAsStream("zprpc.properties"));
-         } catch (IOException e) {
-             LOGGER.error("load zprpc.properties failed", e);
-         }
-         return properties;
-     }
-
-
      public static String getBasePack() {
          return properties.getProperty("basePack");
      }
@@ -70,35 +58,5 @@ package com.lzp.zprpc.common.util;
          return properties.getProperty("nacosIpList");
      }
 
-     public static String getBasePack(ClassLoader classLoader) {
-         Properties properties = new Properties();
-         try {
-             properties.load(classLoader.getResourceAsStream("zprpc.properties"));
-         } catch (IOException e) {
-             LOGGER.error("load zprpc.properties failed", e);
-         }
-         return properties.getProperty("basePack");
-     }
-
-     public static String getConnetionPoolSize(ClassLoader classLoader) {
-         Properties properties = new Properties();
-         try {
-             properties.load(classLoader.getResourceAsStream("zprpc.properties"));
-         } catch (IOException e) {
-             LOGGER.error("load zprpc.properties failed", e);
-         }
-         return properties.getProperty("connetionPoolSize");
-     }
-
-
-     public static String getNacosIpList(ClassLoader classLoader) {
-         Properties properties = new Properties();
-         try {
-             properties.load(classLoader.getResourceAsStream("zprpc.properties"));
-         } catch (IOException e) {
-             LOGGER.error("load zprpc.properties failed", e);
-         }
-         return properties.getProperty("nacosIpList");
-     }
 
  }
