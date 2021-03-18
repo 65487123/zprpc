@@ -28,7 +28,7 @@ import java.util.List;
  * @author zeping lu
  */
 public class LzpMessageDecoder extends ReplayingDecoder<Void> {
-    private boolean isServer;
+    private final boolean isServer;
 
     public LzpMessageDecoder(boolean isServer) {
         this.isServer = isServer;
