@@ -9,8 +9,21 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>rpc-server</artifactId>
+    <description>A high-performance rpc framework</description>
+    <developers>
+        <developer>
+            <name>luzeping</name>
+            <email>zeping_lu@163.com</email>
+        </developer>
+    </developers>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
 
     <dependencies>
         <dependency>
