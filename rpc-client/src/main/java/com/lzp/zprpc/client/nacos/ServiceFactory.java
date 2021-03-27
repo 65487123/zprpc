@@ -227,7 +227,7 @@ import java.util.concurrent.locks.LockSupport;
                      Object result;
                      if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
                              ((String) result).startsWith(Cons.EXCEPTION)) {
-                         throw new RpcException(((String) result).substring(Cons.TEN));
+                         throw new RpcException(((String) result).substring(Cons.THREE));
                      }
                      return result;
                  });
@@ -239,7 +239,7 @@ import java.util.concurrent.locks.LockSupport;
                      Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
                      if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
                          String message;
-                         if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.TEN))) {
+                         if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.THREE))) {
                              throw new TimeoutException();
                          } else {
                              throw new RpcException(message);
