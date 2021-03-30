@@ -9,6 +9,8 @@
     1、Simple configuration and easy to use.
     2、The application scenarios are rich
     The startup process does not depend on any components, such as tomcat, spring (with or without these components, the usage is the same)
+    Support the OSGI environment (OSGI-based projects are packaged in bundles instead of jars. If you rely on other frameworks, the 
+    framework may not find the classes in the  bundle).
     3、High performance: network communication is based on netty, protostuff for serialization. The connection pool 
 	   mechanism is realized, and multiple RPC calls can share a connection at the same time (non-blocking), 
 	   singleton proxy object, code details pay attention to performance.                  
