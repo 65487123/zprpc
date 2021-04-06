@@ -34,13 +34,13 @@
          //得到远程代理对象
          DemoService demoService = (DemoService) ServiceFactory.getServiceBean("demoService", DemoService.class);
          //发起rpc调用并输出结果
-         System.out.println(demoService.sayHello("zeping"));
-         System.out.println(demoService.sayHello("zeping"));
+         System.out.println(demoService.sayHello("hello"));
+         System.out.println(demoService.sayHello("hello"));
 
          //单线程调用测性能。 第一次会慢点，因为server端需要初始化线程池中的线程
          long now = System.currentTimeMillis();
          for (int i = 0; i < 10000; i++) {
-             demoService.sayHello("zeping");
+             demoService.sayHello("hello");
          }
          System.out.println(System.currentTimeMillis() - now);
 
@@ -51,7 +51,7 @@
          CountDownLatch countDownLatch = new CountDownLatch(100000);
          for (int i = 0; i < 100000; i++) {
              executorService.execute(() -> {
-                 demoService.sayHello("zeping");
+                 demoService.sayHello("hello");
                  countDownLatch.countDown();
              });
          }
@@ -62,7 +62,7 @@
          TakeSecondService demoService1 = (TakeSecondService) ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 2000);
 
          //超时没返回会抛出异常
-         demoService1.sayHello("zeping");
+         demoService1.sayHello("hello");
 
      }
  }
