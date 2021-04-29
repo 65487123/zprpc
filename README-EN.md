@@ -100,8 +100,10 @@
        involve the issue of multi-thread concurrency, which is similar to the singleton mode, such as visibility, semi-initialization, etc.
     2、Not every rpc call will block a connection. Like http1.0, every http request creates a new connection, and then closes the connection after the 
 	request is initiated. During this time, this connection only serves this one A http request. Although http1.1 has keepalive and pipeling mechanisms, 
-	at the same time, the connection can only serve one http request, and the next http request must wait for the previous http request Will be sent back. 
-	And my connection mechanism is at the same time, multiple rpc requests can share a connection without any blocking.
+	due to the orderly reception of responses, there will be a line header blocking problem (if the response to the head of the queue request is not received,
+	the connection is blocked, and the subsequent response can only be waited for). (Although http2.0 does not have the above problems, and the content is 
+	encoded in binary, it is still the http protocol. There are so many useless fields in the http protocol, and the performance is destined to not be very high) 
+	And my connection mechanism is at the same time, multiple RPC requests can share a connection, almost without any blocking.
 	For example, there are two projects A and B each containing a set of services, which are deployed on different machines. Method a in project A will 
 	call method e in project B, method b will call method f, and method c will call method g.
 ![example](https://gitee.com/zeping-lu/pngs-for-readme/raw/master/readme0.png)
