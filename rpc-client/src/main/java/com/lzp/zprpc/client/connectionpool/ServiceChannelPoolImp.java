@@ -15,7 +15,7 @@
 
 package com.lzp.zprpc.client.connectionpool;
 
-import com.lzp.zprpc.client.netty.NettyClient;
+import com.lzp.zprpc.client.netty.ConnectionFactory;
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
@@ -62,13 +62,13 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                      *    步骤，能弥补一些因volatile修饰而损失的性能，总体读性能和ArrayList差不多。
                      * */
                     channels = new CopyOnWriteArrayList<>();
-                    Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
+                    Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     updateChannelWhenClosed(channel, channels, hostAndPort);
                     channels.add(channel);
                     hostAndPortChannelsMap.put(hostAndPort, channels);
                     return channel;
                 } else if (channels.size() < SIZE) {
-                    Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
+                    Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     updateChannelWhenClosed(channel, channels, hostAndPort);
                     channels.add(channel);
                     return channel;
@@ -79,7 +79,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         } else if (channels.size() < SIZE) {
             synchronized (this) {
                 if ((channels = hostAndPortChannelsMap.get(hostAndPort)).size() < SIZE) {
-                    Channel channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
+                    Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     updateChannelWhenClosed(channel, channels, hostAndPort);
                     channels.add(channel);
                     return channel;
@@ -105,7 +105,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         channel.closeFuture().addListener(future -> executorService.execute(() -> {
             synchronized (this) {
                 channels.remove(channel);
-                Channel channel1 = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
+                Channel channel1 = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                 channels.add(channel1);
                 updateChannelWhenClosed(channel1, channels, hostAndPort);
             }

@@ -14,9 +14,9 @@ import org.slf4j.LoggerFactory;
  * @author: Lu ZePing
  * @date: 2020/9/27 18:32
  */
-public class NettyClient implements AutoCloseable {
+public class ConnectionFactory implements AutoCloseable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionFactory.class);
     public static EventLoopGroup workerGroup = new NioEventLoopGroup(1);
     private static Bootstrap bootstrap = new Bootstrap();
 
@@ -28,11 +28,15 @@ public class NettyClient implements AutoCloseable {
     }
 
 
-    public static Channel getChannel(String ip, int port) {
+    public static Channel newChannel(String ip, int port) {
         try {
             return bootstrap.connect(ip, port).sync().channel();
         } catch (InterruptedException e) {
-            return getChannel(ip, port);
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ignored) {
+            }
+            return newChannel(ip, port);
         }
     }
 

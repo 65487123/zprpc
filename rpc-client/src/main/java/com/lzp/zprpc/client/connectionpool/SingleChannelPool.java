@@ -15,7 +15,7 @@
 
 package com.lzp.zprpc.client.connectionpool;
 
-import com.lzp.zprpc.client.netty.NettyClient;
+import com.lzp.zprpc.client.netty.ConnectionFactory;
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
@@ -46,7 +46,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
         if (channel == null) {
             synchronized (this) {
                 if ((channel = hostAndPortChannelsMap.get(hostAndPort)) == null) {
-                    channel = NettyClient.getChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
+                    channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
                     channel.closeFuture().addListener(future -> hostAndPortChannelsMap.remove(hostAndPort));
                     hostAndPortChannelsMap.put(hostAndPort, channel);
                 }
