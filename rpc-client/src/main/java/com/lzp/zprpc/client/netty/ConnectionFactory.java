@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Description:nettyclient
+ * Description:ConnectionFactory
  *
  * @author: Lu ZePing
  * @date: 2020/9/27 18:32
