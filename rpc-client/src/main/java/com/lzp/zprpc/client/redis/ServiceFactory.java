@@ -60,23 +60,20 @@ package com.lzp.zprpc.client.redis;
      private static final Logger LOGGER = LoggerFactory.getLogger(ServiceFactory.class);
 
      private static Map<String, BeanAndAllHostAndPort> serviceIdInstanceMap = new ConcurrentHashMap<>();
-     private static RedisClient redisClient;
      private static FixedShareableChannelPool channelPool;
      private static ExecutorService refreshServiceThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("refreshService"));
-     private static RedisClientPool redisClientPool;
+     private static PooledRedisClient redisClient;
 
      static {
          try {
              //必须打在同一classpath下(如果是OSGI环境,可以通过插件配置使得依赖的包在同一classpath下)
-             String redisIpList;
-             redisClient = RedisClientFactory.newRedisClient(redisIpList = PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST));
              String connectionPoolSize;
              if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
                  channelPool = new SingleChannelPool();
              } else {
                  channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
              }
-             redisClientPool = new RedisClientPool(5, redisIpList);
+             redisClient = new PooledRedisClient(new RedisClientPool(5, PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST)));
          } catch (Exception e) {
              LOGGER.error("Throw an exception when initializing NamingService", e);
          }
@@ -254,7 +251,7 @@ package com.lzp.zprpc.client.redis;
          } catch (Exception e) {
              if (e instanceof ConnectException) {
                  hostAndPorts.remove(ipAndport);
-                 redisClientPool.getClient().sremove(serviceId, ipAndport);
+                 redisClient.sremove(serviceId, ipAndport);
                  return callAndGetResult(method, serviceId, deadline, args);
              } else if (e instanceof IllegalArgumentException) {
                  e = new CallException("no service available");
