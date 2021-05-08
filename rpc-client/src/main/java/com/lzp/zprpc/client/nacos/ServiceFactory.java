@@ -125,7 +125,7 @@ import java.util.concurrent.locks.LockSupport;
 
 
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls) throws NacosException {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls) throws NacosException {
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
@@ -157,7 +157,7 @@ import java.util.concurrent.locks.LockSupport;
      }
 
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) throws NacosException {
          checkTimeOut(timeout);
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {

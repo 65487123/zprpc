@@ -131,7 +131,7 @@ package com.lzp.zprpc.client.redis;
         });
     }*/
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls) {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls) {
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
@@ -159,7 +159,7 @@ package com.lzp.zprpc.client.redis;
      }
 
 
-     public static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
          checkTimeOut(timeout);
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
