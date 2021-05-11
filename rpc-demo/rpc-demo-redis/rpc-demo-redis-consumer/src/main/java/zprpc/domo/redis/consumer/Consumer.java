@@ -52,6 +52,7 @@
          for (int i = 0; i < 100000; i++) {
              executorService.execute(() -> {
                  demoService.sayHello("hello");
+                 //由于countDown()耗时和rpc调用耗时相比可以忽略不计,所以可以不考虑多线程激烈竞争导致countDown()性能下降问题。(rpc调用耗时越少,countDown()耗时越多)
                  countDownLatch.countDown();
              });
          }
