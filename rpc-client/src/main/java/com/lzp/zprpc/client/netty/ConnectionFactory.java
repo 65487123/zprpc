@@ -31,7 +31,7 @@ public class ConnectionFactory implements AutoCloseable {
     public static Channel newChannel(String ip, int port) {
         try {
             return bootstrap.connect(ip, port).sync().channel();
-        } catch (InterruptedException e) {
+        } catch (Exception e) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ignored) {
