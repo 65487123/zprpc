@@ -32,6 +32,7 @@ public class ConnectionFactory implements AutoCloseable {
         try {
             return bootstrap.connect(ip, port).sync().channel();
         } catch (Exception e) {
+            LOGGER.warn("set up connection to {} failed , retry", ip + port);
             try {
                 Thread.sleep(10);
             } catch (InterruptedException ignored) {
