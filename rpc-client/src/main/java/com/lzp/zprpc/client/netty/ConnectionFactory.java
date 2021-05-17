@@ -8,6 +8,8 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
+
 /**
  * Description:ConnectionFactory
  *
@@ -28,15 +30,10 @@ public class ConnectionFactory implements AutoCloseable {
     }
 
 
-    public static Channel newChannel(String ip, int port) {
+    public static Channel newChannel(String ip, int port) throws ConnectException {
         try {
             return bootstrap.connect(ip, port).sync().channel();
-        } catch (Exception e) {
-            LOGGER.warn("set up connection to {}:{} failed , retry", ip, port);
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException ignored) {
-            }
+        } catch (InterruptedException e) {
             return newChannel(ip, port);
         }
     }

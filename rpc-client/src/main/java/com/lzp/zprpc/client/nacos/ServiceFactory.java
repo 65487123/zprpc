@@ -264,15 +264,11 @@ import java.util.concurrent.locks.LockSupport;
                  LockSupport.park();
              }
              return result;
-         } catch (Exception e) {
-             if (e instanceof ConnectException) {
-                 //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,这里可能就会一直pendding了)
-                 return callAndGetResult(method, serviceId, deadline, args);
-             } else if (e instanceof IllegalArgumentException) {
-                 e = new CallException("no service available");
-             }
-             throw e;
+         } catch (ConnectException e) {
+             //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,这里可能就会一直pendding了)
+             return callAndGetResult(method, serviceId, deadline, args);
+         } catch (IllegalArgumentException e) {
+             throw new CallException("no service available");
          }
      }
-
  }

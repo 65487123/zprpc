@@ -248,15 +248,12 @@ package com.lzp.zprpc.client.redis;
                  LockSupport.park();
              }
              return result;
-         } catch (Exception e) {
-             if (e instanceof ConnectException) {
-                 hostAndPorts.remove(ipAndport);
-                 redisClient.sremove(serviceId, ipAndport);
-                 return callAndGetResult(method, serviceId, deadline, args);
-             } else if (e instanceof IllegalArgumentException) {
-                 e = new CallException("no service available");
-             }
-             throw e;
+         } catch (ConnectException e) {
+             hostAndPorts.remove(ipAndport);
+             redisClient.sremove(serviceId, ipAndport);
+             return callAndGetResult(method, serviceId, deadline, args);
+         } catch (IllegalArgumentException e) {
+             throw new CallException("no service available");
          }
      }
 

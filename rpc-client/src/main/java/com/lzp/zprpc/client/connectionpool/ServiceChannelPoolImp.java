@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,7 +51,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     }
 
     @Override
-    public Channel getChannel(String hostAndPort)  {
+    public Channel getChannel(String hostAndPort) throws ConnectException {
         List<Channel> channels = hostAndPortChannelsMap.get(hostAndPort);
         if (channels == null) {
             synchronized (this) {
@@ -63,13 +64,13 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                      * */
                     channels = new CopyOnWriteArrayList<>();
                     Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                    updateChannelWhenClosed(channel, channels, hostAndPort);
+                    removeChannelWhenClosed(channel, channels);
                     channels.add(channel);
                     hostAndPortChannelsMap.put(hostAndPort, channels);
                     return channel;
                 } else if (channels.size() < SIZE) {
                     Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                    updateChannelWhenClosed(channel, channels, hostAndPort);
+                    removeChannelWhenClosed(channel, channels);
                     channels.add(channel);
                     return channel;
                 } else {
@@ -80,7 +81,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
             synchronized (this) {
                 if ((channels = hostAndPortChannelsMap.get(hostAndPort)).size() < SIZE) {
                     Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                    updateChannelWhenClosed(channel, channels, hostAndPort);
+                    removeChannelWhenClosed(channel, channels);
                     channels.add(channel);
                     return channel;
                 } else {
@@ -98,19 +99,12 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
      * @author: Lu ZePing
      * @date: 2020/9/27 18:32
      */
-    private void updateChannelWhenClosed(Channel channel, List<Channel> channels, String hostAndPort) {
-        /*因为getChannel()会调用ChannelFuture.sync()方法，会阻塞当前线程，不能在io线程中执行下面的代码块。而事件回调却在io线程中执行的
-          所以下面这段代码需要在另一个线程中执行。每次都new新线程池是因为连接不可用是小概率事件，线程一直存在会比较耗资源。*/
-        ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("get new Channel when closed"));
-        channel.closeFuture().addListener(future -> executorService.execute(() -> {
+    private void removeChannelWhenClosed(Channel channel, List<Channel> channels) {
+        channel.closeFuture().addListener(future -> {
             synchronized (this) {
                 channels.remove(channel);
-                Channel channel1 = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                channels.add(channel1);
-                updateChannelWhenClosed(channel1, channels, hostAndPort);
             }
-            executorService.shutdown();
-        }));
+        });
     }
 
     /**

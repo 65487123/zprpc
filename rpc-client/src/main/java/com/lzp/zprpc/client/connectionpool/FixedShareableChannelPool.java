@@ -18,7 +18,9 @@ package com.lzp.zprpc.client.connectionpool;
 
 import io.netty.channel.Channel;
 
-/**
+import java.net.ConnectException;
+
+ /**
  * Description:固定连接数的连接池，每个ip+port 缓存固定数量的连接。
  * 根据ip+port 获得一个channel。获取channel后，池子中
  * 这个channel还是在的，并不会真的被取出。
@@ -36,5 +38,5 @@ public interface FixedShareableChannelPool {
      * @Date 10:24 2020/10/13
      * @Param hostAndPort ip和端口
      */
-    Channel getChannel(String hostAndPort);
+    Channel getChannel(String hostAndPort) throws ConnectException;
 }

@@ -22,6 +22,7 @@ import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.ConnectException;
 import java.util.Map;
 import java.util.concurrent.*;
 
@@ -41,7 +42,7 @@ public class SingleChannelPool implements FixedShareableChannelPool {
     }
 
     @Override
-    public Channel getChannel(String hostAndPort) {
+    public Channel getChannel(String hostAndPort) throws ConnectException {
         Channel channel = hostAndPortChannelsMap.get(hostAndPort);
         if (channel == null) {
             synchronized (this) {
