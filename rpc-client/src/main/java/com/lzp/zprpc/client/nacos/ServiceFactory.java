@@ -261,7 +261,7 @@ import java.util.concurrent.locks.LockSupport;
              Object result;
              //用while，防止虚假唤醒
              while ((result = threadResultAndTime.getResult()) == null) {
-                 LockSupport.park(thisThread);
+                 LockSupport.park();
              }
              return result;
          } catch (Exception e) {
