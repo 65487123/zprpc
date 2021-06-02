@@ -112,7 +112,30 @@ package com.lzp.zprpc.client.redis;
       * @param interfaceCls 本地和远程服务实现的接口
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls) {
-         return getServiceBean0(serviceId, interfaceCls);
+         if (serviceIdInstanceMap.get(serviceId) == null) {
+             synchronized (ServiceFactory.class) {
+                 if (serviceIdInstanceMap.get(serviceId) == null) {
+                     List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
+                     Object bean = getServiceBean0(serviceId, interfaceCls);
+                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
+                     return bean;
+                 } else {
+                     return serviceIdInstanceMap.get(serviceId).bean;
+                 }
+             }
+         } else {
+             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
+             if (beanAndAllHostAndPort.bean == null) {
+                 synchronized (ServiceFactory.class) {
+                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
+                         beanAndAllHostAndPort.bean = getServiceBean0(serviceId, interfaceCls);
+                     }
+                     return beanAndAllHostAndPort.bean;
+                 }
+             } else {
+                 return beanAndAllHostAndPort.bean;
+             }
+         }
      }
 
      /**
@@ -124,7 +147,31 @@ package com.lzp.zprpc.client.redis;
       * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link TimeoutException}
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) {
-         return getServiceBean0(serviceId, interfaceCls, timeout);
+         checkTimeOut(timeout);
+         if (serviceIdInstanceMap.get(serviceId) == null) {
+             synchronized (ServiceFactory.class) {
+                 if (serviceIdInstanceMap.get(serviceId) == null) {
+                     List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
+                     Object beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
+                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
+                     return beanWithTimeOut;
+                 } else {
+                     return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
+                 }
+             }
+         } else {
+             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
+             if (beanAndAllHostAndPort.beanWithTimeOut == null) {
+                 synchronized (ServiceFactory.class) {
+                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
+                         beanAndAllHostAndPort.beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
+                     }
+                     return beanAndAllHostAndPort.beanWithTimeOut;
+                 }
+             } else {
+                 return beanAndAllHostAndPort.beanWithTimeOut;
+             }
+         }
      }
 
       /* public static Object getAsyServiceBean(String serviceId, Class interfaceCls, int timeout) {
@@ -137,62 +184,6 @@ package com.lzp.zprpc.client.redis;
         });
     }*/
 
-     private static Object getServiceBean0(String serviceId, Class interfaceCls) {
-         if (serviceIdInstanceMap.get(serviceId) == null) {
-             synchronized (ServiceFactory.class) {
-                 if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
-                     Object bean = getBeanCore(serviceId, interfaceCls);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
-                     return bean;
-                 } else {
-                     return serviceIdInstanceMap.get(serviceId).bean;
-                 }
-             }
-         } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
-             if (beanAndAllHostAndPort.bean == null) {
-                 synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
-                         beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls);
-                     }
-                     return beanAndAllHostAndPort.bean;
-                 }
-             } else {
-                 return beanAndAllHostAndPort.bean;
-             }
-         }
-     }
-
-
-     private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
-         checkTimeOut(timeout);
-         if (serviceIdInstanceMap.get(serviceId) == null) {
-             synchronized (ServiceFactory.class) {
-                 if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
-                     Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
-                     return beanWithTimeOut;
-                 } else {
-                     return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
-                 }
-             }
-         } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
-             if (beanAndAllHostAndPort.beanWithTimeOut == null) {
-                 synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
-                         beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
-                     }
-                     return beanAndAllHostAndPort.beanWithTimeOut;
-                 }
-             } else {
-                 return beanAndAllHostAndPort.beanWithTimeOut;
-             }
-         }
-     }
-
 
      /**
       * Description:校验参数
@@ -204,7 +195,7 @@ package com.lzp.zprpc.client.redis;
      }
 
 
-     private static Object getBeanCore(String serviceId, Class interfaceCls) {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls) {
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result;
@@ -216,7 +207,7 @@ package com.lzp.zprpc.client.redis;
                  });
      }
 
-     private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout) {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);

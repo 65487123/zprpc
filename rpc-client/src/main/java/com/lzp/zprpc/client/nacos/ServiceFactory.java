@@ -96,7 +96,34 @@ import java.util.concurrent.locks.LockSupport;
       * @param interfaceCls 本地和远程服务实现的接口
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls) throws NacosException {
-         return getServiceBean0(serviceId, interfaceCls);
+         if (serviceIdInstanceMap.get(serviceId) == null) {
+             synchronized (ServiceFactory.class) {
+                 if (serviceIdInstanceMap.get(serviceId) == null) {
+                     List<String> hostAndPorts = new ArrayList<>();
+                     for (Instance instance : naming.selectInstances(serviceId, true)) {
+                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
+                     }
+                     Object bean = getServiceBean0(serviceId, interfaceCls);
+                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
+                     addListener(serviceId);
+                     return bean;
+                 } else {
+                     return serviceIdInstanceMap.get(serviceId).bean;
+                 }
+             }
+         } else {
+             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
+             if (beanAndAllHostAndPort.bean == null) {
+                 synchronized (ServiceFactory.class) {
+                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
+                         beanAndAllHostAndPort.bean = getServiceBean0(serviceId, interfaceCls);
+                     }
+                     return beanAndAllHostAndPort.bean;
+                 }
+             } else {
+                 return beanAndAllHostAndPort.bean;
+             }
+         }
      }
 
      /**
@@ -108,7 +135,35 @@ import java.util.concurrent.locks.LockSupport;
       * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
       */
      public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
-         return getServiceBean0(serviceId, interfaceCls, timeout);
+         checkTimeOut(timeout);
+         if (serviceIdInstanceMap.get(serviceId) == null) {
+             synchronized (ServiceFactory.class) {
+                 if (serviceIdInstanceMap.get(serviceId) == null) {
+                     List<String> hostAndPorts = new ArrayList<>();
+                     for (Instance instance : naming.selectInstances(serviceId, true)) {
+                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
+                     }
+                     Object beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
+                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
+                     addListener(serviceId);
+                     return beanWithTimeOut;
+                 } else {
+                     return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
+                 }
+             }
+         } else {
+             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
+             if (beanAndAllHostAndPort.beanWithTimeOut == null) {
+                 synchronized (ServiceFactory.class) {
+                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
+                         beanAndAllHostAndPort.beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
+                     }
+                     return beanAndAllHostAndPort.beanWithTimeOut;
+                 }
+             } else {
+                 return beanAndAllHostAndPort.beanWithTimeOut;
+             }
+         }
      }
 
 
@@ -123,71 +178,6 @@ import java.util.concurrent.locks.LockSupport;
         });
     }*/
 
-
-
-     private static Object getServiceBean0(String serviceId, Class interfaceCls) throws NacosException {
-         if (serviceIdInstanceMap.get(serviceId) == null) {
-             synchronized (ServiceFactory.class) {
-                 if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new ArrayList<>();
-                     for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
-                     }
-                     Object bean = getBeanCore(serviceId, interfaceCls);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
-                     addListener(serviceId);
-                     return bean;
-                 } else {
-                     return serviceIdInstanceMap.get(serviceId).bean;
-                 }
-             }
-         } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
-             if (beanAndAllHostAndPort.bean == null) {
-                 synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
-                         beanAndAllHostAndPort.bean = getBeanCore(serviceId, interfaceCls);
-                     }
-                     return beanAndAllHostAndPort.bean;
-                 }
-             } else {
-                 return beanAndAllHostAndPort.bean;
-             }
-         }
-     }
-
-
-     private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) throws NacosException {
-         checkTimeOut(timeout);
-         if (serviceIdInstanceMap.get(serviceId) == null) {
-             synchronized (ServiceFactory.class) {
-                 if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new ArrayList<>();
-                     for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
-                     }
-                     Object beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
-                     addListener(serviceId);
-                     return beanWithTimeOut;
-                 } else {
-                     return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
-                 }
-             }
-         } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
-             if (beanAndAllHostAndPort.beanWithTimeOut == null) {
-                 synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
-                         beanAndAllHostAndPort.beanWithTimeOut = getBeanWithTimeOutCore(serviceId, interfaceCls, timeout);
-                     }
-                     return beanAndAllHostAndPort.beanWithTimeOut;
-                 }
-             } else {
-                 return beanAndAllHostAndPort.beanWithTimeOut;
-             }
-         }
-     }
 
 
      /**
@@ -221,7 +211,7 @@ import java.util.concurrent.locks.LockSupport;
      }
 
 
-     private static Object getBeanCore(String serviceId, Class interfaceCls) {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls) {
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result;
@@ -233,7 +223,7 @@ import java.util.concurrent.locks.LockSupport;
                  });
      }
 
-     private static Object getBeanWithTimeOutCore(String serviceId, Class interfaceCls, int timeout) {
+     private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
