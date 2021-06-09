@@ -66,7 +66,6 @@ package com.lzp.zprpc.client.redis;
 
      static {
          try {
-             //必须打在同一classpath下(如果是OSGI环境,可以通过插件配置使得依赖的包在同一classpath下)
              String connectionPoolSize;
              if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
                  channelPool = new SingleChannelPool();
