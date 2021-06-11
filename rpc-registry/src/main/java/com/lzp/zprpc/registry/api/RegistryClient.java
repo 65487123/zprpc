@@ -24,7 +24,7 @@ import java.util.Map;
  * @author: Lu ZePing
  * @date: 2020/9/27 18:32
  */
-public interface RegistryClient {
+public interface RegistryClient extends AutoCloseable{
 
 
     /**

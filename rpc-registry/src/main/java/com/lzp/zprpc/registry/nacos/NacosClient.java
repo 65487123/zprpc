@@ -37,12 +37,23 @@ import java.util.Map;
   * @date: 2020/10/9 14:10
   */
  public class NacosClient implements RegistryClient {
+     private static final Logger LOGGER = LoggerFactory.getLogger(NacosClient.class);
 
+     NamingService namingService;
+
+     {
+         String nacosIpFromEnv;
+         try {
+             namingService = NamingFactory.createNamingService((nacosIpFromEnv = System
+                     .getenv("rpc_registry")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv);
+         } catch (NacosException e) {
+             LOGGER.error("init nameservice failed", e);
+         }
+     }
 
      @Override
      public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-         String nacosIpFromEnv;
-         return searchAndRegiInstance(basePack, NamingFactory.createNamingService((nacosIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv), ip, port);
+         return searchAndRegiInstance(basePack,namingService , ip, port);
      }
 
 
@@ -91,4 +102,8 @@ import java.util.Map;
          }
      }
 
+     @Override
+     public void close() throws Exception {
+         namingService.shutDown();
+     }
  }

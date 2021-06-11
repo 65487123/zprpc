@@ -37,13 +37,19 @@ import java.util.Map;
  * @date: 2021/3/2 14:52
  */
 public class RedisClient implements RegistryClient {
-
+    com.lzp.zprpc.registry.api.RedisClient redisClient;
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisClient.class);
+
+    {
+        String redisIpFromEnv;
+        redisClient = RedisClientFactory.newRedisClient((redisIpFromEnv = System
+                .getenv("rpc_registry")) == null ? PropertyUtil.getProperties()
+                .getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv);
+    }
 
     @Override
     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        String redisIpFromEnv;
-        return searchAndRegiInstance(basePack, RedisClientFactory.newRedisClient((redisIpFromEnv = System.getenv("rpc_registry")) == null ? PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv), ip, port);
+        return searchAndRegiInstance(basePack, redisClient, ip, port);
     }
 
 
@@ -89,4 +95,8 @@ public class RedisClient implements RegistryClient {
         }
     }
 
+    @Override
+    public void close() throws Exception {
+        redisClient.close();
+    }
 }

@@ -72,8 +72,10 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
         });
     }
 
-
-    static void rigiService() {
+    /**
+     * @return 注册中心客户端
+     */
+    static RegistryClient rigiService() {
         try {
             //默认用nacos做注册中心
             RegistryClient registryClient;
@@ -93,9 +95,10 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
             idServiceMap = registryClient.searchAndRegiInstance(PropertyUtil.getBasePack(), Server.getIp(), Server.getPort());
             LogoUtil.printLogo();
             LOGGER.info("publish service successfully");
+            return registryClient;
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
+            return null;
         }
     }
-
 }

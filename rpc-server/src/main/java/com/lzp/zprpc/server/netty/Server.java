@@ -18,6 +18,7 @@ package com.lzp.zprpc.server.netty;
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.exception.NoFreeIpException;
 import com.lzp.zprpc.common.exception.NoFreePortException;
+import com.lzp.zprpc.registry.api.RegistryClient;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -41,6 +42,14 @@ import java.util.Enumeration;
      private static int port;
      private static EventLoopGroup bossGroup;
      private static EventLoopGroup workerGroup;
+     /**
+      * Description:
+      * 保留注册中心的客户端是为了实现关闭server的时候关闭注册中心客户端
+      * <p>
+      * 因为在不停JVM的情况下,server关闭后(释放端口),注册中心一般是检测不到到这个服务实例不健康并移除的,
+      * 需要关闭注册中心的客户端才能检测到(前提是注册的实例ip和这个客户端主机的ip一致)。
+      */
+     private static RegistryClient registryClient;
 
      public synchronized static void startRpcServer(String ip, int port) {
          if (Server.port != 0) {
@@ -49,7 +58,7 @@ import java.util.Enumeration;
          bossGroup = new NioEventLoopGroup(1);
          workerGroup = new NioEventLoopGroup(1);
          startServer0(ip, port);
-         ServiceHandler.rigiService();
+         registryClient = ServiceHandler.rigiService();
      }
 
      public static void startRpcServer(int port) {
@@ -62,19 +71,19 @@ import java.util.Enumeration;
 
      /**
       * 关闭server(释放端口),如果端口已经释放或者server根本没起则不会做任何操作。
-      * <p>
-      * server关闭后(释放端口),一般注册中心是检查不到到服务实例不健康的并移除实例的,
-      * 需要关闭注册中心的客户端才能检测到(前提是注册的实例ip和这个客户端主机的ip一致)。
       *
       * @return 关闭服务操作是否成功执行
       */
-     public static boolean closeServer() {
+     public synchronized static boolean closeServer() throws Exception {
          if (Server.port != 0) {
              bossGroup.shutdownGracefully();
              workerGroup.shutdownGracefully();
              bossGroup = null;
              workerGroup = null;
              Server.port = 0;
+             if (registryClient != null) {
+                 registryClient.close();
+             }
              LOGGER.info("Service stopped successfully");
              return true;
          }
