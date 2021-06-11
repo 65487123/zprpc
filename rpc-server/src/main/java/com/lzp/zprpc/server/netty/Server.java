@@ -74,7 +74,7 @@ import java.util.Enumeration;
       *
       * @return 关闭服务操作是否成功执行
       */
-     public synchronized static boolean closeServer() throws Exception {
+     public synchronized static boolean closeRpcServer() throws Exception {
          if (Server.port != 0) {
              bossGroup.shutdownGracefully();
              workerGroup.shutdownGracefully();
@@ -148,7 +148,7 @@ import java.util.Enumeration;
              } else {
                  channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
              }
-             channel.closeFuture().addListener(future -> Server.closeServer());
+             channel.closeFuture().addListener(future -> Server.closeRpcServer());
          } catch (InterruptedException e) {
              LOGGER.error(e.getMessage(), e);
          }
