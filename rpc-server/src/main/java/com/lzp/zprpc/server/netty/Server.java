@@ -44,7 +44,7 @@ import java.util.Enumeration;
      private static EventLoopGroup workerGroup;
      /**
       * Description:
-      * 保留注册中心的客户端是为了实现关闭server的时候关闭注册中心客户端
+      * 在这保留注册中心的客户端的引用是为了实现关闭server的时候关闭注册中心客户端
       * <p>
       * 因为在不停JVM的情况下,server关闭后(释放端口),注册中心一般是检测不到到这个服务实例不健康并移除的,
       * 需要关闭注册中心的客户端才能检测到(前提是注册的实例ip和这个客户端主机的ip一致)。
@@ -83,6 +83,7 @@ import java.util.Enumeration;
              Server.port = 0;
              if (registryClient != null) {
                  registryClient.close();
+                 registryClient = null;
              }
              LOGGER.info("Service stopped successfully");
              return true;
