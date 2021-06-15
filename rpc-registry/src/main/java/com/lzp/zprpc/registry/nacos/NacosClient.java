@@ -58,7 +58,7 @@ import java.util.Map;
 
 
      /**
-      * 扫描指定包下所有类，获得所有被com.lzp.com.lzp.zprpc.common.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
+      * 扫描指定包下所有类，获得所有被com.lzp.zprpc.common.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
       * Spring容器中找，找不到才自己初始化一个),并注册到注册中心中
       * <p>
       * ______________________________________________
