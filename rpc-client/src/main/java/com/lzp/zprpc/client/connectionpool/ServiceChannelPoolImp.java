@@ -17,6 +17,7 @@ package com.lzp.zprpc.client.connectionpool;
 
 import com.lzp.zprpc.client.netty.ConnectionFactory;
 import com.lzp.zprpc.common.constant.Cons;
+import com.lzp.zprpc.common.util.StringUtil;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
@@ -63,16 +64,10 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
                      *    步骤，能弥补一些因volatile修饰而损失的性能，总体读性能和ArrayList差不多。
                      * */
                     channels = new CopyOnWriteArrayList<>();
-                    Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                    removeChannelWhenClosed(channel, channels);
-                    channels.add(channel);
                     hostAndPortChannelsMap.put(hostAndPort, channels);
-                    return channel;
+                    return initAddAndReturnNewChannel(hostAndPort, channels);
                 } else if (channels.size() < SIZE) {
-                    Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                    removeChannelWhenClosed(channel, channels);
-                    channels.add(channel);
-                    return channel;
+                    return initAddAndReturnNewChannel(hostAndPort, channels);
                 } else {
                     return channels.get(ThreadLocalRandom.current().nextInt(SIZE));
                 }
@@ -80,10 +75,7 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         } else if (channels.size() < SIZE) {
             synchronized (this) {
                 if ((channels = hostAndPortChannelsMap.get(hostAndPort)).size() < SIZE) {
-                    Channel channel = ConnectionFactory.newChannel(hostAndPort.split(Cons.COLON)[0], Integer.parseInt(hostAndPort.split(Cons.COLON)[1]));
-                    removeChannelWhenClosed(channel, channels);
-                    channels.add(channel);
-                    return channel;
+                    return initAddAndReturnNewChannel(hostAndPort, channels);
                 } else {
                     return channels.get(ThreadLocalRandom.current().nextInt(SIZE));
                 }
@@ -91,6 +83,15 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         } else {
             return channels.get(ThreadLocalRandom.current().nextInt(SIZE));
         }
+    }
+
+    private Channel initAddAndReturnNewChannel(String hostAndPort, List<Channel> channels) throws ConnectException {
+        String[] ipAndPort;
+        Channel channel = ConnectionFactory.newChannel((ipAndPort = StringUtil.stringSplit(hostAndPort,
+                Cons.COLON))[0], Integer.parseInt(ipAndPort[1]));
+        removeChannelWhenClosed(channel, channels);
+        channels.add(channel);
+        return channel;
     }
 
     /**

@@ -18,6 +18,7 @@ package com.lzp.zprpc.registry.util;
 
 
 import com.lzp.zprpc.common.constant.Cons;
+import com.lzp.zprpc.common.util.StringUtil;
 import com.lzp.zprpc.registry.api.RedisClient;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.Jedis;
@@ -37,18 +38,18 @@ import java.util.Set;
 public class RedisClientFactory {
 
 
-    public static RedisClient newRedisClient(String redisIpList) {
+    public static RedisClient newRedisClient(String redisInstaces) {
         String[] ips;
-        if ((ips = redisIpList.split(Cons.COMMA)).length > 1) {
+        if ((ips = StringUtil.stringSplit(redisInstaces, Cons.COMMA)).length > 1) {
             Set<HostAndPort> set = new HashSet<>();
             for (String ip : ips) {
-                String[] ipAndPort = ip.split(Cons.COLON);
+                String[] ipAndPort = StringUtil.stringSplit(ip, Cons.COLON);
                 set.add(new HostAndPort(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
             }
             JedisCluster jedisCluster = new JedisCluster(set);
             return newJedisClusterWrapper(jedisCluster);
         } else {
-            String[] ipAndPort = ips[0].split(Cons.COLON);
+            String[] ipAndPort = StringUtil.stringSplit(ips[0], Cons.COLON);
             Jedis jedis = new Jedis(ipAndPort[0], Integer.parseInt(ipAndPort[1]));
             return newJedisWrapper(jedis);
         }
