@@ -40,7 +40,7 @@ public class RedisClientFactory {
 
     public static RedisClient newRedisClient(String redisInstaces) {
         String[] ips;
-        if ((ips = StringUtil.stringSplit(redisInstaces, Cons.COMMA)).length > 1) {
+        if ((ips = redisInstaces.split(Cons.COMMA)).length > 1) {
             Set<HostAndPort> set = new HashSet<>();
             for (String ip : ips) {
                 String[] ipAndPort = StringUtil.stringSplit(ip, Cons.COLON);

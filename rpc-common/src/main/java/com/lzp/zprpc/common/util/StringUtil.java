@@ -26,12 +26,12 @@ package com.lzp.zprpc.common.util;
 public class StringUtil {
 
     /**
-     * 分割字符串,只支持三个元素以内
+     * 分割字符串,只支持分割后只有两个元素
      */
 
     public static String[] stringSplit(String string, char c) {
-        String[] strings = new String[3];
-        for (int i = 0; i < 3; i++) {
+        String[] strings = new String[2];
+        for (int i = 0; i < 2; i++) {
             int k = string.indexOf(c);
             if (k < 0) {
                 strings[i] = string;
