@@ -241,8 +241,14 @@ package com.lzp.zprpc.client.redis;
          } catch (ConnectException e) {
              hostAndPorts.remove(ipAndport);
              redisClient.sremove(serviceId, ipAndport);
-             return callAndGetResult(method, serviceId, deadline, args);
+             if (System.currentTimeMillis() > deadline) {
+                 ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
+                 return Cons.EXCEPTION + Cons.TIMEOUT;
+             } else {
+                 return callAndGetResult(method, serviceId, deadline, args);
+             }
          } catch (IllegalArgumentException e) {
+             ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
              throw new CallException("no service available");
          }
      }

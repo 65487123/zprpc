@@ -256,9 +256,15 @@ import java.util.concurrent.locks.LockSupport;
              }
              return result;
          } catch (ConnectException e) {
-             //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,这里可能就会一直pendding了)
-             return callAndGetResult(method, serviceId, deadline, args);
+             //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,可能会一直进入这里,直到超时)
+             if (System.currentTimeMillis() > deadline) {
+                 ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
+                 return Cons.EXCEPTION + Cons.TIMEOUT;
+             } else {
+                 return callAndGetResult(method, serviceId, deadline, args);
+             }
          } catch (IllegalArgumentException e) {
+             ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
              throw new CallException("no service available");
          }
      }
