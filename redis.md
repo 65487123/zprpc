@@ -21,7 +21,7 @@
     注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
     示例：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
     3、在resources包下加入配置文件：zprpc.properties，加入配置项。其中有三项是必配的
-	(1)注册中心类型:registry。示例：registry=redis
+    (1)注册中心类型:registry。示例：registry=redis
     (2)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
     (3)redis的ip：redisIpList。示例：redisIpList=192.168.0.101:6379
     除了通过配置文件配置发布到的注册中心的地址,还可以通过系统环境变量设置,系统环境变量优先级大于配置文件
@@ -33,11 +33,7 @@
     或 Server.startRpcServer(port);
     或 Server.startRpcServer();
     不写ip，默认就是本机ip。ip和port都不写，默认就是本机ip加随机可用端口
-    
-    如果服务提供方是在docker环境中部署,默认情况下启动时是不能自动找出对外可用ip的,我这里提供两种比较简单的解决办法
-    (1)、启动docker容器时带参数 --network=host 以host网络模型启动docker容器。
-    (2)、启动docker容器时带参数 -e "ip=x.x.x.x" x.x.x.x就是宿主机可用的ip,把ip传进容器环境变量中，在启动server端时读取这个环境变量，以这个ip启动server。
-    
+   
     服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
  
     如果项目用到了spring,并且服务也被注册到了spring容器中,推荐在spring启动类上加入@Import(com.lzp.zprpc.common.util.SpringUtil.class)。
