@@ -31,6 +31,7 @@ public class Cons {
     public static final int MIN_PORT = 1024;
     public static final int MAX_PORT = 49152;
     public static final String DOCKER_NAME = "docker";
+    public static final String K8S_NAME = "flannel";
     public static final String COMMA = ",";
     public static final char COLON = ':';
     public static final String NACOS = "nacos";

@@ -103,10 +103,12 @@ import java.util.Enumeration;
          try {
              Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
              InetAddress ip;
+             String ifName;
              while (allNetInterfaces.hasMoreElements()) {
                  NetworkInterface netInterface = allNetInterfaces.nextElement();
                  if (!netInterface.isLoopback() && !netInterface.isVirtual() && netInterface.isUp()
-                         && !netInterface.getDisplayName().contains(Cons.DOCKER_NAME)) {
+                         && !(ifName = netInterface.getDisplayName()).contains(Cons.DOCKER_NAME)
+                         && !ifName.contains(Cons.K8S_NAME)) {
                      Enumeration<InetAddress> addresses = netInterface.getInetAddresses();
                      while (addresses.hasMoreElements()) {
                          ip = addresses.nextElement();
