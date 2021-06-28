@@ -53,7 +53,7 @@ import java.util.Map;
 
      @Override
      public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-         return searchAndRegiInstance(basePack,namingService , ip, port);
+         return searchAndRegiInstance(basePack, namingService, ip, port);
      }
 
 
