@@ -47,29 +47,20 @@ public class RedisClient implements RegistryClient {
                 .getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv);
     }
 
-    @Override
-    public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-        return searchAndRegiInstance(basePack, redisClient, ip, port);
-    }
-
-
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.zprpc.common.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
      * Spring容器中找，找不到才自己初始化一个),并注册到redis中
      * <p>
      *
-     * @param basePack    要扫描的包
-     * @param redisClient redis客户端
-     * @param ip          要注册进注册中心的实例（instance)ip
-     * @param port        要注册进注册中心的实例（instance)port
+     * @param basePack 要扫描的包
+     * @param ip       要注册进注册中心的实例（instance)ip
+     * @param port     要注册进注册中心的实例（instance)port
      */
-
-
-    private Map<String, Object> searchAndRegiInstance(String basePack, com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
+    public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
         Map<String, Object> idServiceMap = new HashMap(16);
         try {
             for (String path : ClazzUtils.getClazzName(basePack)) {
-                regiInstance(redisClient, ip, port, idServiceMap, Class.forName(path));
+                regiInstanceIfNecessary(redisClient, ip, port, idServiceMap, Class.forName(path));
             }
         } finally {
             try {
@@ -82,7 +73,7 @@ public class RedisClient implements RegistryClient {
     }
 
 
-    private void regiInstance(com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException {
+    private void regiInstanceIfNecessary(com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException {
         if (cls.isAnnotationPresent(Service.class)) {
             Service service = (Service) cls.getAnnotation(Service.class);
             Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);

@@ -26,7 +26,6 @@ import com.lzp.zprpc.common.util.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -51,11 +50,6 @@ import java.util.Map;
          }
      }
 
-     @Override
-     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
-         return searchAndRegiInstance(basePack, namingService, ip, port);
-     }
-
 
      /**
       * 扫描指定包下所有类，获得所有被com.lzp.zprpc.common.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到
@@ -75,21 +69,22 @@ import java.util.Map;
       * group和serviceid决定一个服务，一个service包含多个cluster，每个cluster
       * 里包含多个instance
       *
-      * @param basePack      要扫描的包
-      * @param namingService 注册中心
-      * @param ip            要注册进注册中心的实例（instance)ip
-      * @param port          要注册进注册中心的实例（instance)port
+      * @param basePack 要扫描的包
+      * @param ip       要注册进注册中心的实例（instance)ip
+      * @param port     要注册进注册中心的实例（instance)port
       */
 
-     private Map<String, Object> searchAndRegiInstance(String basePack, NamingService namingService, String ip, int port) throws ClassNotFoundException, InstantiationException, IllegalAccessException, NacosException {
+     @Override
+     public Map<String, Object> searchAndRegiInstance(String basePack, String ip, int port) throws NacosException, InstantiationException, IllegalAccessException, ClassNotFoundException {
          Map<String, Object> idServiceMap = new HashMap(16);
          for (String path : ClazzUtils.getClazzName(basePack)) {
-             regiInstance(namingService, ip, port, idServiceMap, Class.forName(path));
+             regiInstanceIfNecessary(ip, port, idServiceMap, Class.forName(path));
          }
          return idServiceMap;
      }
 
-     private void regiInstance(NamingService namingService, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException, NacosException {
+
+     private void regiInstanceIfNecessary(String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException, NacosException {
          if (cls.isAnnotationPresent(Service.class)) {
              Service service = (Service) cls.getAnnotation(Service.class);
              Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);
