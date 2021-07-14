@@ -37,7 +37,7 @@ public class Main {
         Server.startRpcServer();
         //测试手动关闭服务
         /*Thread.sleep(10000);
-        Server.closeRpcServer(1, TimeUnit.SECONDS);
+        Server.closeRpcServer(0, TimeUnit.SECONDS);
         Thread.sleep(3000);
         Server.startRpcServer();*/
     }
