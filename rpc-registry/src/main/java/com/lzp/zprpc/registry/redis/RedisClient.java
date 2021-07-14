@@ -43,7 +43,7 @@ public class RedisClient implements RegistryClient {
     {
         String redisIpFromEnv;
         redisClient = RedisClientFactory.newRedisClient((redisIpFromEnv = System
-                .getenv("rpc_registry")) == null ? PropertyUtil.getProperties()
+                .getenv("RPC_REGISTRY")) == null ? PropertyUtil.getProperties()
                 .getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv);
     }
 

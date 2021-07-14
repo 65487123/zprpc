@@ -44,7 +44,7 @@ import java.util.Map;
          String nacosIpFromEnv;
          try {
              namingService = NamingFactory.createNamingService((nacosIpFromEnv = System
-                     .getenv("rpc_registry")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv);
+                     .getenv("RPC_REGISTRY")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv);
          } catch (NacosException e) {
              LOGGER.error("init nameservice failed", e);
          }

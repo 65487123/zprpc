@@ -40,8 +40,8 @@
     (1)The path of the package to be scanned: basePack. Example: basePack=zprpc.demo.producer
     (2)nacos ip: nacosIpList. Example: nacosIpList=192.168.0.101:8848
     In addition to configuring the address of the registry to be published through the configuration file, it can also be set through environment variables. The priority of         environment variables is greater than the configuration file.
-    rpc_registry = xxx.xxx.xxx.xxx:8848
-    Example: rpc_registry = 10.240.70.180:8848,10.240.70.173:8848,10.240.70.166:8848
+    RPC_REGISTRY = xxx.xxx.xxx.xxx:8848
+    Example: RPC_REGISTRY = 10.240.70.180:8848,10.240.70.173:8848,10.240.70.166:8848
     4、Start the service provider through code:
     Server.startRpcServer(ip,port);
     or Server.startRpcServer(port);

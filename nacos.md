@@ -25,8 +25,8 @@
     (1)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
     (2)nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
     除了通过配置文件配置发布到的注册中心的地址,还可以通过系统环境变量设置,系统环境变量优先级大于配置文件
-    rpc_registry = xxx.xxx.xxx.xxx:8848
-    示例:rpc_registry = 10.240.70.180:8848,10.240.70.173:8848,10.240.70.166:8848
+    RPC_REGISTRY = xxx.xxx.xxx.xxx:8848
+    示例:RPC_REGISTRY = 10.240.70.180:8848,10.240.70.173:8848,10.240.70.166:8848
 
     4、通过代码启动服务提供方：
     com.lzp.zprpc.server.netty.Server.startRpcServer(ip,port);
