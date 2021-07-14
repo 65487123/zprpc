@@ -35,13 +35,13 @@ public class Consumer {
         //得到远程代理对象
         DemoService demoService = (DemoService) ServiceFactory.getServiceBean("demoService", DemoService.class);
         //发起rpc调用并输出结果
-        System.out.println(demoService.sayHello("hello"));
-        System.out.println(demoService.sayHello("hello"));
+        System.out.println(demoService.sayHello("world"));
+        System.out.println(demoService.sayHello("world"));
 
         //单线程调用测性能。 第一次会慢点，因为server端需要初始化线程池中的线程
         long now = System.currentTimeMillis();
         for (int i = 0; i < 10000; i++) {
-            demoService.sayHello("hello");
+            demoService.sayHello("world");
         }
         System.out.println(System.currentTimeMillis() - now);
 
@@ -52,7 +52,7 @@ public class Consumer {
         CountDownLatch countDownLatch = new CountDownLatch(100000);
         for (int i = 0; i < 100000; i++) {
             executorService.execute(() -> {
-                demoService.sayHello("hello");
+                demoService.sayHello("world");
                 //由于countDown()耗时和rpc调用耗时相比可以忽略不计,所以可以不考虑多线程激烈竞争导致countDown()性能下降问题。(rpc调用耗时越少,countDown()耗时越多)
                 countDownLatch.countDown();
             });
@@ -64,7 +64,7 @@ public class Consumer {
         TakeSecondService demoService1 = (TakeSecondService) ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 2000);
 
         //超时没返回会抛出异常
-        demoService1.sayHello("hello");
+        demoService1.sayHello("world");
 
     }
 }

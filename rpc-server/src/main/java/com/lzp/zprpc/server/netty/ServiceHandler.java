@@ -33,6 +33,7 @@ import com.lzp.zprpc.server.util.LogoUtil;
 
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.*;
 
 /**
@@ -47,15 +48,6 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
     private static Map<String, Object> idServiceMap;
 
     private static ExecutorService serviceThreadPool;
-
-    static {
-        int logicalCpuCore = Runtime.getRuntime().availableProcessors();
-        //被调用的服务可能会涉及到io操作，所以核心线程数设置比逻辑处理器个数多点
-        serviceThreadPool = new ThreadPoolExecutor(logicalCpuCore + 1, 2 * logicalCpuCore,
-                100, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100000),
-                new ThreadFactoryImpl("rpc service"), (r, executor) -> r.run());
-    }
-
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
@@ -72,10 +64,25 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
         });
     }
 
+    static void initServiceThreadPool() {
+        int logicalCpuCore = Runtime.getRuntime().availableProcessors();
+        //被调用的服务可能会涉及到io操作，所以核心线程数设置比逻辑处理器个数多点
+        serviceThreadPool = new ThreadPoolExecutor(logicalCpuCore + 1, 2 * logicalCpuCore,
+                100, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100000),
+                new ThreadFactoryImpl("rpc service"), (r, executor) -> r.run());
+    }
+
+    static boolean shutDownServiceThreadPool(long timeToWait, TimeUnit unit) throws InterruptedException {
+        serviceThreadPool.shutdown();
+        return serviceThreadPool.awaitTermination(timeToWait, unit);
+    }
+
+
+
     /**
      * @return 注册中心客户端
      */
-    static RegistryClient rigiService() {
+    static RegistryClient regiService() {
         try {
             //默认用nacos做注册中心
             RegistryClient registryClient;
@@ -100,5 +107,9 @@ public class ServiceHandler extends SimpleChannelInboundHandler<byte[]> {
             LOGGER.error(e.getMessage(), e);
             return null;
         }
+    }
+
+    static Set<String> getRegisteredServices(){
+        return idServiceMap.keySet();
     }
 }

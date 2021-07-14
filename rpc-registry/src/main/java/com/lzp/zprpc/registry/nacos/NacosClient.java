@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
  /**
   * Description:实现了统一接口的nacos客户端
@@ -81,6 +82,13 @@ import java.util.Map;
              regiInstanceIfNecessary(ip, port, idServiceMap, Class.forName(path));
          }
          return idServiceMap;
+     }
+
+     @Override
+     public void deregiServices(Set<String> serivces, String ip, int port) throws Exception {
+         for (String service:serivces){
+             namingService.deregisterInstance(service,ip,port);
+         }
      }
 
 

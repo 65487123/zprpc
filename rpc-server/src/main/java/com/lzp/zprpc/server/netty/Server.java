@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.*;
 import java.util.Enumeration;
+import java.util.concurrent.TimeUnit;
 
  /**
   * Description:nettyserver
@@ -58,7 +59,8 @@ import java.util.Enumeration;
          bossGroup = new NioEventLoopGroup(1);
          workerGroup = new NioEventLoopGroup(1);
          startServer0(ip, port);
-         registryClient = ServiceHandler.rigiService();
+         ServiceHandler.initServiceThreadPool();
+         registryClient = ServiceHandler.regiService();
      }
 
      public static void startRpcServer(int port) {
@@ -74,8 +76,10 @@ import java.util.Enumeration;
       *
       * @return 关闭服务操作是否成功执行
       */
-     public synchronized static boolean closeRpcServer() throws Exception {
+     public synchronized static boolean closeRpcServer(long timeToWait, TimeUnit unit) throws Exception {
          if (Server.port != 0) {
+             registryClient.deregiServices(ServiceHandler.getRegisteredServices(), ip, port);
+             ServiceHandler.shutDownServiceThreadPool(timeToWait, unit);
              bossGroup.shutdownGracefully();
              workerGroup.shutdownGracefully();
              bossGroup = null;
@@ -151,7 +155,7 @@ import java.util.Enumeration;
              } else {
                  channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
              }
-             channel.closeFuture().addListener(future -> Server.closeRpcServer());
+             channel.closeFuture().addListener(future -> Server.closeRpcServer(0,TimeUnit.SECONDS));
          } catch (InterruptedException e) {
              LOGGER.error(e.getMessage(), e);
          }

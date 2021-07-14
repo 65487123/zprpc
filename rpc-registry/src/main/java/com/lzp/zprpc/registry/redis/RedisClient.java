@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Description:实现了统一接口的redis客户端
@@ -70,6 +71,13 @@ public class RedisClient implements RegistryClient {
             }
         }
         return idServiceMap;
+    }
+
+    @Override
+    public void deregiServices(Set<String> serivces, String ip, int port) throws Exception {
+        for (String service : serivces) {
+            redisClient.sremove(service, ip + port);
+        }
     }
 
 
