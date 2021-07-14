@@ -13,22 +13,22 @@
   *  limitations under the License.
   */
 
-package com.lzp.zprpc.registry.nacos;
+ package com.lzp.zprpc.registry.nacos;
 
-import com.alibaba.nacos.api.exception.NacosException;
-import com.alibaba.nacos.api.naming.NamingFactory;
-import com.alibaba.nacos.api.naming.NamingService;
-import com.lzp.zprpc.common.annotation.Service;
-import com.lzp.zprpc.registry.api.RegistryClient;
-import com.lzp.zprpc.registry.util.ClazzUtils;
-import com.lzp.zprpc.common.util.PropertyUtil;
-import com.lzp.zprpc.common.util.SpringUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+ import com.alibaba.nacos.api.exception.NacosException;
+ import com.alibaba.nacos.api.naming.NamingFactory;
+ import com.alibaba.nacos.api.naming.NamingService;
+ import com.lzp.zprpc.common.annotation.Service;
+ import com.lzp.zprpc.registry.api.RegistryClient;
+ import com.lzp.zprpc.registry.util.ClazzUtils;
+ import com.lzp.zprpc.common.util.PropertyUtil;
+ import com.lzp.zprpc.common.util.SpringUtil;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+ import java.util.HashMap;
+ import java.util.Map;
+ import java.util.Set;
 
  /**
   * Description:实现了统一接口的nacos客户端
@@ -86,8 +86,8 @@ import java.util.Set;
 
      @Override
      public void deregiServices(Set<String> serivces, String ip, int port) throws Exception {
-         for (String service:serivces){
-             namingService.deregisterInstance(service,ip,port);
+         for (String service : serivces) {
+             namingService.deregisterInstance(service, ip, port);
          }
      }
 

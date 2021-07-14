@@ -13,23 +13,23 @@
   *  limitations under the License.
   */
 
-package com.lzp.zprpc.server.netty;
+ package com.lzp.zprpc.server.netty;
 
-import com.lzp.zprpc.common.constant.Cons;
-import com.lzp.zprpc.common.exception.NoFreeIpException;
-import com.lzp.zprpc.common.exception.NoFreePortException;
-import com.lzp.zprpc.registry.api.RegistryClient;
-import io.netty.bootstrap.ServerBootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+ import com.lzp.zprpc.common.constant.Cons;
+ import com.lzp.zprpc.common.exception.NoFreeIpException;
+ import com.lzp.zprpc.common.exception.NoFreePortException;
+ import com.lzp.zprpc.registry.api.RegistryClient;
+ import io.netty.bootstrap.ServerBootstrap;
+ import io.netty.channel.Channel;
+ import io.netty.channel.EventLoopGroup;
+ import io.netty.channel.nio.NioEventLoopGroup;
+ import io.netty.channel.socket.nio.NioServerSocketChannel;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
 
-import java.net.*;
-import java.util.Enumeration;
-import java.util.concurrent.TimeUnit;
+ import java.net.*;
+ import java.util.Enumeration;
+ import java.util.concurrent.TimeUnit;
 
  /**
   * Description:nettyserver
@@ -155,7 +155,7 @@ import java.util.concurrent.TimeUnit;
              } else {
                  channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
              }
-             channel.closeFuture().addListener(future -> Server.closeRpcServer(0,TimeUnit.SECONDS));
+             channel.closeFuture().addListener(future -> Server.closeRpcServer(0, TimeUnit.SECONDS));
          } catch (InterruptedException e) {
              LOGGER.error(e.getMessage(), e);
          }
