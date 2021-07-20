@@ -74,7 +74,7 @@ package com.lzp.zprpc.client.redis;
              }
              redisClient = new PooledRedisClient(new RedisClientPool(5, PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST)));
          } catch (Exception e) {
-             LOGGER.error("Throw an exception when initializing NamingService", e);
+             LOGGER.error("Throw an exception when initializing refis client", e);
          }
          refreshServiceThreadPool.execute(() -> {
              for (; ; ) {
