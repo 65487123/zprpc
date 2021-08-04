@@ -5,7 +5,7 @@
 # 项目整体架构
 ![architecture](https://github.com/65487123/zprpc/raw/master/architecture.png)
 # 特点：
-* 配置简单，上手容易，非常轻量，占用内存小。
+* 配置简单，上手容易，非常轻量，占用资源小。
 * 适用场景丰富,启动过程不依赖任何组件，比如tomcat、spring(有没有这些组件，用法都一样)。
 支持OSGI环境(基于OSGI的工程打成的包是bundle而不是jar,如果依赖其他框架，框架很有可能找不到bundle中的类)。
 * 高性能：与市面上常见的java高性能rpc框架简单对比测试了下,目前没发现有比这个性能高的。
