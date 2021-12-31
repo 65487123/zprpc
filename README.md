@@ -9,6 +9,7 @@
 实现rpc调用更合适。(访问service的clusterIp的某个端口，k8s会自己帮忙负载均衡到service对应的所有存活pod中的其中一个的某个端口上，如
 果觉得功能不够，可以在这基础上定制其他功能)
 
+
 # 项目整体架构
 ![architecture](https://github.com/65487123/zprpc/raw/master/architecture.png)
 # 特点：
