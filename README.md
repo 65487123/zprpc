@@ -2,6 +2,13 @@
 中文|[English](https://github.com/65487123/zprpc/blob/master/README-EN.md)
 # 功能介绍
 一个高性能rpc框架，暂时只支持nacos(默认)和redis做注册中心。
+
+# 适用场景
+对调用远程服务性能要求比较高的场景。
+如果服务都部署在K8S上，而又对服务间调用性能没很高要求，那么几乎没必要使用rpc框架，也没必要另外部署注册中心，基于K8S自带的功能来
+实现rpc调用更合适。(访问service的clusterIp的某个端口，k8s会自己帮忙负载均衡到service对应的所有存活pod中的其中一个的某个端口上，如
+果觉得功能不够，可以在这基础上定制其他功能)
+
 # 项目整体架构
 ![architecture](https://github.com/65487123/zprpc/raw/master/architecture.png)
 # 特点：
