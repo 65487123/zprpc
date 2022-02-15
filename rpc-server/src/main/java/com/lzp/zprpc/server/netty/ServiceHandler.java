@@ -59,7 +59,7 @@
                  channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(method
                          .invoke(service, requestDTO.getParams()), requestDTO.getThreadId())));
              } catch (Exception e) {
-                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + e.getMessage(), requestDTO.getThreadId())));
+                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + getDetailMsgOfException(e), requestDTO.getThreadId())));
              }
          });
      }
@@ -106,6 +106,14 @@
              LOGGER.error(e.getMessage(), e);
              return null;
          }
+     }
+
+     private String getDetailMsgOfException(Throwable t) {
+         Throwable th;
+         do {
+             th = t;
+         } while ((t = t.getCause()) != null);
+         return th.getMessage();
      }
 
      static Set<String> getRegisteredServices() {
