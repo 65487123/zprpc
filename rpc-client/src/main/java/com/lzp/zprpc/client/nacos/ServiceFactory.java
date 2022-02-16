@@ -29,7 +29,7 @@ import com.lzp.zprpc.client.connectionpool.SingleChannelPool;
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.dtos.RequestDTO;
 import com.lzp.zprpc.common.exception.CallException;
-import com.lzp.zprpc.common.exception.RpcException;
+import com.lzp.zprpc.common.exception.RemoteException;
 import com.lzp.zprpc.client.netty.ResultHandler;
 import com.lzp.zprpc.common.exception.RpcTimeoutException;
 import com.lzp.zprpc.common.util.PropertyUtil;
@@ -218,7 +218,7 @@ import java.util.concurrent.locks.LockSupport;
                      Object result;
                      if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
                              ((String) result).startsWith(Cons.EXCEPTION)) {
-                         throw new RpcException(((String) result).substring(Cons.THREE));
+                         throw new RemoteException(((String) result).substring(Cons.THREE));
                      }
                      return result;
                  });
@@ -233,7 +233,7 @@ import java.util.concurrent.locks.LockSupport;
                          if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.THREE))) {
                              throw new RpcTimeoutException("rpc timeout");
                          } else {
-                             throw new RpcException(message);
+                             throw new RemoteException(message);
                          }
                      }
                      return result;
