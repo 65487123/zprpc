@@ -8,7 +8,8 @@
 	
 ### 二、创建工程、导入依赖、编写配置与代码
 ##### 定义公共接口
-    1、新建一个工程，定义公共接口，供服务提供方和服务消费方依赖
+    新建一个工程，定义公共接口，供服务提供方和服务消费方依赖    
+注意：没必要在接口声明抛出自定义的异常，因为这个rpc只会抛出以下三个异常[CallException](https://github.com/65487123/zprpc/blob/master/rpc-common/src/main/java/com/lzp/zprpc/common/exception/CallException.java)、[RemoteException](https://github.com/65487123/zprpc/blob/master/rpc-common/src/main/java/com/lzp/zprpc/common/exception/RemoteException.java)、[RpcTimeoutException](https://github.com/65487123/zprpc/blob/master/rpc-common/src/main/java/com/lzp/zprpc/common/exception/RpcTimeoutException.java)
 ##### 服务提供方
     1、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
     <dependency>
