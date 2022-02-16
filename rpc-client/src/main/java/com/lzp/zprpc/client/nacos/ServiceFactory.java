@@ -31,6 +31,7 @@ import com.lzp.zprpc.common.dtos.RequestDTO;
 import com.lzp.zprpc.common.exception.CallException;
 import com.lzp.zprpc.common.exception.RpcException;
 import com.lzp.zprpc.client.netty.ResultHandler;
+import com.lzp.zprpc.common.exception.RpcTimeoutException;
 import com.lzp.zprpc.common.util.PropertyUtil;
 import com.lzp.zprpc.common.util.RequestSearialUtil;
 import org.slf4j.Logger;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.LockSupport;
 
  /**
@@ -231,7 +231,7 @@ import java.util.concurrent.locks.LockSupport;
                      if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
                          String message;
                          if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.THREE))) {
-                             throw new TimeoutException();
+                             throw new RpcTimeoutException("rpc timeout");
                          } else {
                              throw new RpcException(message);
                          }
