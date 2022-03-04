@@ -36,7 +36,7 @@
     或 Server.startRpcServer();
     不写ip，默认就是本机ip。ip和port都不写，默认就是本机ip加随机可用端口
    
-    服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到nacos中。
+    服务提供方启动后，会扫描被@Service注解修饰的服务，初始化后保存在本地(都是单例的)，并把服务发布到redis中。
  
     如果项目用到了spring,并且服务也被注册到了spring容器中,推荐在spring启动类上加入@Import(com.lzp.zprpc.common.util.SpringUtil.class)。
     先启动spring容器然后再启动rpc服务。这样在发布服务时，会先到spring容器中去找，如果spring容器中有服务实例，就会用spring中的。如果没有就会自己初始化一个。
@@ -55,7 +55,7 @@
          <version>1.0</version>
     </dependency>
     2、编写配置文件，主要包括下面这项：
-    nacos的ip：redisIpList。示例：redisIpList=192.168.0.101:6379 (和服务提供方一样，也可以通过系统环境变量设置)
+    redis的ip：redisIpList。示例：redisIpList=192.168.0.101:6379 (和服务提供方一样，也可以通过系统环境变量设置)
     还可以配置和每台实例的连接池连接数。
     示例：connetionPoolSize：2
     不配置，默认连接池里的数量就是一。 也就是这个消费方和某个服务实例里的所有服务通信都是走这一个连接，但是不会有任何阻塞。
