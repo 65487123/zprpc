@@ -24,7 +24,7 @@ import zprpc.demo.redis.api.DemoService;
  * @author zeping lu
  */
 @Component
-@Service(id = "demoService", interfaceValue = "zprpc.demo.redis.api.DemoService")
+@Service(name = "demoService")
 public class DemoServiceImpl implements DemoService {
 
     @Override

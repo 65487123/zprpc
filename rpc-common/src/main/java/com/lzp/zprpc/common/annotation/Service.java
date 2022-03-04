@@ -32,10 +32,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 
 public @interface Service {
-    String id();
+    String name();
 
-    /**
-     * @Description 这个参数暂时没什么用，后续可能用作注入时校验
-     */
-    String interfaceValue();
+    String group() default "default";
 }

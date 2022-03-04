@@ -83,15 +83,27 @@ public class RedisClient implements RegistryClient {
 
     private void regiInstanceIfNecessary(com.lzp.zprpc.registry.api.RedisClient redisClient, String ip, int port, Map<String, Object> idServiceMap, Class cls) throws InstantiationException, IllegalAccessException {
         if (cls.isAnnotationPresent(Service.class)) {
-            Service service = (Service) cls.getAnnotation(Service.class);
+            String id = getId((Service) cls.getAnnotation(Service.class));
             Map<String, Object> nameInstanceMap = SpringUtil.getBeansOfType(cls);
             if (nameInstanceMap.size() != 0) {
-                idServiceMap.put(service.id(), nameInstanceMap.entrySet().iterator().next().getValue());
+                idServiceMap.put(id, nameInstanceMap.entrySet().iterator().next().getValue());
             } else {
-                idServiceMap.put(service.id(), cls.newInstance());
+                idServiceMap.put(id, cls.newInstance());
             }
-            redisClient.sAdd(service.id(), ip + Cons.COLON + port);
+            redisClient.sAdd(id, ip + Cons.COLON + port);
         }
+    }
+
+    private String getId(Service service) {
+        String name;
+        String group;
+        if ((name = service.name()).startsWith("$")) {
+            name = System.getenv(name.substring(1));
+        }
+        if ((group = service.group()).startsWith("$")) {
+            group = System.getenv(group.substring(1));
+        }
+        return name + "." + group;
     }
 
     @Override

@@ -89,14 +89,21 @@ import java.util.concurrent.locks.LockSupport;
          }
      }
 
+
+     public static Object getServiceBean(String serviceName, Class interfaceCls) throws NacosException {
+         return getServiceBean(serviceName, "default", interfaceCls);
+     }
+
      /**
       * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样
       * 代理对象是单例的
       *
-      * @param serviceId    需要远程调用的服务id
+      * @param serviceName  需要远程调用的服务名
+      * @param group        需要远程调用的组
       * @param interfaceCls 本地和远程服务实现的接口
       */
-     public static Object getServiceBean(String serviceId, Class interfaceCls) throws NacosException {
+     public static Object getServiceBean(String serviceName, String group, Class interfaceCls) throws NacosException {
+         String serviceId = serviceName + "." + group;
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
@@ -127,16 +134,22 @@ import java.util.concurrent.locks.LockSupport;
          }
      }
 
+     public static Object getServiceBean(String serviceName, Class interfaceCls, int timeout) throws NacosException {
+         return getServiceBean(serviceName, "default", interfaceCls, timeout);
+     }
+
      /**
       * Description:获取远程服务代理对象，通过这个对象可以调用远程服务的方法，就和调用本地方法一样
       * 代理对象是单例的
       *
-      * @param serviceId    需要远程调用的服务id
+      * @param serviceName  需要远程调用的服务名
+      * @param group        需要远程调用的组
       * @param interfaceCls 本地和远程服务实现的接口
-      * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link java.util.concurrent.TimeoutException}
+      * @param timeout      rpc调用的超时时间,单位是毫秒,超过这个时间没返回则抛 {@link RpcTimeoutException}
       */
-     public static Object getServiceBean(String serviceId, Class interfaceCls, int timeout) throws NacosException {
+     public static Object getServiceBean(String serviceName, String group, Class interfaceCls, int timeout) throws NacosException {
          checkTimeOut(timeout);
+         String serviceId = serviceName + "." + group;
          if (serviceIdInstanceMap.get(serviceId) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {

@@ -22,7 +22,7 @@ import zprpc.demo.redis.api.TakeSecondService;
 /**
  * @author zeping lu
  */
-@Service(id = "takeSecondService", interfaceValue = "zprpc.demo.redis.api.TakeSecondService")
+@Service(name = "takeSecondService")
 public class TakeSecondServiceImpl implements TakeSecondService {
     @Override
     public String sayHello(String name) {
