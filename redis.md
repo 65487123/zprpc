@@ -19,9 +19,10 @@
          <version>version</version>
     </dependency>
     2、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
-    注解有两个参数，分别是服务的id和接口的全限定名，服务id需要有唯一性
-    示例：@Service(id = "serviceImpl", interfaceValue = "xxx.xxx.xxx.Service")
-    3、在resources包下加入配置文件：zprpc.properties，加入配置项。其中有三项是必配的
+    注解有两个参数，分别是服务的name和服务所属的组名，服务组名不写，默认就是default。如果服务名和组名需要在部署时动态写入，可以写在系统环境变量中
+    注解值用"$"加系统环境变量名，在项目部署时，框架就会从系统环境变量中找出这个环境变量值并写入。
+    示例：@Service(name = "serviceImpl", group = "$SERVICE_GROUP")或@Service(name = "serviceImpl")
+    3、在resources包下加入配置文件：zprpc.properties，加入配置项。主要包括下面三项
     (1)注册中心类型:registry。示例：registry=redis
     (2)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
     (3)redis的ip：redisIpList。示例：redisIpList=192.168.0.101:6379
@@ -53,18 +54,22 @@
          <artifactId>rpc-client</artifactId>
          <version>1.0</version>
     </dependency>
-    2、编写配置文件，有一项是必写的：
-    nacos的ip：redisIpList。示例：redisIpList=192.168.0.101:6379
+    2、编写配置文件，主要包括下面这项：
+    nacos的ip：redisIpList。示例：redisIpList=192.168.0.101:6379 (和服务提供方一样，也可以通过系统环境变量设置)
     还可以配置和每台实例的连接池连接数。
     示例：connetionPoolSize：2
     不配置，默认连接池里的数量就是一。 也就是这个消费方和某个服务实例里的所有服务通信都是走这一个连接，但是不会有任何阻塞。
     推荐不配置连接池连接数，使用默认单个连接的连接池。因为客户端开了一个Reactor，也就是只有一个线程服务所有连接，多个连接没多大意义
     3.得到代理对象，通过代理对象可以发起远程调用，就和调用本地方法一样
-    com.lzp.zprpc.client.redis.ServiceFactory.getServiceBean(String serviceId,Class interfaceCls);
-    serviceId就是服务的唯一id，interfaceCls是接口的Class对象。返回一个实例，强转成接口类型就行。
+    com.lzp.zprpc.client.redis.ServiceFactory.getServiceBean(String serviceName,String group,Class interfaceCls);
+    或com.lzp.zprpc.client.redis.ServiceFactory.getServiceBean(String serviceName,Class interfaceCls);
+    serviceName+group确定唯一一个服务，不带group参数group即为"default"，interfaceCls是接口的Class对象。返回一个实例，强转成接口类型就行。
     也可以通过
-    ServiceFactory.getServiceBean(String serviceId,Class interfaceCls,int timeOut);
+    ServiceFactory.getServiceBean(String serviceName,String group,Class interfaceCls,int timeOut);
+    或者ServiceFactory.getServiceBean(String serviceName,Class interfaceCls,int timeOut);
     来获取代理对象，通过这个对象远程调用会有超时限制，超过指定秒数没返回结果就会抛出超时异常。
+    
+    
     
  ### 三、Demo 
     源码中提供了demo，在rpc-demo工程下，包含了服务提供方工程和服务消费方工程，代码拉下来编译后直接就能跑，配置一下redisIpList，
