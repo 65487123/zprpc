@@ -104,7 +104,8 @@ import java.util.concurrent.locks.LockSupport;
       */
      public static Object getServiceBean(String serviceName, String group, Class interfaceCls) throws NacosException {
          String serviceId = serviceName + "." + group;
-         if (serviceIdInstanceMap.get(serviceId) == null) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort;
+         if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new ArrayList<>();
@@ -120,7 +121,6 @@ import java.util.concurrent.locks.LockSupport;
                  }
              }
          } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
              if (beanAndAllHostAndPort.bean == null) {
                  synchronized (ServiceFactory.class) {
                      if (serviceIdInstanceMap.get(serviceId).bean == null) {
@@ -150,7 +150,8 @@ import java.util.concurrent.locks.LockSupport;
      public static Object getServiceBean(String serviceName, String group, Class interfaceCls, int timeout) throws NacosException {
          checkTimeOut(timeout);
          String serviceId = serviceName + "." + group;
-         if (serviceIdInstanceMap.get(serviceId) == null) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort;
+         if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new ArrayList<>();
@@ -166,7 +167,6 @@ import java.util.concurrent.locks.LockSupport;
                  }
              }
          } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
              if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                  synchronized (ServiceFactory.class) {
                      if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
@@ -191,7 +191,6 @@ import java.util.concurrent.locks.LockSupport;
             }
         });
     }*/
-
 
 
      /**

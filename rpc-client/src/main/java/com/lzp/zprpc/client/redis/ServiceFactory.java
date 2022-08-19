@@ -115,7 +115,8 @@ package com.lzp.zprpc.client.redis;
       */
      public static Object getServiceBean(String serviceName, String group, Class interfaceCls) {
          String serviceId = serviceName + "." + group;
-         if (serviceIdInstanceMap.get(serviceId) == null) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort;
+         if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
@@ -127,7 +128,6 @@ package com.lzp.zprpc.client.redis;
                  }
              }
          } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
              if (beanAndAllHostAndPort.bean == null) {
                  synchronized (ServiceFactory.class) {
                      if (serviceIdInstanceMap.get(serviceId).bean == null) {
@@ -157,7 +157,8 @@ package com.lzp.zprpc.client.redis;
      public static Object getServiceBean(String serviceName, String group, Class interfaceCls, int timeout) {
          checkTimeOut(timeout);
          String serviceId = serviceName + "." + group;
-         if (serviceIdInstanceMap.get(serviceId) == null) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort;
+         if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
@@ -169,7 +170,6 @@ package com.lzp.zprpc.client.redis;
                  }
              }
          } else {
-             BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
              if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                  synchronized (ServiceFactory.class) {
                      if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
