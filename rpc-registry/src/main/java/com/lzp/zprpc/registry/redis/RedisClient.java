@@ -19,7 +19,6 @@ package com.lzp.zprpc.registry.redis;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.lzp.zprpc.common.annotation.Service;
 import com.lzp.zprpc.common.constant.Cons;
-import com.lzp.zprpc.common.util.PropertyUtil;
 import com.lzp.zprpc.common.util.SpringUtil;
 import com.lzp.zprpc.registry.api.RegistryClient;
 import com.lzp.zprpc.registry.util.ClazzUtils;
@@ -38,15 +37,11 @@ import java.util.Set;
  * @date: 2021/3/2 14:52
  */
 public class RedisClient implements RegistryClient {
-    com.lzp.zprpc.registry.api.RedisClient redisClient;
+
+    com.lzp.zprpc.registry.api.RedisClient redisClient = RedisClientFactory.newRedisClient(HOST);
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisClient.class);
 
-    {
-        String redisIpFromEnv;
-        redisClient = RedisClientFactory.newRedisClient((redisIpFromEnv = System
-                .getenv("RPC_REGISTRY")) == null ? PropertyUtil.getProperties()
-                .getProperty(Cons.REDIS_IP_LIST) : redisIpFromEnv);
-    }
 
     /**
      * 扫描指定包下所有类，获得所有被com.lzp.zprpc.common.annotation.@Service修饰的类，返回实例（如果项目用到了Spring，就到

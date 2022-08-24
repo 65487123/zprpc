@@ -85,8 +85,7 @@
          try {
              //默认用nacos做注册中心
              RegistryClient registryClient;
-             String regi;
-             switch ((regi = PropertyUtil.getProperties().getProperty(Cons.REGISTRY)) == null ? Cons.NACOS : regi) {
+             switch (RegistryClient.TYPE) {
                  case Cons.NACOS: {
                      registryClient = new NacosClient();
                      break;

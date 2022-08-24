@@ -16,6 +16,9 @@
  package com.lzp.zprpc.registry.api;
 
 
+ import com.lzp.zprpc.common.constant.Cons;
+ import com.lzp.zprpc.common.util.PropertyUtil;
+
  import java.util.Map;
  import java.util.Set;
 
@@ -26,6 +29,12 @@
   * @date: 2020/9/27 18:32
   */
  public interface RegistryClient extends AutoCloseable {
+
+     String TYPE = PropertyUtil.getProperties().getProperty(Cons.REGISTRY) == null ? Cons.NACOS : PropertyUtil.getProperties().getProperty(Cons.REGISTRY);
+
+     String HOST = System.getenv("RPC_REGISTRY") == null ? PropertyUtil.getProperties()
+             .getProperty(Cons.REGISTRY_IP_LIST) : System.getenv("RPC_REGISTRY");
+
 
 
      /**

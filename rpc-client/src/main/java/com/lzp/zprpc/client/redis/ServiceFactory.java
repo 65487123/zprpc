@@ -28,6 +28,7 @@ package com.lzp.zprpc.client.redis;
  import com.lzp.zprpc.common.util.PropertyUtil;
  import com.lzp.zprpc.common.util.RequestSearialUtil;
  import com.lzp.zprpc.common.util.ThreadFactoryImpl;
+ import com.lzp.zprpc.registry.api.RegistryClient;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
 
@@ -70,7 +71,7 @@ package com.lzp.zprpc.client.redis;
              } else {
                  channelPool = new ServiceChannelPoolImp(Integer.parseInt(connectionPoolSize));
              }
-             redisClient = new PooledRedisClient(new RedisClientPool(5, PropertyUtil.getProperties().getProperty(Cons.REDIS_IP_LIST)));
+             redisClient = new PooledRedisClient(new RedisClientPool(5, RegistryClient.HOST));
          } catch (Exception e) {
              LOGGER.error("Throw an exception when initializing refis client", e);
          }

@@ -19,10 +19,9 @@
  import com.alibaba.nacos.api.naming.NamingFactory;
  import com.alibaba.nacos.api.naming.NamingService;
  import com.lzp.zprpc.common.annotation.Service;
+ import com.lzp.zprpc.common.util.SpringUtil;
  import com.lzp.zprpc.registry.api.RegistryClient;
  import com.lzp.zprpc.registry.util.ClazzUtils;
- import com.lzp.zprpc.common.util.PropertyUtil;
- import com.lzp.zprpc.common.util.SpringUtil;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
 
@@ -42,10 +41,8 @@
      NamingService namingService;
 
      {
-         String nacosIpFromEnv;
          try {
-             namingService = NamingFactory.createNamingService((nacosIpFromEnv = System
-                     .getenv("RPC_REGISTRY")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv);
+             namingService = NamingFactory.createNamingService(HOST);
          } catch (NacosException e) {
              LOGGER.error("init nameservice failed", e);
          }

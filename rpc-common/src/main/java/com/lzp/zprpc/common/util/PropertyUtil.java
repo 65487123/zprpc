@@ -54,9 +54,5 @@
      }
 
 
-     public static String getNacosIpList() {
-         return properties.getProperty("nacosIpList");
-     }
-
 
  }

@@ -16,7 +16,6 @@
  package com.lzp.zprpc.server.netty;
 
  import com.lzp.zprpc.common.constant.Cons;
- import com.lzp.zprpc.common.exception.NoFreeIpException;
  import com.lzp.zprpc.common.exception.NoFreePortException;
  import com.lzp.zprpc.registry.api.RegistryClient;
  import io.netty.bootstrap.ServerBootstrap;
@@ -27,8 +26,7 @@
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
 
- import java.net.*;
- import java.util.Enumeration;
+ import java.net.Socket;
  import java.util.concurrent.TimeUnit;
 
  /**
@@ -103,7 +101,9 @@
          return port;
      }
 
-     public static String getIpAddress(String excludedIp) {
+
+     ///不去遍历网卡了，用能连同注册中心的ip来发布
+     /*public static String getIpAddress(List<String> excludedIp) {
          try {
              Enumeration<NetworkInterface> allNetInterfaces = NetworkInterface.getNetworkInterfaces();
              InetAddress ip;
@@ -117,7 +117,7 @@
                      while (addresses.hasMoreElements()) {
                          ip = addresses.nextElement();
                          String address;
-                         if (ip instanceof Inet4Address && !excludedIp.equals(address = ip.getHostAddress())) {
+                         if (ip instanceof Inet4Address && !excludedIp.contains(address = ip.getHostAddress())) {
                              return address;
                          }
                      }
@@ -127,14 +127,15 @@
              LOGGER.error("failed to find ip", e);
          }
          throw new NoFreeIpException("All ip ports are occupied");
-     }
+     }*/
 
-     private static synchronized void startServer0(String ip, int port) {
-         Server.ip = ip == null ? getIpAddress("") : ip;
+     /*private static synchronized void startServer0(String ip, int port) {
+         List<String> excludedIps= new ArrayList<>();
+         Server.ip = ip == null ? getIpAddress(null) : ip;
          ServerBootstrap serverBootstrap = new ServerBootstrap()
                  .group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
                  ///测了下，禁用Nagle算法并没有带来明显的性能提升，考虑到会占用更多带宽，暂时就不开启
-                 /*.childOption(ChannelOption.TCP_NODELAY,true)*/
+                 *//*.childOption(ChannelOption.TCP_NODELAY,true)*//*
                  .childHandler(new SocketChannelInitializerForServer());
          try {
              Channel channel;
@@ -146,12 +147,55 @@
                      } catch (NoFreePortException e) {
                          //进到这里说明,上一个ip的端口已经被占用完了，如果是指定ip的,直接抛异常
                          if (ip == null) {
-                             Server.ip = getIpAddress(Server.ip);
+                             excludedIps.add(ip);
+                             Server.ip = getIpAddress(excludedIps);
                          } else {
                              throw e;
                          }
                      }
                  }
+             } else {
+                 channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
+             }
+             channel.closeFuture().addListener(future -> Server.closeRpcServer(0, TimeUnit.SECONDS));
+         } catch (InterruptedException e) {
+             LOGGER.error(e.getMessage(), e);
+         }
+     }*/
+
+     /**
+     *找到能和注册中心建立TCP连接的ip
+     * 如果连不上注册中心，返回环回地址
+      * */
+     private static String getLocalIpAddressToRegistry() {
+         Socket socket = null;
+         try {
+             String[] hostAndPort = RegistryClient.HOST.split(Cons.COMMA)[0].split(":");
+             socket = new Socket(hostAndPort[0], Integer.parseInt(hostAndPort[1]));
+             return socket.getLocalAddress().getHostAddress();
+         } catch (Exception e) {
+             return "127.0.0.1";
+         } finally {
+             try {
+                 assert socket != null;
+                 socket.close();
+             } catch (Exception ignored) {
+             }
+         }
+     }
+
+
+     private static synchronized void startServer0(String ip, int port) {
+         Server.ip = ip == null ? getLocalIpAddressToRegistry() : ip;
+         ServerBootstrap serverBootstrap = new ServerBootstrap()
+                 .group(bossGroup, workerGroup).channel(NioServerSocketChannel.class)
+                 ///测了下，禁用Nagle算法并没有带来明显的性能提升，考虑到会占用更多带宽，暂时就不开启
+                 /*.childOption(ChannelOption.TCP_NODELAY,true)*/
+                 .childHandler(new SocketChannelInitializerForServer());
+         try {
+             Channel channel;
+             if (port == 0) {
+                 channel = bind(Server.ip, serverBootstrap);
              } else {
                  channel = serverBootstrap.bind(Server.ip, Server.port = port).sync().channel();
              }

@@ -37,5 +37,5 @@ public class Cons {
     public static final String NACOS = "nacos";
     public static final String REDIS = "redis";
     public static final String REGISTRY = "registry";
-    public static final String REDIS_IP_LIST = "redisIpList";
+    public static final String REGISTRY_IP_LIST = "registryIpList";
 }

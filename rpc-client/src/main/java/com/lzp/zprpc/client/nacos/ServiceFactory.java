@@ -34,6 +34,7 @@ import com.lzp.zprpc.client.netty.ResultHandler;
 import com.lzp.zprpc.common.exception.RpcTimeoutException;
 import com.lzp.zprpc.common.util.PropertyUtil;
 import com.lzp.zprpc.common.util.RequestSearialUtil;
+import com.lzp.zprpc.registry.api.RegistryClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,7 @@ import java.util.concurrent.locks.LockSupport;
          try {
              String nacosIpFromEnv;
              //如果需要查配置文件,必须打在同一classpath下(如果是OSGI环境,可以通过插件配置)
-             naming = NamingFactory.createNamingService((nacosIpFromEnv = System.getenv("RPC_REGISTRY")) == null ? PropertyUtil.getNacosIpList() : nacosIpFromEnv);
+             naming = NamingFactory.createNamingService(RegistryClient.HOST);
              String connectionPoolSize;
              if ((connectionPoolSize = PropertyUtil.getConnetionPoolSize()) == null) {
                  channelPool = new SingleChannelPool();
