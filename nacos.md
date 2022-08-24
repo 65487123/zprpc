@@ -26,7 +26,7 @@
     示例：@Service(name = "serviceImpl", group = "$SERVICE_GROUP")或@Service(name = "serviceImpl")
     3、在resources包下加入配置文件：zprpc.properties，加入配置项。主要包括下面两项
     (1)需要要扫描的包的路径：basePack。示例：basePack=zprpc.demo.producer
-    (2)nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848
+    (2)nacos的ip：registryIpList。示例：registryIpList=192.168.0.101:8848
     除了通过配置文件配置发布到的注册中心的地址,还可以通过系统环境变量设置,系统环境变量优先级大于配置文件
     RPC_REGISTRY = xxx.xxx.xxx.xxx:8848
     示例:RPC_REGISTRY = 10.240.70.180:8848,10.240.70.173:8848,10.240.70.166:8848
@@ -56,7 +56,7 @@
          <version>1.0</version>
     </dependency>
     2、编写配置文件，主要包括下面这项：
-    nacos的ip：nacosIpList。示例：nacosIpList=192.168.0.101:8848 (和服务提供方一样，也可以通过系统环境变量设置)
+    nacos的ip：registryIpList。示例：registryIpList=192.168.0.101:8848 (和服务提供方一样，也可以通过系统环境变量设置)
     还可以配置和每台实例的连接池连接数。
     示例：connetionPoolSize：2
     不配置，默认连接池里的数量就是一。 也就是这个消费方和某个服务实例里的所有服务通信都是走这一个连接，但是不会有任何阻塞。
