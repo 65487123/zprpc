@@ -169,19 +169,23 @@
       * */
      private static String getLocalIpAddressToRegistry() {
          Socket socket = null;
-         try {
-             String[] hostAndPort = RegistryClient.HOST.split(Cons.COMMA)[0].split(":");
-             socket = new Socket(hostAndPort[0], Integer.parseInt(hostAndPort[1]));
-             return socket.getLocalAddress().getHostAddress();
-         } catch (Exception e) {
-             return "127.0.0.1";
-         } finally {
+         String[] hosts = RegistryClient.HOST.split(Cons.COMMA);
+         for (String host : hosts) {
              try {
-                 assert socket != null;
-                 socket.close();
+                 String[] hostAndPort = host.split(":");
+                 socket = new Socket(hostAndPort[0], Integer.parseInt(hostAndPort[1]));
+                 return socket.getLocalAddress().getHostAddress();
              } catch (Exception ignored) {
+             } finally {
+                 try {
+                     if (socket != null) {
+                         socket.close();
+                     }
+                 } catch (Exception ignored) {
+                 }
              }
          }
+         return "127.0.0.1";
      }
 
 
