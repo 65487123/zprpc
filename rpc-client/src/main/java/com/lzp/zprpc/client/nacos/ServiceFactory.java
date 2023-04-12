@@ -63,7 +63,6 @@ import java.util.concurrent.locks.LockSupport;
 
      static {
          try {
-             String nacosIpFromEnv;
              //如果需要查配置文件,必须打在同一classpath下(如果是OSGI环境,可以通过插件配置)
              naming = NamingFactory.createNamingService(RegistryClient.HOST);
              String connectionPoolSize;
@@ -91,8 +90,8 @@ import java.util.concurrent.locks.LockSupport;
      }
 
 
-     public static Object getServiceBean(String serviceName, Class interfaceCls) throws NacosException {
-         return getServiceBean(serviceName, "default", interfaceCls);
+     public static <T> T getServiceBean(String serviceName, Class<T> interfaceCls) throws NacosException {
+         return (T) getServiceBean(serviceName, "default", interfaceCls);
      }
 
      /**
@@ -135,8 +134,8 @@ import java.util.concurrent.locks.LockSupport;
          }
      }
 
-     public static Object getServiceBean(String serviceName, Class interfaceCls, int timeout) throws NacosException {
-         return getServiceBean(serviceName, "default", interfaceCls, timeout);
+     public static <T> T getServiceBean(String serviceName, Class<T> interfaceCls, int timeout) throws NacosException {
+         return (T) getServiceBean(serviceName, "default", interfaceCls, timeout);
      }
 
      /**
