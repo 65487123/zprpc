@@ -252,7 +252,7 @@ import java.util.concurrent.locks.LockSupport;
                  });
      }
 
-     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) throws Exception {
+     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) {
          try {
              //根据serviceid找到所有提供这个服务的ip+port
              List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
