@@ -30,9 +30,9 @@
   */
  @SpringBootApplication
  public class Consumer {
-     public static void main(String[] args) throws  InterruptedException {
+     public static void main(String[] args) throws InterruptedException {
          //得到远程代理对象
-         DemoService demoService = (DemoService) ServiceFactory.getServiceBean("demoService", DemoService.class);
+         DemoService demoService = ServiceFactory.getServiceBean("demoService", DemoService.class);
          //发起rpc调用并输出结果
          System.out.println(demoService.sayHello("hello"));
          System.out.println(demoService.sayHello("hello"));
@@ -60,7 +60,7 @@
          System.out.println(System.currentTimeMillis() - now);
 
          //获取带超时时间的rpc代理对象
-         TakeSecondService demoService1 = (TakeSecondService) ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 2000);
+         TakeSecondService demoService1 = ServiceFactory.getServiceBean("takeSecondService", TakeSecondService.class, 2000);
 
          //超时没返回会抛出异常
          demoService1.sayHello("hello");

@@ -102,8 +102,8 @@ package com.lzp.zprpc.client.redis;
          }
      }
 
-     public static Object getServiceBean(String serviceName, Class interfaceCls) {
-         return getServiceBean(serviceName, "default", interfaceCls);
+     public static <T> T getServiceBean(String serviceName, Class<T> interfaceCls) {
+         return (T) getServiceBean(serviceName, "default", interfaceCls);
      }
 
      /**
@@ -142,8 +142,8 @@ package com.lzp.zprpc.client.redis;
          }
      }
 
-     public static Object getServiceBean(String serviceName, Class interfaceCls, int timeout) {
-         return getServiceBean(serviceName, "default", interfaceCls, timeout);
+     public static <T> T getServiceBean(String serviceName, Class<T> interfaceCls, int timeout) {
+         return (T) getServiceBean(serviceName, "default", interfaceCls, timeout);
      }
 
      /**
