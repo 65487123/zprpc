@@ -58,9 +58,11 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
             synchronized (this) {
                 if ((channels = hostAndPortChannelsMap.get(hostAndPort)) == null) {
                     /*用CopyOnWriteArrayList而不用ArrayList来保存channel的原因：
-                     * 1、synchronized关键词虽然保证原子性和可见性，但是不能防止指令重排序。需要加volatile来防止半初始化问题
-                     *    CopyOnWriteArrayList底层的数组刚好就用volatile修饰了。
-                     * 2、当连接池满了，基本都是读操作，基本不会有写操作。CopyOnWriteArrayList的读操作相比ArrayList少了校验
+                     * 1、synchronized关键字虽然保证代码块里的代码原子性以及可见性，但是不能防止指令重排序。需要加volatile来防止半初始化问题
+                     *    CopyOnWriteArrayList底层的数组刚好就用volatile修饰了。(虽说我这里List的size()方法不会被半初始话问题影响,还是写规范点好).
+                     * 2、当连接不可用了，其他线程会从List移除不可用的channel,如果用ArrayList，可能会出现channel已经被移除了而一直没发现
+                     *  的情况。(synchronized只能保证进入代码块的代码可见性,不保证代码块外面的代码可见性，ArrayList的size属性没用volatile修饰)
+                     * 3、当连接池满了，基本都是读操作，基本不会有写操作。CopyOnWriteArrayList的读操作相比ArrayList少了校验
                      *    步骤，能弥补一些因volatile修饰而损失的性能，总体读性能和ArrayList差不多。
                      * */
                     channels = new CopyOnWriteArrayList<>();
