@@ -78,8 +78,20 @@ import java.util.concurrent.locks.LockSupport;
 
 
      private static final class BeanAndAllHostAndPort {
+
+         /**
+          * 这个字段加不加volatile都没影响,客户端获取服务代理对象后一般都会把引用保存起来,
+          * 不会通过beanAndAllHostAndPort.bean获取,所以这个volatile对实际使用性能没任何影响。
+          * 加volatile的好处是在获取代理对象时可能原本要进入synchronized块而不需要进入了。(获取代理对象也不是个频繁操作,其实无所谓的)
+          * */
          private volatile Object bean;
          private volatile List<String> hostAndPorts;
+
+         /**
+          * 这个字段加不加volatile都没影响,客户端获取服务代理对象后一般都会把引用保存起来,
+          * 不会通过beanAndAllHostAndPort.beanWithTimeOut获取,所以这个volatile对实际使用性能没任何影响。
+          * 加volatile的好处是在获取代理对象时可能原本要进入synchronized块而不需要进入了。(获取代理对象也不是个频繁操作,其实无所谓的)
+          * */
          private volatile Object beanWithTimeOut;
 
          public BeanAndAllHostAndPort(Object bean, List<String> hostAndPorts, Object beanWithTimeOut) {
@@ -254,7 +266,7 @@ import java.util.concurrent.locks.LockSupport;
 
      private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) {
          try {
-             //根据serviceid找到所有提供这个服务的ip+port
+             //根据serviceid找到所有提供这个服务的ip+portz
              List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
              Thread thisThread = Thread.currentThread();
              ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
