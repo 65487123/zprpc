@@ -44,7 +44,17 @@ public class LzpMessageDecoder extends ReplayingDecoder<Void> {
             return;
         }
         byte[] content = new byte[length];
+        //这里byteBuf默认是池化的DirectByteBuf,也就是存在堆外直接内存的bytebuf,
+        //由于netty用到了DMA技术,当读取网络数据时,数据会从网卡直接被传输到堆外的DirectByteBuf(用户空间)中,
+        //然后我下面这行代码，会把堆外的DirectByteBuf中的数据拷贝到堆内的数组中。
+        //readBytes(content)底层会调用getBytes(readerIndex, dst, dstIndex, length),然后把读索引加个数组长度;
         byteBuf.readBytes(content);
+        /*个人理解,DirectByteBuf相比堆内的ByteBuffer只是少了一次从堆外(用户空间)拷贝到堆内ByteBuf的过程
+        * 因为不管netty用的是堆外Buf还是堆内Buf,数据都是必须要先传输到用户空间的堆外内存(必须传输到用户空间是因为
+        * 用户进程是没法直接访问内核空间的数据的，只能通过系统调用间接访问，每次访问，程序都会从用户态切换为内核态，效率很低，
+        * 所以数据直接传输到用户空间，访问效率高点。必须先传到堆外是因为在数据传输过程中，目标地址不能变,如果传输到堆内,
+        * 会影响到GC)
+        * */
         list.add(content);
     }
 
