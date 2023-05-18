@@ -52,7 +52,7 @@
 
      public synchronized static void startRpcServer(String ip, int port) {
          if (Server.port != 0) {
-             throw new RuntimeException("The server has started");
+             throw new RuntimeException("The server has already started");
          }
          bossGroup = new NioEventLoopGroup(1);
          workerGroup = new NioEventLoopGroup(1);
