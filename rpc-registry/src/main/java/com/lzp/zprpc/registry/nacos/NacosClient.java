@@ -98,9 +98,32 @@
              } else {
                  idServiceMap.put(id, cls.newInstance());
              }
-             namingService.registerInstance(id, ip, port);
+             regiInstUntilSuccess(id, ip, port);
          }
      }
+
+     /**
+     *
+     *注册服务时,如果nacos不可用导致注册抛异常,进行重试,直到注册成功
+     * */
+     private void regiInstUntilSuccess(String serviceName, String ip, int port) {
+         while (true) {
+             try {
+                 namingService.registerInstance(serviceName, ip, port);
+             } catch (NacosException e) {
+                 try {
+                     LOGGER.error("service registration failure",e);
+                     Thread.sleep(5000);
+                     LOGGER.info("start registering again");
+                 } catch (InterruptedException ignored) {
+                 }
+                 continue;
+             }
+             break;
+         }
+     }
+
+
 
      private String getId(Service service) {
          String name;
