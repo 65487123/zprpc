@@ -121,12 +121,12 @@ import java.util.concurrent.locks.LockSupport;
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new ArrayList<>();
-                     for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
-                     }
                      Object bean = getServiceBean0(serviceId, interfaceCls);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
                      addListener(serviceId);
+                     for (Instance instance : naming.selectInstances(serviceId, true)) {
+                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
+                     }
                      return bean;
                  } else {
                      return serviceIdInstanceMap.get(serviceId).bean;
@@ -167,12 +167,12 @@ import java.util.concurrent.locks.LockSupport;
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new ArrayList<>();
-                     for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
-                     }
                      Object beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
                      serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
                      addListener(serviceId);
+                     for (Instance instance : naming.selectInstances(serviceId, true)) {
+                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
+                     }
                      return beanWithTimeOut;
                  } else {
                      return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
