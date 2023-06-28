@@ -120,13 +120,9 @@ import java.util.concurrent.locks.LockSupport;
          if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new ArrayList<>();
                      Object bean = getServiceBean0(serviceId, interfaceCls);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
+                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, null, null));
                      addListener(serviceId);
-                     for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
-                     }
                      return bean;
                  } else {
                      return serviceIdInstanceMap.get(serviceId).bean;
@@ -166,13 +162,9 @@ import java.util.concurrent.locks.LockSupport;
          if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
-                     List<String> hostAndPorts = new ArrayList<>();
                      Object beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
+                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, null, beanWithTimeOut));
                      addListener(serviceId);
-                     for (Instance instance : naming.selectInstances(serviceId, true)) {
-                         hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
-                     }
                      return beanWithTimeOut;
                  } else {
                      return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
@@ -221,6 +213,14 @@ import java.util.concurrent.locks.LockSupport;
      private static void addListener(String serviceId) throws NacosException {
          naming.subscribe(serviceId, new EventListener() {
              BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
+
+             {
+                 List<String> hostAndPorts = new ArrayList<>();
+                 for (Instance instance : naming.selectInstances(serviceId, true)) {
+                     hostAndPorts.add(instance.getIp() + Cons.COLON + instance.getPort());
+                 }
+                 beanAndAllHostAndPort.hostAndPorts = hostAndPorts;
+             }
 
              @Override
              public void onEvent(Event event) {
