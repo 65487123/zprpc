@@ -120,8 +120,9 @@ import java.util.concurrent.locks.LockSupport;
          if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
+                     serviceIdInstanceMap.put(serviceId, beanAndAllHostAndPort = new BeanAndAllHostAndPort(null, null, null));
                      Object bean = getServiceBean0(serviceId, interfaceCls);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, null, null));
+                     beanAndAllHostAndPort.bean = bean;
                      addListener(serviceId);
                      return bean;
                  } else {
@@ -131,7 +132,7 @@ import java.util.concurrent.locks.LockSupport;
          } else {
              if (beanAndAllHostAndPort.bean == null) {
                  synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
+                     if (beanAndAllHostAndPort.bean == null) {
                          beanAndAllHostAndPort.bean = getServiceBean0(serviceId, interfaceCls);
                      }
                      return beanAndAllHostAndPort.bean;
@@ -162,8 +163,9 @@ import java.util.concurrent.locks.LockSupport;
          if ((beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId)) == null) {
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
+                     serviceIdInstanceMap.put(serviceId, beanAndAllHostAndPort = new BeanAndAllHostAndPort(null, null, null));
                      Object beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, null, beanWithTimeOut));
+                     beanAndAllHostAndPort.beanWithTimeOut = beanWithTimeOut;
                      addListener(serviceId);
                      return beanWithTimeOut;
                  } else {
@@ -173,7 +175,7 @@ import java.util.concurrent.locks.LockSupport;
          } else {
              if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                  synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
+                     if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                          beanAndAllHostAndPort.beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
                      }
                      return beanAndAllHostAndPort.beanWithTimeOut;
@@ -237,10 +239,11 @@ import java.util.concurrent.locks.LockSupport;
 
 
      private static Object getServiceBean0(String serviceId, Class interfaceCls) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result;
-                     if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
+                     if ((result = callAndGetResult(method, serviceId, beanAndAllHostAndPort, Long.MAX_VALUE, args)) instanceof String &&
                              ((String) result).startsWith(Cons.EXCEPTION)) {
                          throw new RemoteException(((String) result).substring(Cons.THREE));
                      }
@@ -249,9 +252,11 @@ import java.util.concurrent.locks.LockSupport;
      }
 
      private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
-                     Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
+                     Object result = callAndGetResult(method, serviceId, beanAndAllHostAndPort,
+                             System.currentTimeMillis() + timeout, args);
                      if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
                          String message;
                          if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.THREE))) {
@@ -264,10 +269,11 @@ import java.util.concurrent.locks.LockSupport;
                  });
      }
 
-     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) {
+     private static Object callAndGetResult(Method method, String serviceId, BeanAndAllHostAndPort beanAndAllHostAndPort,
+                                            long deadline, Object... args) {
          try {
              //根据serviceid找到所有提供这个服务的ip+portz
-             List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+             List<String> hostAndPorts = beanAndAllHostAndPort.hostAndPorts;
              Thread thisThread = Thread.currentThread();
              ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
              ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
@@ -285,7 +291,7 @@ import java.util.concurrent.locks.LockSupport;
                  ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
                  return Cons.EXCEPTION + Cons.TIMEOUT;
              } else {
-                 return callAndGetResult(method, serviceId, deadline, args);
+                 return callAndGetResult(method, serviceId, beanAndAllHostAndPort, deadline, args);
              }
          } catch (IllegalArgumentException e) {
              ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
