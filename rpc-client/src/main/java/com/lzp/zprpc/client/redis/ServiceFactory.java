@@ -13,7 +13,7 @@
   *  limitations under the License.
   */
 
-package com.lzp.zprpc.client.redis;
+ package com.lzp.zprpc.client.redis;
 
 
  import com.lzp.zprpc.client.connectionpool.FixedShareableChannelPool;
@@ -42,11 +42,11 @@ package com.lzp.zprpc.client.redis;
 
  /**
   * Description:提供代理bean，用以远程调服务。代理bean是单例的
-  *
+  * <p>
   * 用redis做注册中心,目前还不是非常完善。当被注册进redis的服务,如果一段时间其主机网卡出问题了,
   * 这时消费者发现这个服务不可用,会把他从redis中移除。过了一段时间,出问题的主机网络恢复了,但是不会
   * 再次把自己注册进redis一次,导致消费者访问不到这个服务。所以,如果出现这个问题,只能重启。
-  *
+  * <p>
   * 虽说这个问题如果发生也只是浪费了点资源，并且出现的概率比较低,出现了也能通过重启解决。
   * 但是也是可以从代码上解决的,可以从redis客户端上着手,和redis建完连接就监听这个连接(如果
   * java客户端没监听api,可以自己开线程异步轮询,判断连接状态),如果连接被动关闭了就重连,
@@ -121,8 +121,9 @@ package com.lzp.zprpc.client.redis;
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
+                     serviceIdInstanceMap.put(serviceId, beanAndAllHostAndPort = new BeanAndAllHostAndPort(null, hostAndPorts, null));
                      Object bean = getServiceBean0(serviceId, interfaceCls);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(bean, hostAndPorts, null));
+                     beanAndAllHostAndPort.bean = bean;
                      return bean;
                  } else {
                      return serviceIdInstanceMap.get(serviceId).bean;
@@ -131,7 +132,7 @@ package com.lzp.zprpc.client.redis;
          } else {
              if (beanAndAllHostAndPort.bean == null) {
                  synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).bean == null) {
+                     if (beanAndAllHostAndPort.bean == null) {
                          beanAndAllHostAndPort.bean = getServiceBean0(serviceId, interfaceCls);
                      }
                      return beanAndAllHostAndPort.bean;
@@ -163,8 +164,9 @@ package com.lzp.zprpc.client.redis;
              synchronized (ServiceFactory.class) {
                  if (serviceIdInstanceMap.get(serviceId) == null) {
                      List<String> hostAndPorts = new CopyOnWriteArrayList<>(redisClient.getAndTransformToList(serviceId));
+                     serviceIdInstanceMap.put(serviceId, beanAndAllHostAndPort = new BeanAndAllHostAndPort(null, hostAndPorts, null));
                      Object beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
-                     serviceIdInstanceMap.put(serviceId, new BeanAndAllHostAndPort(null, hostAndPorts, beanWithTimeOut));
+                     beanAndAllHostAndPort.beanWithTimeOut = beanWithTimeOut;
                      return beanWithTimeOut;
                  } else {
                      return serviceIdInstanceMap.get(serviceId).beanWithTimeOut;
@@ -173,7 +175,7 @@ package com.lzp.zprpc.client.redis;
          } else {
              if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                  synchronized (ServiceFactory.class) {
-                     if (serviceIdInstanceMap.get(serviceId).beanWithTimeOut == null) {
+                     if (beanAndAllHostAndPort.beanWithTimeOut == null) {
                          beanAndAllHostAndPort.beanWithTimeOut = getServiceBean0(serviceId, interfaceCls, timeout);
                      }
                      return beanAndAllHostAndPort.beanWithTimeOut;
@@ -206,10 +208,11 @@ package com.lzp.zprpc.client.redis;
 
 
      private static Object getServiceBean0(String serviceId, Class interfaceCls) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
                      Object result;
-                     if ((result = callAndGetResult(method, serviceId, Long.MAX_VALUE, args)) instanceof String &&
+                     if ((result = callAndGetResult(method, serviceId, beanAndAllHostAndPort, Long.MAX_VALUE, args)) instanceof String &&
                              ((String) result).startsWith(Cons.EXCEPTION)) {
                          throw new RemoteException(((String) result).substring(Cons.THREE));
                      }
@@ -218,9 +221,10 @@ package com.lzp.zprpc.client.redis;
      }
 
      private static Object getServiceBean0(String serviceId, Class interfaceCls, int timeout) {
+         BeanAndAllHostAndPort beanAndAllHostAndPort = serviceIdInstanceMap.get(serviceId);
          return Proxy.newProxyInstance(ServiceFactory.class.getClassLoader(),
                  new Class[]{interfaceCls}, (proxy, method, args) -> {
-                     Object result = callAndGetResult(method, serviceId, System.currentTimeMillis() + timeout, args);
+                     Object result = callAndGetResult(method, serviceId, beanAndAllHostAndPort, System.currentTimeMillis() + timeout, args);
                      if (result instanceof String && ((String) result).startsWith(Cons.EXCEPTION)) {
                          String message;
                          if (Cons.TIMEOUT.equals(message = ((String) result).substring(Cons.THREE))) {
@@ -233,9 +237,10 @@ package com.lzp.zprpc.client.redis;
                  });
      }
 
-     private static Object callAndGetResult(Method method, String serviceId, long deadline, Object... args) throws Exception {
+     private static Object callAndGetResult(Method method, String serviceId, BeanAndAllHostAndPort beanAndAllHostAndPort,
+                                            long deadline, Object... args) throws Exception {
          String ipAndport = "";
-         List<String> hostAndPorts = serviceIdInstanceMap.get(serviceId).hostAndPorts;
+         List<String> hostAndPorts = beanAndAllHostAndPort.hostAndPorts;
          try {
              //根据serviceid找到所有提供这个服务的ip+port
              Thread thisThread = Thread.currentThread();
@@ -256,7 +261,7 @@ package com.lzp.zprpc.client.redis;
                  ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
                  return Cons.EXCEPTION + Cons.TIMEOUT;
              } else {
-                 return callAndGetResult(method, serviceId, deadline, args);
+                 return callAndGetResult(method, serviceId, beanAndAllHostAndPort, deadline, args);
              }
          } catch (IllegalArgumentException e) {
              ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
