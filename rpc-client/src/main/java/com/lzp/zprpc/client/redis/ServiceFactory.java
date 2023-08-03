@@ -26,7 +26,7 @@
  import com.lzp.zprpc.common.exception.RemoteException;
  import com.lzp.zprpc.common.exception.RpcTimeoutException;
  import com.lzp.zprpc.common.util.PropertyUtil;
- import com.lzp.zprpc.common.util.RequestSearialUtil;
+ import com.lzp.zprpc.common.util.SearialUtil;
  import com.lzp.zprpc.common.util.ThreadFactoryImpl;
  import com.lzp.zprpc.registry.api.RegistryClient;
  import org.slf4j.Logger;
@@ -247,7 +247,7 @@
              ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
              ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
              channelPool.getChannel(ipAndport = hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                     .writeAndFlush(RequestSearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
+                     .writeAndFlush(SearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
              Object result;
              //用while，防止虚假唤醒
              while ((result = threadResultAndTime.getResult()) == null) {

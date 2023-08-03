@@ -13,5 +13,5 @@
         <level value="info" />
         <appender-ref ref="console" />
     </root>
-
+    <logger name="io.fury" level="ERROR" />
 </configuration>

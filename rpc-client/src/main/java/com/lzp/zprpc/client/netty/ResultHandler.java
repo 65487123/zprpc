@@ -2,7 +2,7 @@ package com.lzp.zprpc.client.netty;
 
 import com.lzp.zprpc.common.constant.Cons;
 import com.lzp.zprpc.common.dtos.ResponseDTO;
-import com.lzp.zprpc.common.util.ResponseSearialUtil;
+import com.lzp.zprpc.common.util.SearialUtil;
 import com.lzp.zprpc.common.util.ThreadFactoryImpl;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -91,7 +91,7 @@ public class ResultHandler extends SimpleChannelInboundHandler<byte[]> {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
         rpcClientThreadPool.execute(() -> {
-            ResponseDTO responseDTO = ResponseSearialUtil.deserialize(bytes);
+            ResponseDTO responseDTO = (ResponseDTO) SearialUtil.deserialize(bytes);
             ThreadResultAndTime threadResultAndTime = reqIdThreadMap.remove(responseDTO.getThreadId());
             if (threadResultAndTime != null) {
                 threadResultAndTime.result = responseDTO.getResult();

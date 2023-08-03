@@ -1,5 +1,9 @@
 import com.lzp.zprpc.common.dtos.ResponseDTO;
-import com.lzp.zprpc.common.util.ResponseSearialUtil;
+import com.lzp.zprpc.common.util.SearialUtil;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Description:
@@ -24,13 +28,11 @@ public class Test {
             this.blockedThread = blockedThread;
         }
     }
-    public static void main(String[] args) {
-        ResponseDTO responseDTO =new ResponseDTO();
-        long now = System.currentTimeMillis();
+    public static void main(String[] args) throws InterruptedException {
 
-        for (int i = 0 ;i<10000000;i++){
-            ResponseSearialUtil.deserialize(ResponseSearialUtil.serialize(responseDTO));
-        }
-        System.out.println(System.currentTimeMillis()-now);
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(8,8,0, TimeUnit.SECONDS,new LinkedBlockingQueue<>());
+        ResponseDTO responseDTO =new ResponseDTO(new Object(),2120);
+
+        System.out.println(SearialUtil.serialize(responseDTO).length);
     }
 }

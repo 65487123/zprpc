@@ -49,15 +49,13 @@ public class Consumer {
         //服务端线程池数量设置得比逻辑cpu要多，因为实际场景service很有可能会进行io操作。而这里没有，所以这里的测试出的并不是最好结果
         ExecutorService executorService = new ThreadPoolExecutor(25, 25, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("rpc call"));
         now = System.currentTimeMillis();
-        CountDownLatch countDownLatch = new CountDownLatch(100000);
         for (int i = 0; i < 100000; i++) {
             executorService.execute(() -> {
                 demoService.sayHello("world");
-                //由于countDown()耗时和rpc调用耗时相比可以忽略不计,所以可以不考虑多线程激烈竞争导致countDown()性能下降问题。(rpc调用耗时越少,countDown()耗时越多)
-                countDownLatch.countDown();
             });
         }
-        countDownLatch.await();
+        executorService.shutdown();
+        executorService.awaitTermination(10000,TimeUnit.SECONDS);
         System.out.println(System.currentTimeMillis() - now);
 
         //获取带超时时间的rpc代理对象

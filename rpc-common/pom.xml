@@ -5,7 +5,7 @@
     <parent>
         <artifactId>zprpc-parent</artifactId>
         <groupId>com.lzp.zprpc</groupId>
-        <version>1.1</version>
+        <version>2.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
     <packaging>jar</packaging>
@@ -14,20 +14,20 @@
     <artifactId>rpc-common</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>org.furyio</groupId>
+            <artifactId>fury-core</artifactId>
+            <version>0.1.0-alpha.2</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
             <version>5.1.6.RELEASE</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.protostuff</groupId>
-            <artifactId>protostuff-runtime</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>

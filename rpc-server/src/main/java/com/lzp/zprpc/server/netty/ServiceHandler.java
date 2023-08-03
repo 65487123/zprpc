@@ -18,12 +18,9 @@
  import com.lzp.zprpc.common.constant.Cons;
  import com.lzp.zprpc.common.dtos.RequestDTO;
  import com.lzp.zprpc.common.dtos.ResponseDTO;
+ import com.lzp.zprpc.common.util.*;
  import com.lzp.zprpc.registry.api.RegistryClient;
  import com.lzp.zprpc.registry.nacos.NacosClient;
- import com.lzp.zprpc.common.util.PropertyUtil;
- import com.lzp.zprpc.common.util.RequestSearialUtil;
- import com.lzp.zprpc.common.util.ResponseSearialUtil;
- import com.lzp.zprpc.common.util.ThreadFactoryImpl;
  import com.lzp.zprpc.registry.redis.RedisClient;
  import io.netty.channel.ChannelHandlerContext;
  import io.netty.channel.SimpleChannelInboundHandler;
@@ -52,14 +49,14 @@
      @Override
      protected void channelRead0(ChannelHandlerContext channelHandlerContext, byte[] bytes) {
          serviceThreadPool.execute(() -> {
-             RequestDTO requestDTO = RequestSearialUtil.deserialize(bytes);
+             RequestDTO requestDTO = (RequestDTO) SearialUtil.deserialize(bytes);
              try {
                  Object service = idServiceMap.get(requestDTO.getServiceId());
                  Method method = service.getClass().getMethod(requestDTO.getMethodName(), requestDTO.getParamTypes());
-                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(method
+                 channelHandlerContext.writeAndFlush(SearialUtil.serialize(new ResponseDTO(method
                          .invoke(service, requestDTO.getParams()), requestDTO.getThreadId())));
              } catch (Exception e) {
-                 channelHandlerContext.writeAndFlush(ResponseSearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + getDetailMsgOfException(e), requestDTO.getThreadId())));
+                 channelHandlerContext.writeAndFlush(SearialUtil.serialize(new ResponseDTO(Cons.EXCEPTION + getDetailMsgOfException(e), requestDTO.getThreadId())));
              }
          });
      }
@@ -68,7 +65,7 @@
          int logicalCpuCore = Runtime.getRuntime().availableProcessors();
          //被调用的服务可能会涉及到io操作，所以核心线程数设置比逻辑处理器个数多点
          serviceThreadPool = new ThreadPoolExecutor(logicalCpuCore + 1, 2 * logicalCpuCore,
-                 100, TimeUnit.SECONDS, new ArrayBlockingQueue<>(100000),
+                 100, TimeUnit.SECONDS, new OptimizedArrBlockQueue<>(100000),
                  new ThreadFactoryImpl("rpc service"), (r, executor) -> r.run());
      }
 
