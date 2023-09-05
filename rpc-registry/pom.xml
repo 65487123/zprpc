@@ -11,21 +11,17 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>rpc-registry</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>registry-nacos</module>
+        <module>registry-redis</module>
+        <module>registry-common</module>
+    </modules>
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.nacos</groupId>
-            <artifactId>nacos-client</artifactId>
-            <version>${nacos.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.lzp.zprpc</groupId>
             <artifactId>rpc-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-            <version>3.5.1</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.birt.runtime.3_7_1</groupId>

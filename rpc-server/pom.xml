@@ -10,17 +10,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>rpc-server</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>server-nacos</module>
+        <module>server-redis</module>
+        <module>server-common</module>
+    </modules>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-registry</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 
 </project>

@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-client</artifactId>
+            <artifactId>client-nacos</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

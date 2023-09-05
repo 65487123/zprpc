@@ -8,7 +8,12 @@
         <version>2.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
+    <modules>
+        <module>client-nacos</module>
+        <module>client-redis</module>
+        <module>client-common</module>
+    </modules>
 
     <modelVersion>4.0.0</modelVersion>
 

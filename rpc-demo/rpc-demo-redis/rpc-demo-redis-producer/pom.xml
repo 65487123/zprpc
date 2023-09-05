@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-server</artifactId>
+            <artifactId>server-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

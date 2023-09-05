@@ -15,10 +15,8 @@
 
 package zprpc.demo.redis.producer;
 
-import com.lzp.zprpc.server.netty.Server;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-import java.util.concurrent.CountDownLatch;
+ import com.lzp.zprpc.server.redis.netty.Server;
+ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 
 /**
