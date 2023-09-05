@@ -23,5 +23,10 @@
             <artifactId>client-redis</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.lzp.zprpc</groupId>
+            <artifactId>server-redis</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

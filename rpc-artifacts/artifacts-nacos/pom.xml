@@ -23,5 +23,10 @@
             <artifactId>client-nacos</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.lzp.zprpc</groupId>
+            <artifactId>server-nacos</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

@@ -17,12 +17,5 @@
 
     <artifactId>rpc-artifacts</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.lzp.zprpc</groupId>
-            <artifactId>rpc-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 
 </project>
