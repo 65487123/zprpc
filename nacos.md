@@ -16,8 +16,8 @@
     1、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <!--如果既是服务服务方又是服务消费方,artifactId为rpc-artifacts就行-->
-         <artifactId>rpc-server</artifactId>
+         <!--如果既是服务服务方又是服务消费方,artifactId为artifacts-nacos就行-->
+         <artifactId>server-nacos</artifactId>
          <version>version</version>
     </dependency>
     2、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
@@ -51,9 +51,9 @@
     1、创建服务消费方工程，依赖提供接口的工程，并导入依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <!--如果既是服务服务方又是服务消费方,artifactId为rpc-artifacts就行-->
-         <artifactId>rpc-client</artifactId>
-         <version>1.0</version>
+         <!--如果既是服务服务方又是服务消费方,artifactId为artifacts-nacos就行-->
+         <artifactId>client-nacos</artifactId>
+         <version>2.0</version>
     </dependency>
     2、编写配置文件，主要包括下面这项：
     nacos的ip：registryIpList。示例：registryIpList=192.168.0.101:8848 (和服务提供方一样，也可以通过系统环境变量设置)
