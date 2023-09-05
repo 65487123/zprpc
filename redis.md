@@ -14,8 +14,8 @@
     1、创建服务提供方工程，依赖提供接口的工程，并导入maven依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <!--如果既是服务服务方又是服务消费方,artifactId为rpc-artifacts就行-->
-         <artifactId>rpc-server</artifactId>
+         <!--如果既是服务服务方又是服务消费方,artifactId为artifacts-redis就行-->
+         <artifactId>server-redis</artifactId>
          <version>version</version>
     </dependency>
     2、创建接口实现类，实现接口的具体方法，并在接口实现类上加上com.lzp.zprpc.common.annotation.Service注解;
@@ -50,8 +50,8 @@
     1、创建服务消费方工程，依赖提供接口的工程，并导入依赖
     <dependency>
          <groupId>com.lzp.zprpc</groupId>
-         <!--如果既是服务服务方又是服务消费方,artifactId为rpc-artifacts就行-->
-         <artifactId>rpc-client</artifactId>
+         <!--如果既是服务服务方又是服务消费方,artifactId为artifacts-redis就行-->
+         <artifactId>client-redis</artifactId>
          <version>1.0</version>
     </dependency>
     2、编写配置文件，主要包括下面这项：
