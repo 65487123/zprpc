@@ -202,7 +202,7 @@
                  .childHandler(new ChannelInitializer<Channel>(){
                      @Override
                      protected void initChannel(Channel channel) {
-                         channel.pipeline().addLast(new IdleStateHandler(15, Integer.MAX_VALUE, Integer.MAX_VALUE))
+                         channel.pipeline().addLast(new IdleStateHandler(90, Integer.MAX_VALUE, Integer.MAX_VALUE))
                                  .addLast(new LzpMessageDecoder(true)).addLast(new LzpMessageEncoder())
                                  .addLast("serviceHandler", new ServiceHandler());
                      }

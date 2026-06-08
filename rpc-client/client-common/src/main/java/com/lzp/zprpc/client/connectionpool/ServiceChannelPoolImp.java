@@ -37,15 +37,12 @@ import java.util.concurrent.*;
  */
 public class ServiceChannelPoolImp implements FixedShareableChannelPool {
     private final Logger LOGGER = LoggerFactory.getLogger(ServiceChannelPoolImp.class);
-    private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
 
 
     private Map<String, List<Channel>> hostAndPortChannelsMap = new HashMap<>();
     private final int SIZE;
 
-    {
-        heartBeatThreadPool.execute(this::hearBeat);
-    }
+
 
     public ServiceChannelPoolImp(int size) {
         this.SIZE = size;
@@ -110,22 +107,4 @@ public class ServiceChannelPoolImp implements FixedShareableChannelPool {
         });
     }
 
-    /**
-     * Description ：每12秒发送一个心跳包
-     **/
-    private void hearBeat() {
-        while (true) {
-            byte[] emptyPackage = new byte[0];
-            for (Map.Entry<String, List<Channel>> entry : hostAndPortChannelsMap.entrySet()) {
-                for (Channel channel : entry.getValue()) {
-                    channel.writeAndFlush(emptyPackage);
-                }
-            }
-            try {
-                Thread.sleep(12000);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }
 }

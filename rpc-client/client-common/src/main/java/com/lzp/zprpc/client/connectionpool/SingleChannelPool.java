@@ -38,12 +38,9 @@ package com.lzp.zprpc.client.connectionpool;
  */
 public class SingleChannelPool implements FixedShareableChannelPool {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleChannelPool.class);
-    private ThreadPoolExecutor heartBeatThreadPool = new ThreadPoolExecutor(1, 1, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(), new ThreadFactoryImpl("heartBeat"));
     private Map<String, Channel> hostAndPortChannelsMap = new ConcurrentHashMap<>();
 
-    {
-        heartBeatThreadPool.execute(this::hearBeat);
-    }
+
 
     @Override
     public Channel getChannel(String hostAndPort) throws ConnectException {
@@ -64,21 +61,4 @@ public class SingleChannelPool implements FixedShareableChannelPool {
         }
     }
 
-
-    /**
-     * Description ：每12秒发送一个心跳包
-     **/
-    private void hearBeat() {
-        while (true) {
-            byte[] emptyPackage = new byte[0];
-            for (Map.Entry<?, Channel> entry : hostAndPortChannelsMap.entrySet()) {
-                entry.getValue().writeAndFlush(emptyPackage);
-            }
-            try {
-                Thread.sleep(12000);
-            } catch (InterruptedException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
-    }
 }

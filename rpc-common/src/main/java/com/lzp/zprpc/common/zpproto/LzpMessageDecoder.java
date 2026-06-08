@@ -18,6 +18,7 @@ package com.lzp.zprpc.common.zpproto;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ReplayingDecoder;
+import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +63,14 @@ public class LzpMessageDecoder extends ReplayingDecoder<Void> {
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) {
         if (evt instanceof IdleStateEvent) {
-            ctx.channel().close();
+            IdleStateEvent e = (IdleStateEvent) evt;
+            if (e.state() == IdleState.READER_IDLE) {
+                // 读空闲超时，对方可能已经掉线，关闭连接
+                ctx.channel().close();
+            } else if (e.state() == IdleState.WRITER_IDLE) {
+                // 写空闲，发送心跳包
+                ctx.channel().writeAndFlush(new byte[0]);
+            }
         }
     }
 
