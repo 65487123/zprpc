@@ -13,7 +13,7 @@
   *  limitations under the License.
   */
 
-package com.lzp.zprpc.client.nacos;
+ package com.lzp.zprpc.client.nacos;
 
 
  import com.alibaba.nacos.api.exception.NacosException;
@@ -83,7 +83,8 @@ package com.lzp.zprpc.client.nacos;
           * 这个字段加不加volatile都没影响,客户端获取服务代理对象后一般都会把引用保存起来,
           * 不会通过beanAndAllHostAndPort.bean获取,所以这个volatile对实际使用性能没任何影响。
           * 加volatile的好处是在获取代理对象时可能原本要进入synchronized块而不需要进入了。(获取代理对象也不是个频繁操作,其实无所谓的)
-          * */
+          *
+          */
          private volatile Object bean;
          private volatile List<String> hostAndPorts;
 
@@ -91,7 +92,8 @@ package com.lzp.zprpc.client.nacos;
           * 这个字段加不加volatile都没影响,客户端获取服务代理对象后一般都会把引用保存起来,
           * 不会通过beanAndAllHostAndPort.beanWithTimeOut获取,所以这个volatile对实际使用性能没任何影响。
           * 加volatile的好处是在获取代理对象时可能原本要进入synchronized块而不需要进入了。(获取代理对象也不是个频繁操作,其实无所谓的)
-          * */
+          *
+          */
          private volatile Object beanWithTimeOut;
 
          public BeanAndAllHostAndPort(Object bean, List<String> hostAndPorts, Object beanWithTimeOut) {
@@ -271,31 +273,31 @@ package com.lzp.zprpc.client.nacos;
 
      private static Object callAndGetResult(Method method, String serviceId, BeanAndAllHostAndPort beanAndAllHostAndPort,
                                             long deadline, Object... args) {
-         try {
-             //根据serviceid找到所有提供这个服务的ip+portz
-             List<String> hostAndPorts = beanAndAllHostAndPort.hostAndPorts;
-             Thread thisThread = Thread.currentThread();
-             ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
-             ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
-             channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
-                     .writeAndFlush(SearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
-             Object result;
-             //用while，防止虚假唤醒
-             while ((result = threadResultAndTime.getResult()) == null) {
-                 LockSupport.park();
-             }
-             return result;
-         } catch (ConnectException e) {
-             //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,可能会一直进入这里,直到超时)
-             if (System.currentTimeMillis() > deadline) {
+         while (true) {
+             try {
+                 //根据serviceid找到所有提供这个服务的ip+portz
+                 List<String> hostAndPorts = beanAndAllHostAndPort.hostAndPorts;
+                 Thread thisThread = Thread.currentThread();
+                 ResultHandler.ThreadResultAndTime threadResultAndTime = new ResultHandler.ThreadResultAndTime(deadline, thisThread);
+                 ResultHandler.reqIdThreadMap.put(thisThread.getId(), threadResultAndTime);
+                 channelPool.getChannel(hostAndPorts.get(ThreadLocalRandom.current().nextInt(hostAndPorts.size())))
+                         .writeAndFlush(SearialUtil.serialize(new RequestDTO(thisThread.getId(), serviceId, method.getName(), method.getParameterTypes(), args)));
+                 Object result;
+                 //用while，防止虚假唤醒
+                 while ((result = threadResultAndTime.getResult()) == null) {
+                     LockSupport.park();
+                 }
+                 return result;
+             } catch (ConnectException e) {
+                 //当服务缩容时,服务关闭后,nacos没刷新(nacos如果不是高可用,可能会一直进入这里,直到超时)
                  ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
-                 return Cons.EXCEPTION + Cons.TIMEOUT;
-             } else {
-                 return callAndGetResult(method, serviceId, beanAndAllHostAndPort, deadline, args);
+                 if (System.currentTimeMillis() > deadline) {
+                     return Cons.EXCEPTION + Cons.TIMEOUT;
+                 }
+             } catch (IllegalArgumentException e) {
+                 ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
+                 throw new CallException("no service available");
              }
-         } catch (IllegalArgumentException e) {
-             ResultHandler.reqIdThreadMap.remove(Thread.currentThread().getId());
-             throw new CallException("no service available");
          }
      }
  }
